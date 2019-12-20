@@ -8,9 +8,9 @@
     <string name="prefs_txtvw_rating">Rating</string>
     <string name="prefs_txtvw_pricing">Pricing</string>
     <string name="prefs_txtvw_distance">Distance</string>
-    <string name="prefs_btn_search">Search</string>
     <string name="prefs_rdbtn_pricinglv1">$</string>
     <string name="prefs_rdbtn_pricinglv2">$$</string>
     <string name="prefs_rdbtn_pricinglv3">$$$</string>
+    <string name="prefs_btn_search">Search</string>
 
 </resources>
