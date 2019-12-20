@@ -27,9 +27,9 @@
         android:ems="10"
         android:hint="@string/prefs_edtxt_food_type_hint"
         android:inputType="textPersonName"
+        app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_foodtype"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/vertical50"
-        app:layout_constraintTop_toTopOf="@+id/txtvw_foodtype" />
+        app:layout_constraintStart_toStartOf="@+id/vertical50" />
 
 
     <TextView
@@ -111,14 +111,17 @@
     </RadioGroup>
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:id="@+id/btn_search"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
-        android:text="@string/places_autocomplete_search_hint"
+        android:layout_marginEnd="16dp"
+        android:text="@string/prefs_btn_search"
         app:layout_constraintEnd_toEndOf="@+id/sbr_distance"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/sbr_distance"
+        app:layout_constraintStart_toStartOf="@+id/txtvw_distance"
         app:layout_constraintTop_toBottomOf="@+id/sbr_distance" />
 
     <androidx.constraintlayout.widget.Guideline
