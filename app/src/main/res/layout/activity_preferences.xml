@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/vertical_text"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -47,10 +48,12 @@
     <SeekBar
         android:id="@+id/sbr_rating"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
         android:max="5"
+        app:layout_constraintBottom_toBottomOf="@+id/txtvw_rating"
         app:layout_constraintEnd_toEndOf="@+id/edtxt_foodtype"
-        app:layout_constraintStart_toStartOf="@+id/edtxt_foodtype"
+        app:layout_constraintStart_toStartOf="@+id/guideline3"
         app:layout_constraintTop_toTopOf="@+id/txtvw_rating" />
 
     <TextView
@@ -67,8 +70,9 @@
     <SeekBar
         android:id="@+id/sbr_distance"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:max="20"
+        app:layout_constraintBottom_toBottomOf="@+id/txtvw_distance"
         app:layout_constraintEnd_toEndOf="@+id/sbr_rating"
         app:layout_constraintStart_toStartOf="@+id/sbr_rating"
         app:layout_constraintTop_toTopOf="@+id/txtvw_distance" />
@@ -121,6 +125,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
+        android:onClick="submitPref"
         android:text="@string/prefs_btn_search"
         app:layout_constraintEnd_toEndOf="@+id/sbr_distance"
         app:layout_constraintHorizontal_bias="1.0"
@@ -132,7 +137,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.38" />
+        app:layout_constraintGuide_percent="0.38199514" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/horizontal5"
@@ -140,5 +145,29 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.1" />
+
+    <TextView
+        android:id="@+id/txtvw_rating_progress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintStart_toStartOf="@+id/vertical50"
+        app:layout_constraintTop_toTopOf="@+id/sbr_rating" />
+
+    <TextView
+        android:id="@+id/txtvw_distance_progress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@+id/txtvw_rating_progress"
+        app:layout_constraintStart_toStartOf="@+id/txtvw_rating_progress"
+        app:layout_constraintTop_toTopOf="@+id/sbr_distance" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5523114" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
