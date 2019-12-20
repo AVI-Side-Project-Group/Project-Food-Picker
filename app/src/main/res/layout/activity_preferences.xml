@@ -48,6 +48,7 @@
         android:id="@+id/sbr_rating"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:max="5"
         app:layout_constraintEnd_toEndOf="@+id/edtxt_foodtype"
         app:layout_constraintStart_toStartOf="@+id/edtxt_foodtype"
         app:layout_constraintTop_toTopOf="@+id/txtvw_rating" />
@@ -61,14 +62,15 @@
         android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintEnd_toEndOf="@+id/txtvw_pricing"
         app:layout_constraintStart_toStartOf="@+id/txtvw_pricing"
-        app:layout_constraintTop_toBottomOf="@+id/rdgroup_pricing" />
+        app:layout_constraintTop_toBottomOf="@+id/sbr_rating" />
 
     <SeekBar
         android:id="@+id/sbr_distance"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@+id/rdgroup_pricing"
-        app:layout_constraintStart_toStartOf="@+id/rdgroup_pricing"
+        android:max="20"
+        app:layout_constraintEnd_toEndOf="@+id/sbr_rating"
+        app:layout_constraintStart_toStartOf="@+id/sbr_rating"
         app:layout_constraintTop_toTopOf="@+id/txtvw_distance" />
 
     <TextView
@@ -79,16 +81,17 @@
         android:text="@string/prefs_txtvw_pricing"
         android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintEnd_toEndOf="@+id/txtvw_rating"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/txtvw_rating"
-        app:layout_constraintTop_toBottomOf="@+id/sbr_rating" />
+        app:layout_constraintTop_toBottomOf="@+id/sbr_distance" />
 
     <RadioGroup
         android:id="@+id/rdgroup_pricing"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="@+id/sbr_rating"
-        app:layout_constraintStart_toStartOf="@+id/sbr_rating"
+        app:layout_constraintEnd_toEndOf="@+id/sbr_distance"
+        app:layout_constraintStart_toStartOf="@+id/sbr_distance"
         app:layout_constraintTop_toTopOf="@+id/txtvw_pricing">
 
         <RadioButton
@@ -116,13 +119,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         android:text="@string/prefs_btn_search"
         app:layout_constraintEnd_toEndOf="@+id/sbr_distance"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/txtvw_distance"
-        app:layout_constraintTop_toBottomOf="@+id/sbr_distance" />
+        app:layout_constraintTop_toBottomOf="@+id/rdgroup_pricing" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical50"

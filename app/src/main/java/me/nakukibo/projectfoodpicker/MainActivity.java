@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.SeekBar;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
@@ -25,6 +27,11 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MainActivity extends AppCompatActivity {
 
+    private EditText edtxtFoodType;
+    private SeekBar sbarRating;
+    private SeekBar sbarDistance;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,5 +44,7 @@ public class MainActivity extends AppCompatActivity {
         // Create a new Places client instance
         PlacesClient placesClient = Places.createClient(this);
     }
+
+
 
 }
