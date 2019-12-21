@@ -14,6 +14,8 @@ import android.widget.TextView;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity {
     // TODO: make a neutral option for some of the preferences and maybe switch out of using seek bars
     // TODO: figure out a secure way to store API keys
@@ -23,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioGroup rdgroupPricing;
     private String[] foodTypes = {"Any", "American", "African", "Asian", "European", "Mediterranean",
                                     "Mexican"};
-    private String[] ratings = {"Any", "1 star", "2 star", "3 star", "4 star"};
+    private String[] ratings = {"Any", "2 star", "3 star", "4 star"};
     private Float[] distances = {.5f, 1f, 5f, 10f, 20f};
 
     @Override
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     public void submitPref(View view){
         System.out.println("Food: " + spinFoodtype.getSelectedItem().toString());
         System.out.println("Rating: " + spinRating.getSelectedItem().toString());
-        System.out.println("Distance: " + sbrDistance.getProgress());
+        System.out.println("Distance: " + getDistance(sbrDistance.getProgress()));
         System.out.println("Pricing: " + ((RadioButton) findViewById(rdgroupPricing.getCheckedRadioButtonId())).getText().toString());
     }
 
@@ -63,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
         spinRating.setSelection(0);
 
         final TextView distanceVal = findViewById(R.id.txtvw_distance_progress);
-        distanceVal.setText(String.format("%2.1f miles", distances[sbrDistance.getProgress()]));
+        distanceVal.setText(getDistance(sbrDistance.getProgress()));
         sbrDistance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                distanceVal.setText(String.format("%2.1f miles", distances[i]));
+                distanceVal.setText(getDistance(i));
             }
 
             @Override
@@ -80,5 +82,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private String getDistance(int index){
+        return String.format(Locale.US, "%2.1f miles", distances[index]);
     }
 }
