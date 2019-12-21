@@ -4,10 +4,10 @@
 
     <!-- activity_preferences.xml text-->
     <string name="prefs_txtvw_food_type">Food Type</string>
-    <string name="prefs_edtxt_food_type_hint">""Chinese""</string>
-    <string name="prefs_txtvw_rating">Rating</string>
-    <string name="prefs_txtvw_pricing">Pricing</string>
-    <string name="prefs_txtvw_distance">Distance</string>
+    <string name="prefs_edtxt_food_type_hint">\"Chinese\"</string>
+    <string name="prefs_txtvw_rating">Rating (min)</string>
+    <string name="prefs_txtvw_pricing">Price(max)</string>
+    <string name="prefs_txtvw_distance">Distance (max)</string>
     <string name="prefs_rdbtn_pricinglv1">$</string>
     <string name="prefs_rdbtn_pricinglv2">$$</string>
     <string name="prefs_rdbtn_pricinglv3">$$$</string>
