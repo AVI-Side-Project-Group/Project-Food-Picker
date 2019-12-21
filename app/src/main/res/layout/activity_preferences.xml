@@ -15,7 +15,7 @@
         android:layout_marginEnd="16dp"
         android:text="@string/prefs_txtvw_food_type"
         android:textSize="@dimen/font_size_pref_main"
-        app:layout_constraintEnd_toStartOf="@+id/vertical50"
+        app:layout_constraintEnd_toStartOf="@+id/vertical45"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/horizontal5" />
 
@@ -28,7 +28,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/txtvw_foodtype"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/vertical50"
+        app:layout_constraintStart_toStartOf="@+id/vertical45"
         app:layout_constraintTop_toTopOf="@+id/txtvw_foodtype" />
 
 
@@ -52,7 +52,7 @@
         android:max="5"
         app:layout_constraintBottom_toBottomOf="@+id/txtvw_rating"
         app:layout_constraintEnd_toEndOf="@+id/spin_foodtype"
-        app:layout_constraintStart_toStartOf="@+id/vertical50"
+        app:layout_constraintStart_toStartOf="@+id/vertical45"
         app:layout_constraintTop_toTopOf="@+id/txtvw_rating" />
 
     <TextView
@@ -137,7 +137,7 @@
         app:layout_constraintTop_toBottomOf="@+id/rdgroup_pricing" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/vertical50"
+        android:id="@+id/vertical45"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -157,7 +157,7 @@
         android:layout_marginStart="16dp"
         app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_distance"
         app:layout_constraintEnd_toStartOf="@+id/vertical55"
-        app:layout_constraintStart_toStartOf="@+id/vertical50" />
+        app:layout_constraintStart_toStartOf="@+id/vertical45" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical55"
