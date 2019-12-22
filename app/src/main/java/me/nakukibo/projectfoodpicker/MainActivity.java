@@ -1,20 +1,18 @@
 package me.nakukibo.projectfoodpicker;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -32,31 +30,35 @@ public class MainActivity extends AppCompatActivity {
     private String[] ratings = {"Any", "2 star", "3 star", "4 star"};
     private Float[] distances = {.5f, 1f, 5f, 10f, 20f};
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private static PlacesClient placesClient;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                1);
-
-       //RestaurantCard restaurantCard = findViewById(R.id.restcard);
+        requestLocationPermission();
         initPrefWidgets();
-
-        // Initialize the SDK
-        Places.initialize(getApplicationContext(), "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0");
-        // Create a new Places client instance
-        PlacesClient placesClient = Places.createClient(this);
-
-
+        initPlacesAPI();
     }
 
     public void submitPref(View view){
-        System.out.println("Food: " + spinFoodtype.getSelectedItem().toString());
-        System.out.println("Rating: " + spinRating.getSelectedItem().toString());
-        System.out.println("Distance: " + getDistance(sbrDistance.getProgress()));
-        System.out.println("Pricing: " + ((RadioButton) findViewById(rdgroupPricing.getCheckedRadioButtonId())).getText().toString());
+        Log.d(TAG, "submitPref: Attempting to submit preferences");
+        Log.d(TAG, "submitPref: " + String.format("Food: %s",
+                spinFoodtype.getSelectedItem().toString()));
+        Log.d(TAG, "submitPref: " + String.format("Rating: %s",
+                spinRating.getSelectedItem().toString()));
+        Log.d(TAG, "submitPref:  " + String.format("Distance: %s",
+                getDistance(sbrDistance.getProgress())));
+        Log.d(TAG, "submitPref:  " + String.format("Pricing: %s",
+                ((RadioButton) findViewById(rdgroupPricing.getCheckedRadioButtonId())).getText().toString()));
+    }
+
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                1);
     }
 
     private void initPrefWidgets() {
@@ -93,6 +95,11 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void initPlacesAPI() {
+        Places.initialize(getApplicationContext(), "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0");
+        placesClient = Places.createClient(this);
     }
 
     private String getDistance(int index){
