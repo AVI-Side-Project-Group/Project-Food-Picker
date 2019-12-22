@@ -104,7 +104,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/prefs_rdbtn_pricinglv1"
-            />
+            android:checked="true"/>
 
         <RadioButton
             android:id="@+id/rdbtn_pricinglvl2"

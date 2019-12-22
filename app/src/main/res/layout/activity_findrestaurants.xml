@@ -8,8 +8,14 @@
     <me.nakukibo.projectfoodpicker.RestaurantCard
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:address="243 NE 28th ST\nFort Worth, TX 76164"
+        app:hours="10:00AM - 10:00PM\n10:00AM - 10:00PM\n10:00AM - 10:00PM\n10:00AM - 10:00PM\n10:00AM - 10:00PM\n10:00AM - 10:00PM\n10:00AM - 11:00PM\n"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:name="China Buffet"
+        app:phone_number="(817) 542-7378"
+        app:price_level="1"
+        app:rating="3.7" />
 </androidx.constraintlayout.widget.ConstraintLayout>

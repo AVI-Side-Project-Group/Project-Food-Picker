@@ -11,7 +11,7 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/name"
+            android:id="@+id/txtvw_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -24,28 +24,69 @@
             app:layout_constraintTop_toTopOf="@+id/horizontal15" />
 
         <ImageView
-            android:id="@+id/image"
+            android:id="@+id/imgvw_restaurant"
             android:layout_width="0dp"
             android:layout_height="200dp"
             android:layout_marginTop="32dp"
-            app:layout_constraintEnd_toEndOf="@+id/name"
-            app:layout_constraintStart_toStartOf="@+id/name"
-            app:layout_constraintTop_toBottomOf="@+id/name"
+            app:layout_constraintEnd_toEndOf="@+id/txtvw_name"
+            app:layout_constraintStart_toStartOf="@+id/txtvw_name"
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_name"
             app:srcCompat="@color/cardview_dark_background" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/vertical45"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/txtvw_rating"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.45" />
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="@dimen/font_size_restaurant_text"
+            app:layout_constraintEnd_toStartOf="@+id/vertical45"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imgvw_restaurant" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/horizontal15"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/txtvw_price_level"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.15" />
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="@dimen/font_size_restaurant_text"
+            app:layout_constraintEnd_toEndOf="@+id/txtvw_rating"
+            app:layout_constraintEnd_toStartOf="@+id/vertical45"
+            app:layout_constraintStart_toStartOf="@+id/txtvw_rating"
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_rating" />
+
+        <TextView
+            android:id="@+id/txtvw_address"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/restcard_txtvw_addr_placeholder"
+            android:textSize="@dimen/font_size_restaurant_text"
+            app:layout_constraintEnd_toEndOf="@+id/txtvw_price_level"
+            app:layout_constraintStart_toStartOf="@+id/txtvw_price_level"
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_price_level" />
+
+        <TextView
+            android:id="@+id/txtvw_phone_number"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textSize="@dimen/font_size_restaurant_text"
+            app:layout_constraintEnd_toEndOf="@+id/txtvw_address"
+            app:layout_constraintStart_toStartOf="@+id/txtvw_address"
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_address" />
+
+        <TextView
+            android:id="@+id/txtvw_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textSize="@dimen/font_size_restaurant_text"
+            app:layout_constraintEnd_toEndOf="@+id/txtvw_phone_number"
+            app:layout_constraintStart_toStartOf="@+id/txtvw_phone_number"
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_phone_number" />
 
         <TextView
             android:id="@+id/txtvw_hours_label"
@@ -58,7 +99,7 @@
             android:textSize="@dimen/font_size_restaurant_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/vertical45"
-            app:layout_constraintTop_toBottomOf="@+id/image" />
+            app:layout_constraintTop_toBottomOf="@+id/imgvw_restaurant" />
 
         <TextView
             android:id="@+id/txtvw_hours"
@@ -85,59 +126,19 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/txtvw_hours" />
 
-        <TextView
-            android:id="@+id/txtvw_address"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/horizontal15"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/restcard_txtvw_addr_placeholder"
-            android:textSize="@dimen/font_size_restaurant_text"
-            app:layout_constraintEnd_toEndOf="@+id/txtvw_price_level"
-            app:layout_constraintStart_toStartOf="@+id/txtvw_price_level"
-            app:layout_constraintTop_toBottomOf="@+id/txtvw_price_level" />
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.15" />
 
-        <TextView
-            android:id="@+id/txtvw_rating"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/vertical45"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="@dimen/font_size_restaurant_text"
-            app:layout_constraintEnd_toStartOf="@+id/vertical45"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/image" />
-
-        <TextView
-            android:id="@+id/txtvw_price_level"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:textSize="@dimen/font_size_restaurant_text"
-            app:layout_constraintEnd_toEndOf="@+id/txtvw_rating"
-            app:layout_constraintEnd_toStartOf="@+id/vertical45"
-            app:layout_constraintStart_toStartOf="@+id/txtvw_rating"
-            app:layout_constraintTop_toBottomOf="@+id/txtvw_rating" />
-
-        <TextView
-            android:id="@+id/txtvw_phone_number"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:textSize="@dimen/font_size_restaurant_text"
-            app:layout_constraintEnd_toEndOf="@+id/txtvw_address"
-            app:layout_constraintStart_toStartOf="@+id/txtvw_address"
-            app:layout_constraintTop_toBottomOf="@+id/txtvw_address" />
-
-        <TextView
-            android:id="@+id/txtvw_website"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="@+id/txtvw_phone_number"
-            app:layout_constraintStart_toStartOf="@+id/txtvw_phone_number"
-            app:layout_constraintTop_toBottomOf="@+id/txtvw_phone_number" />
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.45" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
