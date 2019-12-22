@@ -1,6 +1,11 @@
 package me.nakukibo.projectfoodpicker;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -17,10 +22,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-    // TODO: make a neutral option for some of the preferences and maybe switch out of using seek bars
-    // TODO: figure out a secure way to store API keys
-    // TODO: add swipe left to get rid of a restaurant
-    
+
     private Spinner spinFoodtype;
     private Spinner spinRating;
     private SeekBar sbrDistance;
@@ -33,17 +35,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_findrestaurants);
+        setContentView(R.layout.activity_preferences);
 
-        RestaurantCard restaurantCard = findViewById(R.id.restcard);
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                1);
 
-
-        //initPrefWidgets();
+       //RestaurantCard restaurantCard = findViewById(R.id.restcard);
+        initPrefWidgets();
 
         // Initialize the SDK
         Places.initialize(getApplicationContext(), "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0");
         // Create a new Places client instance
         PlacesClient placesClient = Places.createClient(this);
+
+
     }
 
     public void submitPref(View view){

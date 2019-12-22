@@ -14,8 +14,6 @@ import java.util.Locale;
 
 public class RestaurantCard extends CardView {
 
-    // TODO: add a "open in Google Maps" option
-
     public RestaurantCard(@NonNull Context context) {
         this(context, null);
     }
