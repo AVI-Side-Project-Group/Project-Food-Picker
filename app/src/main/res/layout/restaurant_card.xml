@@ -21,7 +21,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.467"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/horizontal15" />
+            app:layout_constraintTop_toTopOf="@+id/horizontal5" />
 
         <ImageView
             android:id="@+id/imgvw_restaurant"
@@ -127,11 +127,11 @@
             app:layout_constraintStart_toEndOf="@+id/txtvw_hours" />
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/horizontal15"
+            android:id="@+id/horizontal5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_percent="0.15" />
+            app:layout_constraintGuide_percent="0.05" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/vertical45"

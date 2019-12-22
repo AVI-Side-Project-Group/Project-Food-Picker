@@ -14,6 +14,8 @@ import java.util.Locale;
 
 public class RestaurantCard extends CardView {
 
+    // TODO: add a "open in Google Maps" option
+
     public RestaurantCard(@NonNull Context context) {
         this(context, null);
     }
@@ -42,7 +44,7 @@ public class RestaurantCard extends CardView {
         TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.RestaurantCard);
 
         txtvwName.setText(attributes.getString(R.styleable.RestaurantCard_name));
-        imgvwRestaurant.setImageDrawable(attributes.getDrawable(R.styleable.RestaurantCard_image));
+        imgvwRestaurant.setImageDrawable(attributes.getDrawable(R.styleable.RestaurantCard_android_src));
         txtvwRating.setText(String.format(Locale.US, "%1.1f stars", attributes.getFloat(R.styleable.RestaurantCard_rating, 1f)));
         txtvwPriceLevel.setText(String.format(Locale.US, "Price Level: %d", attributes.getInteger(R.styleable.RestaurantCard_price_level, 1)));
         txtvwAddress.setText(attributes.getString(R.styleable.RestaurantCard_address));

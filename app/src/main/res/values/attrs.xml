@@ -2,7 +2,7 @@
 <resources>
     <declare-styleable name="RestaurantCard">
         <attr name="name" format="string"/>
-        <attr name="image" format="reference"/>
+        <attr name="android:src"/>
         <attr name="address" format="string"/>
         <attr name="rating" format="float"/>
         <attr name="price_level" format="integer"/>

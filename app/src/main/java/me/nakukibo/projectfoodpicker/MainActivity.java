@@ -19,6 +19,8 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
     // TODO: make a neutral option for some of the preferences and maybe switch out of using seek bars
     // TODO: figure out a secure way to store API keys
+    // TODO: add swipe left to get rid of a restaurant
+    
     private Spinner spinFoodtype;
     private Spinner spinRating;
     private SeekBar sbrDistance;
@@ -32,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_findrestaurants);
+
+        RestaurantCard restaurantCard = findViewById(R.id.restcard);
+
 
         //initPrefWidgets();
 
