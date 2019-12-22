@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RestaurantCard">
+        <attr name="name" format="string"/>
+        <attr name="android:src"/>
+        <attr name="address" format="string"/>
+        <attr name="rating" format="float"/>
+        <attr name="price_level" format="integer"/>
+        <attr name="phone_number" format="string"/>
+        <attr name="website" format="string"/>
+        <attr name="hours" format="string"/>
+    </declare-styleable>
+</resources>

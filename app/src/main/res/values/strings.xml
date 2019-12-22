@@ -1,8 +1,8 @@
 <resources>
-    <!--project title-->
+<!--    project title-->
     <string name="app_name">Project Food Picker</string>
 
-    <!-- activity_preferences.xml text-->
+<!--    activity_preferences.xml text-->
     <string name="prefs_txtvw_food_type">Food Type</string>
     <string name="prefs_edtxt_food_type_hint">\"Chinese\"</string>
     <string name="prefs_txtvw_rating">Rating (min)</string>
@@ -13,4 +13,15 @@
     <string name="prefs_rdbtn_pricinglv3">$$$</string>
     <string name="prefs_btn_search">Search</string>
 
+<!--    restaurant_card.xml text-->
+    <string name="restcard_txtvw_hours">Opening Hours</string>
+    <string name="restcard_txtvw_hours_label">
+        Mon:\nTue:\nWed:\nThu:\nFri:\nSat:\nSun:
+    </string>
+    <string name="restcard_txtvw_hours_placeholder">
+        12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM
+    </string>
+    <string name="restcard_txtvw_addr_placeholder">
+        123 NE 123th Street\nCity, State, ZipCode
+    </string>
 </resources>
