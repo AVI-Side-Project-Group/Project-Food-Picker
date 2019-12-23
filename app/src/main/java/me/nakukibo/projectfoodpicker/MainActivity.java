@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private String[] ratings = {"Any", "2 star", "3 star", "4 star"};
     private Float[] distances = {.5f, 1f, 5f, 10f, 20f};
 
+    public final String APIkey = "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         //initPrefWidgets();
 
         // Initialize the SDK
-        Places.initialize(getApplicationContext(), "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0");
+        Places.initialize(getApplicationContext(), APIkey);
         // Create a new Places client instance
         PlacesClient placesClient = Places.createClient(this);
     }
