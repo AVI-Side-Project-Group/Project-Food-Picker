@@ -92,4 +92,8 @@ public class MainActivity extends AppCompatActivity {
     private String getDistance(int index){
         return String.format(Locale.US, "%2.1f miles", distances[index]);
     }
+
+    private void randomGenerator(){
+
+    }
 }
