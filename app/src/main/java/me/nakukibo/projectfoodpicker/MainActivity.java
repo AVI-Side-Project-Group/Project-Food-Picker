@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private Float[] distances = {.5f, 1f, 5f, 10f, 20f};
     private boolean isLocationOn;
 
+    public final String APIkey = "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,5 +136,9 @@ public class MainActivity extends AppCompatActivity {
 
     private String getDistance(int index) {
         return String.format(Locale.US, "%2.1f miles", distances[index]);
+    }
+
+    private void randomGenerator(){
+
     }
 }
