@@ -1,7 +1,6 @@
 package me.nakukibo.projectfoodpicker;
 
 import android.os.AsyncTask;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -18,12 +17,19 @@ public class NearbyData extends AsyncTask<Object, String, String> {
 
     private String googlePlacesData;
     private GoogleMap mMap;
-    String url;
+    private String url;
+
+    private ReceiveData receiveData;
+
+    public NearbyData(ReceiveData receiveData) {
+        this.receiveData = receiveData;
+    }
 
     @Override
     protected String doInBackground(Object... objects){
-        mMap = (GoogleMap)objects[0];
-        url = (String)objects[1];
+        //put back in if using map
+        //mMap = (GoogleMap)objects[0];
+        url = (String) objects[0];
 
         DownloadUrl downloadURL = new DownloadUrl();
         try {
@@ -42,7 +48,12 @@ public class NearbyData extends AsyncTask<Object, String, String> {
         DataParser parser = new DataParser();
         nearbyPlaceList = parser.parse(s);
         Log.d("nearbyplacesdata","called parse method");
-        showNearbyPlaces(nearbyPlaceList);
+
+        //remove if using map
+        receiveData.sendData(nearbyPlaceList);
+
+        //put back in if using map
+        //showNearbyPlaces(nearbyPlaceList);
     }
 
     private void showNearbyPlaces(List<HashMap<String, String>> nearbyPlaceList)

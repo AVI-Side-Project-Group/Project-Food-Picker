@@ -23,30 +23,28 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MainActivity extends AppCompatActivity {
 
-    // TODO: get rid of unnecessary stuff from tutorial
-    // TODO: remove stuff as needed from permissions and figure out what each of them do
-    // TODO: deal with "next page" in json readings
-    // TODO: change the pricing and other parameters to the appropriate data type
-    // TODO: add a back button to go back to preferences
-
+    // variables used to pass data between MainActivity and MapsActivity
     public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
     public static final String PREF_INTENT_PRICING = "pricing";
 
+    // tag for logging
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    // views from layout
     private Spinner spinFoodType;
     private Spinner spinRating;
     private SeekBar sbrDistance;
     private RadioGroup rdgroupPricing;
-    private String[] foodTypes = {"Any", "American", "African", "Asian", "European", "Mediterranean",
-            "Mexican"};
-    private String[] ratings = {"Any", "2 star", "3 star", "4 star"};
+
+    // values for views
+    private String[] foodTypes = {"Any", "American", "African", "Asian",
+            "Barbecue", "European", "Hamburger", "Mediterranean",
+            "Mexican", "Pizza", "Seafood", "Steak"};
+    private int[] minRatings = {0, 1, 2, 3, 4};
     private Float[] distances = {.5f, 1f, 5f, 10f, 20f};
     private boolean isLocationOn;
-
-    public final String APIkey = "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,38 +52,52 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_preferences);
 
         requestLocationPermission();
-        initPrefWidgets();
+        initPrefViews();
     }
 
+    /**
+     * gets the preference values and opens the results activity (RestaurantCardFinder.java)
+     *
+     * @param view the view to be interfaced
+     */
     public void submitPref(View view) {
+        // if not search button then wrong view
+        if (view.getId() != R.id.btn_search) return;
+
         if (isLocationOn) {
+            // retrieve value from preferences
             String foodType = spinFoodType.getSelectedItem().toString();
-            String rating = spinRating.getSelectedItem().toString();
+            int rating = spinRating.getSelectedItemPosition();
             int distMeters = milesToMeters(distances[sbrDistance.getProgress()]);
             String pricing = ((RadioButton) findViewById(rdgroupPricing.getCheckedRadioButtonId()))
                     .getText()
                     .toString();
 
+            // log the values
             Log.d(TAG, "submitPref: Attempting to submit preferences");
             Log.d(TAG, "submitPref: " + String.format("Food: %s", foodType));
             Log.d(TAG, "submitPref: " + String.format("Rating: %s", rating));
             Log.d(TAG, "submitPref:  " + String.format("Distance: %d meters", distMeters));
             Log.d(TAG, "submitPref:  " + String.format("Pricing: %s", pricing));
 
-            // go to MapsActivity.java
-            Intent switchIntent = new Intent(this, MapsActivity.class);
+            // go to MapsActivity.java and pass along values
+            Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
             switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
             switchIntent.putExtra(PREF_INTENT_RATING, rating);
             switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);
             switchIntent.putExtra(PREF_INTENT_PRICING, pricing);
             startActivity(switchIntent);
         } else {
+            // tell user error message
             Toast toast = Toast.makeText(getApplicationContext(), "You cannot search with location off.",
                     Toast.LENGTH_LONG);
             toast.show();
         }
     }
 
+    /**
+     * ask user for location permission and sets global isLocationOn
+     * */
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{ACCESS_FINE_LOCATION}, 1);
@@ -96,7 +108,10 @@ public class MainActivity extends AppCompatActivity {
         isLocationOn = true;
     }
 
-    private void initPrefWidgets() {
+    /**
+     * initializes the view globals and the values
+     */
+    private void initPrefViews() {
         spinFoodType = findViewById(R.id.spin_foodtype);
         spinRating = findViewById(R.id.spin_rating);
         sbrDistance = findViewById(R.id.sbr_distance);
@@ -107,8 +122,17 @@ public class MainActivity extends AppCompatActivity {
         spinFoodType.setAdapter(adapterFood);
         spinFoodType.setSelection(0);
 
+        String[] ratingString = new String[minRatings.length];
+        for (int i = 0; i < minRatings.length; i++) {
+            int rating = minRatings[i];
+            if (rating == 0) {
+                ratingString[i] = "Any";
+            } else {
+                ratingString[i] = String.format(Locale.US, "%d stars", rating);
+            }
+        }
         ArrayAdapter<String> adapterRating = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item, ratings);
+                android.R.layout.simple_spinner_dropdown_item, ratingString);
         spinRating.setAdapter(adapterRating);
         spinRating.setSelection(0);
 
@@ -121,24 +145,28 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStartTrackingTouch(SeekBar seekBar) { }
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) { }
         });
     }
 
+    /**
+     * converts miles to meters
+     * @param miles miles value
+     * @return int rounded up value of meters
+     * */
     private int milesToMeters(double miles){
         return (int) Math.ceil(miles*1609.34);
     }
 
+    /**
+     * returns the distance as a string: "[miles of the index] miles"
+     * @param index  index of the distances array
+     * @return String string representation of the value to be displayed in view
+     * */
     private String getDistance(int index) {
         return String.format(Locale.US, "%2.1f miles", distances[index]);
-    }
-
-    private void randomGenerator(){
-
     }
 }

@@ -2,13 +2,8 @@ package me.nakukibo.projectfoodpicker;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,13 +25,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
-import java.util.List;
-
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
+
+    /**
+     * NOTE: most of the code here was for testing purposes.
+     * I was testing the use of url and passing of values from MainActivity.java
+     * This code needs a lot of refactoring
+     */
 
     public static final int REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
@@ -48,26 +46,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker currentLocationmMarker;
 
     private String foodType;
-    private String rating;
+    private final static int ERROR_PASSED_VALUE = -1;
     private int distance;
     private String pricing;
+    private int rating;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        foodType = getIntent().getStringExtra(MainActivity.PREF_INTENT_FOOD_TYPE);
-        rating = getIntent().getStringExtra(MainActivity.PREF_INTENT_RATING);
-        distance = getIntent().getIntExtra(MainActivity.PREF_INTENT_DISTANCE, -1);
-        pricing = getIntent().getStringExtra(MainActivity.PREF_INTENT_PRICING);
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-
+        retrievePassedValues();
+        initMapFragment();
     }
 
     @Override
@@ -106,7 +96,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-
     protected synchronized void bulidGoogleApiClient() {
         client = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
         client.connect();
@@ -123,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             currentLocationmMarker.remove();
 
         }
-        Log.d("lat = ", "" + latitude);
+
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
@@ -137,14 +126,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
         }
 
-        Object dataTransfer[] = new Object[2];
-        NearbyData getNearbyPlacesData = new NearbyData();
-        String url = getUrl();
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-        getNearbyPlacesData.execute(dataTransfer);
+        Object[] dataTransfer = new Object[2];
+//        NearbyData getNearbyPlacesData = new NearbyData();
+//        String url = getUrl();
+//        dataTransfer[0] = mMap;
+//        dataTransfer[1] = url;
+//        getNearbyPlacesData.execute(dataTransfer);
     }
 
+    /**
+     * get the google place url based on the values passed
+     */
     private String getUrl() {
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
         googlePlaceUrl.append("location=").append(latitude).append(",").append(longitude);
@@ -159,7 +151,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
         locationRequest = new LocationRequest();
         locationRequest.setInterval(100);
         locationRequest.setFastestInterval(1000);
@@ -179,4 +170,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
 
+    /**
+     * set global variables equal to values passed from MainActivity.java
+     */
+    private void retrievePassedValues() {
+        foodType = getIntent().getStringExtra(MainActivity.PREF_INTENT_FOOD_TYPE);
+        rating = getIntent().getIntExtra(MainActivity.PREF_INTENT_RATING, ERROR_PASSED_VALUE);
+        distance = getIntent().getIntExtra(MainActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
+        pricing = getIntent().getStringExtra(MainActivity.PREF_INTENT_PRICING);
+    }
+
+    /**
+     * Obtain the SupportMapFragment and get notified when the map is ready to be used.
+     */
+    private void initMapFragment() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
 }
