@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * gets the preference values and opens the results activity (MapsActivity.java)
+     * gets the preference values and opens the results activity (RestaurantCardFinder.java)
      *
      * @param view the view to be interfaced
      */
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "submitPref:  " + String.format("Pricing: %s", pricing));
 
             // go to MapsActivity.java and pass along values
-            Intent switchIntent = new Intent(this, MapsActivity.class);
+            Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
             switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
             switchIntent.putExtra(PREF_INTENT_RATING, rating);
             switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);

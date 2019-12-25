@@ -30,6 +30,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
 
+    /**
+     * NOTE: most of the code here was for testing purposes.
+     * I was testing the use of url and passing of values from MainActivity.java
+     * This code needs a lot of refactoring
+     */
+
     public static final int REQUEST_LOCATION_CODE = 99;
     int PROXIMITY_RADIUS = 10000;
     double latitude, longitude;
@@ -121,11 +127,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         Object[] dataTransfer = new Object[2];
-        NearbyData getNearbyPlacesData = new NearbyData();
-        String url = getUrl();
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
-        getNearbyPlacesData.execute(dataTransfer);
+//        NearbyData getNearbyPlacesData = new NearbyData();
+//        String url = getUrl();
+//        dataTransfer[0] = mMap;
+//        dataTransfer[1] = url;
+//        getNearbyPlacesData.execute(dataTransfer);
     }
 
     /**
