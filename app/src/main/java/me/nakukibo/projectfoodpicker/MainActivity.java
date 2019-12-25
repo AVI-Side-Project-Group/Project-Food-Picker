@@ -17,24 +17,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
-
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = MainActivity.class.getSimpleName();
-    private static PlacesClient placesClient;
+
     // TODO: get rid of unnecessary stuff from tutorial
     // TODO: remove stuff as needed from permissions and figure out what each of them do
     // TODO: deal with "next page" in json readings
-    private Spinner spinFoodtype;
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private Spinner spinFoodType;
     private Spinner spinRating;
     private SeekBar sbrDistance;
     private RadioGroup rdgroupPricing;
@@ -49,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
-        initPlacesAPI();
         requestLocationPermission();
         initPrefWidgets();
     }
@@ -58,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         if (isLocationOn) {
             Log.d(TAG, "submitPref: Attempting to submit preferences");
             Log.d(TAG, "submitPref: " + String.format("Food: %s",
-                    spinFoodtype.getSelectedItem().toString()));
+                    spinFoodType.getSelectedItem().toString()));
             Log.d(TAG, "submitPref: " + String.format("Rating: %s",
                     spinRating.getSelectedItem().toString()));
             Log.d(TAG, "submitPref:  " + String.format("Distance: %s",
@@ -77,31 +70,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{ACCESS_FINE_LOCATION},
-                1);
-
-        List<Place.Field> placeFields = Collections.singletonList(Place.Field.NAME);
-        FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
         if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // A local method to request required permissions;
-            // See https://developer.android.com/training/permissions/requesting
-            isLocationOn = false;
-        } else {
-            isLocationOn = true;
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{ACCESS_FINE_LOCATION}, 1);
+            if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                isLocationOn = false;
+            }
         }
+        isLocationOn = true;
     }
 
     private void initPrefWidgets() {
-        spinFoodtype = findViewById(R.id.spin_foodtype);
+        spinFoodType = findViewById(R.id.spin_foodtype);
         spinRating = findViewById(R.id.spin_rating);
         sbrDistance = findViewById(R.id.sbr_distance);
         rdgroupPricing = findViewById(R.id.rdgroup_pricing);
 
         ArrayAdapter<String> adapterFood = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, foodTypes);
-        spinFoodtype.setAdapter(adapterFood);
-        spinFoodtype.setSelection(0);
+        spinFoodType.setAdapter(adapterFood);
+        spinFoodType.setSelection(0);
 
         ArrayAdapter<String> adapterRating = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, ratings);
@@ -118,19 +105,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
             }
         });
-    }
-
-    private void initPlacesAPI() {
-        Places.initialize(getApplicationContext(), "AIzaSyDlyvqIWa52WgnfWn3OCb_vq8aaY4lu5z0");
-        placesClient = Places.createClient(this);
     }
 
     private String getDistance(int index) {
