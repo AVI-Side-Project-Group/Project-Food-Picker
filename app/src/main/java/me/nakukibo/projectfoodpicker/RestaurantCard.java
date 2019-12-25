@@ -14,8 +14,6 @@ import java.util.Locale;
 
 public class RestaurantCard extends CardView {
 
-    // TODO: add a "open in Google Maps" option
-
     public RestaurantCard(@NonNull Context context) {
         this(context, null);
     }
@@ -26,10 +24,10 @@ public class RestaurantCard extends CardView {
 
     public RestaurantCard(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        InitializeCard(context, attrs);
+        initCard(context, attrs);
     }
 
-    private void InitializeCard(@NonNull Context context, @Nullable AttributeSet attrs){
+    private void initCard(@NonNull Context context, @Nullable AttributeSet attrs) {
         inflate(context, R.layout.restaurant_card, this);
 
         TextView txtvwName = findViewById(R.id.txtvw_name);
