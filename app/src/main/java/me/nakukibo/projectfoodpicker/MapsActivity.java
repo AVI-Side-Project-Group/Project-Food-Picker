@@ -47,14 +47,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location lastlocation;
     private Marker currentLocationmMarker;
 
+    private String foodType;
+    private String rating;
+    private int distance;
+    private String pricing;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        foodType = getIntent().getStringExtra(MainActivity.PREF_INTENT_FOOD_TYPE);
+        rating = getIntent().getStringExtra(MainActivity.PREF_INTENT_RATING);
+        distance = getIntent().getIntExtra(MainActivity.PREF_INTENT_DISTANCE, -1);
+        pricing = getIntent().getStringExtra(MainActivity.PREF_INTENT_PRICING);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
     }
 
     @Override
@@ -123,86 +136,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (client != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(client, this);
         }
-    }
 
-    public void onClick(View v) {
         Object dataTransfer[] = new Object[2];
         NearbyData getNearbyPlacesData = new NearbyData();
-
-        switch (v.getId()) {
-            case R.id.B_search:
-                EditText tf_location = findViewById(R.id.TF_location);
-                String location = tf_location.getText().toString();
-                List<Address> addressList;
-
-
-                if (!location.equals("")) {
-                    Geocoder geocoder = new Geocoder(this);
-
-                    try {
-                        addressList = geocoder.getFromLocationName(location, 5);
-
-                        if (addressList != null) {
-                            for (int i = 0; i < addressList.size(); i++) {
-                                LatLng latLng = new LatLng(addressList.get(i).getLatitude(), addressList.get(i).getLongitude());
-                                MarkerOptions markerOptions = new MarkerOptions();
-                                markerOptions.position(latLng);
-                                markerOptions.title(location);
-                                mMap.addMarker(markerOptions);
-                                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                break;
-            case R.id.B_hopistals:
-                mMap.clear();
-                String hospital = "hospital";
-                String url = getUrl(latitude, longitude, hospital);
-                dataTransfer[0] = mMap;
-                dataTransfer[1] = url;
-
-                getNearbyPlacesData.execute(dataTransfer);
-                Toast.makeText(MapsActivity.this, "Showing Nearby Hospitals", Toast.LENGTH_SHORT).show();
-                break;
-
-
-            case R.id.B_schools:
-                mMap.clear();
-                String school = "school";
-                url = getUrl(latitude, longitude, school);
-                dataTransfer[0] = mMap;
-                dataTransfer[1] = url;
-
-                getNearbyPlacesData.execute(dataTransfer);
-                Toast.makeText(MapsActivity.this, "Showing Nearby Schools", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.B_restaurants:
-                mMap.clear();
-                String resturant = "restuarant";
-                url = getUrl(latitude, longitude, resturant);
-                dataTransfer[0] = mMap;
-                dataTransfer[1] = url;
-
-                getNearbyPlacesData.execute(dataTransfer);
-                Toast.makeText(MapsActivity.this, "Showing Nearby Restaurants", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.B_to:
-        }
+        String url = getUrl();
+        dataTransfer[0] = mMap;
+        dataTransfer[1] = url;
+        getNearbyPlacesData.execute(dataTransfer);
     }
 
-
-    private String getUrl(double latitude, double longitude, String nearbyPlace) {
-
+    private String getUrl() {
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-        googlePlaceUrl.append("location=" + latitude + "," + longitude);
-        googlePlaceUrl.append("&radius=" + PROXIMITY_RADIUS);
-        googlePlaceUrl.append("&type=" + nearbyPlace);
+        googlePlaceUrl.append("location=").append(latitude).append(",").append(longitude);
+        googlePlaceUrl.append("&radius=").append(distance);
+        googlePlaceUrl.append("&type=restaurant");
+        if(!foodType.equals("any")) googlePlaceUrl.append("&keyword=").append(foodType);
         googlePlaceUrl.append("&sensor=true");
-        googlePlaceUrl.append("&key=" + "AIzaSyCd9Q5wxR59XOi1ugwZzH4l8fa2_BnBvOI");
+        googlePlaceUrl.append("&key=AIzaSyCd9Q5wxR59XOi1ugwZzH4l8fa2_BnBvOI");
 
         return googlePlaceUrl.toString();
     }
@@ -220,7 +170,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LocationServices.FusedLocationApi.requestLocationUpdates(client, locationRequest, this);
         }
     }
-
 
     @Override
     public void onConnectionSuspended(int i) {

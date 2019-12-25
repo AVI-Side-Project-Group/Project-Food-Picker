@@ -25,4 +25,5 @@
         123 NE 123th Street\nCity, State, ZipCode
     </string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps2">Map</string>
 </resources>

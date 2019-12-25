@@ -26,8 +26,16 @@ public class MainActivity extends AppCompatActivity {
     // TODO: get rid of unnecessary stuff from tutorial
     // TODO: remove stuff as needed from permissions and figure out what each of them do
     // TODO: deal with "next page" in json readings
+    // TODO: change the pricing and other parameters to the appropriate data type
+    // TODO: add a back button to go back to preferences
+
+    public static final String PREF_INTENT_FOOD_TYPE = "food_type";
+    public static final String PREF_INTENT_RATING = "rating";
+    public static final String PREF_INTENT_DISTANCE = "distance";
+    public static final String PREF_INTENT_PRICING = "pricing";
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private Spinner spinFoodType;
     private Spinner spinRating;
     private SeekBar sbrDistance;
@@ -49,18 +57,25 @@ public class MainActivity extends AppCompatActivity {
 
     public void submitPref(View view) {
         if (isLocationOn) {
+            String foodType = spinFoodType.getSelectedItem().toString();
+            String rating = spinRating.getSelectedItem().toString();
+            int distMeters = milesToMeters(distances[sbrDistance.getProgress()]);
+            String pricing = ((RadioButton) findViewById(rdgroupPricing.getCheckedRadioButtonId()))
+                    .getText()
+                    .toString();
+
             Log.d(TAG, "submitPref: Attempting to submit preferences");
-            Log.d(TAG, "submitPref: " + String.format("Food: %s",
-                    spinFoodType.getSelectedItem().toString()));
-            Log.d(TAG, "submitPref: " + String.format("Rating: %s",
-                    spinRating.getSelectedItem().toString()));
-            Log.d(TAG, "submitPref:  " + String.format("Distance: %s",
-                    getDistance(sbrDistance.getProgress())));
-            Log.d(TAG, "submitPref:  " + String.format("Pricing: %s",
-                    ((RadioButton) findViewById(rdgroupPricing.getCheckedRadioButtonId())).getText().toString()));
+            Log.d(TAG, "submitPref: " + String.format("Food: %s", foodType));
+            Log.d(TAG, "submitPref: " + String.format("Rating: %s", rating));
+            Log.d(TAG, "submitPref:  " + String.format("Distance: %d meters", distMeters));
+            Log.d(TAG, "submitPref:  " + String.format("Pricing: %s", pricing));
 
             // go to MapsActivity.java
             Intent switchIntent = new Intent(this, MapsActivity.class);
+            switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
+            switchIntent.putExtra(PREF_INTENT_RATING, rating);
+            switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);
+            switchIntent.putExtra(PREF_INTENT_PRICING, pricing);
             startActivity(switchIntent);
         } else {
             Toast toast = Toast.makeText(getApplicationContext(), "You cannot search with location off.",
@@ -111,6 +126,10 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
         });
+    }
+
+    private int milesToMeters(double miles){
+        return (int) Math.ceil(miles*1609.34);
     }
 
     private String getDistance(int index) {
