@@ -51,12 +51,14 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
      * get the google place url based on the values passed
      */
     private String getUrl(double latitude, double longitude) {
-        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/textsearch/json?");
         googlePlaceUrl.append("location=").append(latitude).append(",").append(longitude);
         googlePlaceUrl.append("&radius=").append(distance);
         googlePlaceUrl.append("&type=restaurant");
         if (!foodType.equals("any")) googlePlaceUrl.append("&keyword=").append(foodType);
-        googlePlaceUrl.append("&sensor=true");
+        googlePlaceUrl.append("&sensor=true"); //take out?
+        googlePlaceUrl.append("&field=formatted_address,name,permanently_closed,photos,place_id," +
+                "price_level,rating,user_ratings_total");
         googlePlaceUrl.append("&key=AIzaSyCd9Q5wxR59XOi1ugwZzH4l8fa2_BnBvOI");
 
         return googlePlaceUrl.toString();

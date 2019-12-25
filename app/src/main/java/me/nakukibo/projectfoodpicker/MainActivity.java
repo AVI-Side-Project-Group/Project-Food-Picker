@@ -32,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     // tag for logging
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    // flag for checking whether the user allowed for location data
+    private boolean isLocationOn;
+
     // views from layout
     private Spinner spinFoodType;
     private Spinner spinRating;
@@ -44,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
             "Mexican", "Pizza", "Seafood", "Steak"};
     private int[] minRatings = {0, 1, 2, 3, 4};
     private Float[] distances = {.5f, 1f, 5f, 10f, 20f};
-    private boolean isLocationOn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,19 @@ public class MainActivity extends AppCompatActivity {
 
         requestLocationPermission();
         initPrefViews();
+    }
+
+    /**
+     * logs all values as debug
+     *
+     * @param tag:      the tag for the messages
+     * @param funcName: function name where this function is called from
+     * @param values:   values to be logged
+     */
+    public static void logValues(String tag, String funcName, String... values) {
+        for (String value : values) {
+            Log.d(tag, funcName + ": " + value);
+        }
     }
 
     /**
@@ -75,10 +90,8 @@ public class MainActivity extends AppCompatActivity {
 
             // log the values
             Log.d(TAG, "submitPref: Attempting to submit preferences");
-            Log.d(TAG, "submitPref: " + String.format("Food: %s", foodType));
-            Log.d(TAG, "submitPref: " + String.format("Rating: %s", rating));
-            Log.d(TAG, "submitPref:  " + String.format("Distance: %d meters", distMeters));
-            Log.d(TAG, "submitPref:  " + String.format("Pricing: %s", pricing));
+            logValues(TAG, "submitPref", foodType, String.valueOf(rating),
+                    String.valueOf(distMeters), pricing);
 
             // go to MapsActivity.java and pass along values
             Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
