@@ -2,6 +2,7 @@ package me.nakukibo.projectfoodpicker;
 
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -100,13 +101,15 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
         StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/textsearch/json?");
         googlePlaceUrl.append("location=").append(latitude).append(",").append(longitude);
         googlePlaceUrl.append("&radius=").append(distance);
+        if (!foodType.equals("any")) googlePlaceUrl.append("&query=").append(foodType);
         googlePlaceUrl.append("&type=restaurant");
-        if (!foodType.equals("any")) googlePlaceUrl.append("&keyword=").append(foodType);
+        //if (!foodType.equals("any")) googlePlaceUrl.append("&keyword=").append(foodType);
         googlePlaceUrl.append("&sensor=true"); //take out?
         googlePlaceUrl.append("&field=formatted_address,name,permanently_closed,photos,place_id," +
                 "price_level,rating,user_ratings_total");
         googlePlaceUrl.append("&key=AIzaSyCd9Q5wxR59XOi1ugwZzH4l8fa2_BnBvOI");
 
+        Log.d(TAG, "getUrl: " + googlePlaceUrl.toString());
         return googlePlaceUrl.toString();
     }
 
