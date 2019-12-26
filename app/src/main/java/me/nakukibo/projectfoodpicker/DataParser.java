@@ -15,10 +15,13 @@ public class DataParser {
     public static final String DATA_KEY_NAME = "restaurant_name";
     public static final String DATA_KEY_ADDRESS = "formatted_addresss";
     public static final String DATA_KEY_HOURS = "opening_hours";
+    public static final String DATA_KEY_CURRENTLY_OPEN = "currently_open";
     public static final String DATA_KEY_PHOTO = "restaurant_photo";
     public static final String DATA_KEY_RATING = "restaurant_rating";
     public static final String DATA_KEY_TOT_RATING = "restaurant_total_rating";
     public static final String DATA_KEY_PRICE_LEVEL = "price_level";
+    public static final String DATA_KEY_PHONE_NUMBER = "phone_number";
+    public static final String DATA_KEY_WEBSITE = "website";
     public static final String DATA_KEY_PLACE_ID = "restaurant_place_id";
 
     private static final String DATA_DEFAULT = "--NA--";
@@ -36,11 +39,9 @@ public class DataParser {
         String rating = DATA_DEFAULT;
         String totRating = DATA_DEFAULT;
         String priceLevel = DATA_DEFAULT;
+        String phoneNumber = DATA_DEFAULT;
+        String website = DATA_DEFAULT;
         String placeId = DATA_DEFAULT;
-
-        String latitude = "";
-        String longitude = "";
-        String reference = "";
 
         Log.d("DataParser","jsonobject ="+googlePlaceJson.toString());
 
@@ -70,17 +71,24 @@ public class DataParser {
                 placeId = googlePlaceJson.getString("place_id");
             }
 
-            latitude = googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lat");
-            longitude = googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lng");
-            reference = googlePlaceJson.getString("reference");
+            // add detail search here
 
-            googlePlaceMap.put("place_name", name);
-            googlePlaceMap.put("lat", latitude);
-            googlePlaceMap.put("lng", longitude);
-            googlePlaceMap.put("reference", reference);
+
+            googlePlaceMap.put(DATA_KEY_NAME, name);
+            googlePlaceMap.put(DATA_KEY_ADDRESS, address);
+            googlePlaceMap.put(DATA_KEY_HOURS, hours);
+            googlePlaceMap.put(DATA_KEY_CURRENTLY_OPEN, isCurrentlyOpen);
+            googlePlaceMap.put(DATA_KEY_PHOTO, photo);
+            googlePlaceMap.put(DATA_KEY_RATING, rating);
+            googlePlaceMap.put(DATA_KEY_TOT_RATING, totRating);
+            googlePlaceMap.put(DATA_KEY_PRICE_LEVEL, priceLevel);
+            googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, phoneNumber);
+            googlePlaceMap.put(DATA_KEY_WEBSITE, website);
+            googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
 
             Log.d(TAG, "getPlace: Values from parse attempt");
-            MainActivity.logValues(TAG, "getPlace", name, address, isCurrentlyOpen, photo, rating, totRating, priceLevel, placeId);
+            MainActivity.logValues(TAG, "getPlace", name, address, isCurrentlyOpen, hours,
+                    photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
         }
         catch (JSONException e) {
             e.printStackTrace();
@@ -122,7 +130,12 @@ public class DataParser {
         return getPlaces(jsonArray);
     }
 
-    private void getDetailsUrl() {
+    private static String getDetailsUrl(String placeId) {
+        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/details/json?");
+        googlePlaceUrl.append("place_id=").append(placeId);
+        googlePlaceUrl.append("&fields=formatted_phone_number,opening_hours,website");
+        googlePlaceUrl.append("&key=AIzaSyCd9Q5wxR59XOi1ugwZzH4l8fa2_BnBvOI");
 
+        return googlePlaceUrl.toString();
     }
 }

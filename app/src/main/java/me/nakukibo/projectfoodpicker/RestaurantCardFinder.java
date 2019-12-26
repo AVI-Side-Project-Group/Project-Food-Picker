@@ -2,6 +2,8 @@ package me.nakukibo.projectfoodpicker;
 
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +14,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Random;
 
 public class RestaurantCardFinder extends AppCompatActivity implements ReceiveData {
 
@@ -73,8 +77,33 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
     @Override
     public void sendData(List<HashMap<String, String>> nearbyPlaceList) {
-        HashMap<String, String> selectedRestaurant = nearbyPlaceList.get(0);
+        int index = (int) (Math.random() * (nearbyPlaceList.size() + 1));
+        HashMap<String, String> selectedRestaurant = nearbyPlaceList.get(index);
+
         TextView txtvwName = findViewById(R.id.txtvw_name);
-        txtvwName.setText(selectedRestaurant.get("place_name"));
+        txtvwName.setText(selectedRestaurant.get(DataParser.DATA_KEY_NAME));
+
+        ImageView restPhoto = findViewById(R.id.imgvw_restaurant);
+        restPhoto.setImageResource(R.drawable.ic_launcher_background);
+
+        TextView txtvwRating = findViewById(R.id.txtvw_rating);
+        txtvwRating.setText(String.format(Locale.US, "%s stars (%s)",
+                selectedRestaurant.get(DataParser.DATA_KEY_RATING), selectedRestaurant.get(DataParser.DATA_KEY_TOT_RATING)));
+
+        TextView txtvwPricing = findViewById(R.id.txtvw_price_level);
+        txtvwPricing.setText(String.format(Locale.US, "Pricing Level: %s",
+                selectedRestaurant.get(DataParser.DATA_KEY_PRICE_LEVEL)));
+
+        TextView txtvwAddress = findViewById(R.id.txtvw_address);
+        txtvwAddress.setText(selectedRestaurant.get(DataParser.DATA_KEY_ADDRESS));
+
+        TextView txtvwPhoneNumber = findViewById(R.id.txtvw_phone_number);
+        txtvwPhoneNumber.setText(selectedRestaurant.get(DataParser.DATA_KEY_PHONE_NUMBER));
+
+        TextView txtvwWebsite = findViewById(R.id.txtvw_website);
+        txtvwWebsite.setText(selectedRestaurant.get(DataParser.DATA_KEY_WEBSITE));
+
+        TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
+        txtvwHours.setText(selectedRestaurant.get(DataParser.DATA_KEY_HOURS));
     }
 }
