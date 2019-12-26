@@ -23,7 +23,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class MainActivity extends AppCompatActivity {
 
-    // variables used to pass data between MainActivity and MapsActivity
+    // variables used to pass data between MainActivity and RestaurantCardFinder
     public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             logValues(TAG, "submitPref", foodType, String.valueOf(rating),
                     String.valueOf(distMeters), pricing);
 
-            // go to MapsActivity.java and pass along values
+            // go to RestaurantCardFinder.java and pass along values
             Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
             switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
             switchIntent.putExtra(PREF_INTENT_RATING, rating);

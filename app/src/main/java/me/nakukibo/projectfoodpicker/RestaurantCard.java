@@ -27,9 +27,13 @@ public class RestaurantCard extends CardView {
         initCard(context, attrs);
     }
 
+    /**
+     * initialize the views in the card to specific values
+     */
     private void initCard(@NonNull Context context, @Nullable AttributeSet attrs) {
         inflate(context, R.layout.restaurant_card, this);
 
+        // defines all views
         TextView txtvwName = findViewById(R.id.txtvw_name);
         ImageView imgvwRestaurant = findViewById(R.id.imgvw_restaurant);
         TextView txtvwRating = findViewById(R.id.txtvw_rating);
@@ -39,6 +43,7 @@ public class RestaurantCard extends CardView {
         TextView txtvwWebsite = findViewById(R.id.txtvw_website);
         TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
 
+        // set view values to attribute values
         TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.RestaurantCard);
 
         txtvwName.setText(attributes.getString(R.styleable.RestaurantCard_name));
