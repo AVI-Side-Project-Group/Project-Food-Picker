@@ -107,7 +107,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
         googlePlaceUrl.append("&sensor=true"); //take out?
         googlePlaceUrl.append("&field=formatted_address,name,permanently_closed,photos,place_id," +
                 "price_level,rating,user_ratings_total");
-        googlePlaceUrl.append("&key=AIzaSyCd9Q5wxR59XOi1ugwZzH4l8fa2_BnBvOI");
+        googlePlaceUrl.append("&key=").append(getResources().getString(R.string.google_maps_key));
 
         Log.d(TAG, "getUrl: " + googlePlaceUrl.toString());
         return googlePlaceUrl.toString();
