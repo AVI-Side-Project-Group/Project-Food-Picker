@@ -36,11 +36,11 @@ class DataParser {
      * @param placeId place_id for the location where the data is to be fetched
      * @return String the url to be used to fetch the said data (phone number, opening hours, website)
      */
-    private static String getDetailsUrl(String placeId) {
+    private static String getDetailsUrl(String placeId, String apiKey) {
         String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/details/json?";
         googlePlaceUrl += "place_id=" + placeId;
         googlePlaceUrl += "&fields=formatted_phone_number,opening_hours,website";
-        googlePlaceUrl += "&key=AIzaSyCd9Q5wxR59XOi1ugwZzH4l8fa2_BnBvOI";
+        googlePlaceUrl += "&key=" + apiKey;
 
         return googlePlaceUrl;
     }
@@ -157,6 +157,7 @@ class DataParser {
             Log.d(TAG, "getPlaceData: Values from parse attempt");
             MainActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
                     photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
+            Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
         } catch (JSONException e) {
             e.printStackTrace();
         }
