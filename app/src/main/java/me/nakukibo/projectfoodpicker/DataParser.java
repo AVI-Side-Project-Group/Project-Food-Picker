@@ -168,7 +168,8 @@ class DataParser {
             }
             if (!googlePlaceJson.isNull("price_level")) {
                 priceLevel = googlePlaceJson.getString("price_level");
-                if(Double.parseDouble(priceLevel) != pricingRange) return null;
+                if (Double.parseDouble(priceLevel) != pricingRange && pricingRange != PreferencesActivity.PREF_ANY_INT_REP)
+                    return null;
             }
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");

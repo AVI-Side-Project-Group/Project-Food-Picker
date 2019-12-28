@@ -27,6 +27,8 @@ public class NearbyData extends AsyncTask<Object, String, String> {
     protected String doInBackground(Object... objects){
         String url = (String) objects[0];
         Log.d(TAG, "doInBackground: url to search=" + url);
+
+        // set variables to values passed
         userLocation = (Location) objects[1];
         maxDistance = (int) objects[2];
         pricingRange = (int) objects[3];

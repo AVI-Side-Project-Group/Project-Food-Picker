@@ -1,6 +1,7 @@
 package me.nakukibo.projectfoodpicker;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,15 +19,20 @@ import java.util.Random;
 public class RestaurantCardFinder extends AppCompatActivity implements ReceiveData {
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
-    private final static int ERROR_PASSED_VALUE = -1;
+    private static final int ERROR_PASSED_VALUE = -1;
+    private static final String DEFAULT_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
+    private static final int DEFAULT_WAIT_MS = 500;
 
+    // accumulates the list over several calls
     private static List<HashMap<String, String>> nearbyPlaceListCombined;
 
+    // data passed from PreferencesActivity.java
     private String foodType;
     private int distance;
     private int pricing;
     private int rating;
 
+    // previous pageToken for multiple calls
     private String previousPageToken;
 
     @Override
@@ -41,32 +47,23 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
     @Override
     public void sendData(List<HashMap<String, String>> nearbyPlaceList, String nextPageToken) {
-        // get random restaurant passed back
-
         if(nearbyPlaceList == null){
-            String nextPage = getUrlNextPage(previousPageToken);
-            fetchLocation(nextPage);
+            // if null then that means the nextPageToken request failed so search again
+            requestNextPageSearch(previousPageToken);
             return;
-        }else {
+        } else {
             previousPageToken = nextPageToken;
         }
-
-        Log.d(TAG, "sendData: has nearbyPlaceList of size " + nearbyPlaceList.size() + " with " +
-                "token " + nextPageToken);
 
         if(nearbyPlaceListCombined == null) {
             nearbyPlaceListCombined = nearbyPlaceList;
         } else {
             nearbyPlaceListCombined.addAll(nearbyPlaceList);
-            Log.d(TAG, "sendData: new size of " + nearbyPlaceListCombined.size());
+            Log.d(TAG, "sendData: combined list has new size of " + nearbyPlaceListCombined.size());
         }
 
-//        logAllPlacesList(nearbyPlaceList);
-
         if(nextPageToken != null){
-            String nextPage = getUrlNextPage(nextPageToken);
-            Log.d(TAG, "sendData: search with pageToken=" + nextPageToken + " and url=" + nextPage);
-            fetchLocation(nextPage);
+            requestNextPageSearch(nextPageToken);
             return;
         }
 
@@ -75,8 +72,13 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
         int index = new Random().nextInt(nearbyPlaceListCombined.size());
         HashMap<String, String> selectedRestaurant = nearbyPlaceListCombined.get(index);
+        setViewValues(selectedRestaurant);
+    }
 
-        // set view values depending on the restaurant values
+    /**
+     * set values of views to values in HashMap<String, String>
+     */
+    private void setViewValues(HashMap<String, String> selectedRestaurant) {
         TextView txtvwName = findViewById(R.id.txtvw_name);
         txtvwName.setText(selectedRestaurant.get(DataParser.DATA_KEY_NAME));
 
@@ -102,6 +104,16 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
         TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
         txtvwHours.setText(selectedRestaurant.get(DataParser.DATA_KEY_HOURS));
+    }
+
+    /**
+     * send search request with nextPageToken
+     */
+    private void requestNextPageSearch(String nextPageToken) {
+        SystemClock.sleep(DEFAULT_WAIT_MS);
+        String nextPage = getUrlNextPage(nextPageToken);
+        Log.d(TAG, "sendData: search with url=" + nextPage);
+        fetchLocation(nextPage);
     }
 
     /**
@@ -131,8 +143,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
                 });
     }
 
+    /**
+     * get the google place url based on nextPageToken only
+     */
     private String getUrlNextPage(String nextPageToken){
-        String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
+        String googlePlaceUrl = DEFAULT_PLACES_SEARCH_URL;
         googlePlaceUrl += "pagetoken=" + nextPageToken;
         googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
         return googlePlaceUrl;
@@ -142,21 +157,26 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
      * get the google place url based on the values passed
      */
     private String getUrl(double latitude, double longitude) {
-        StringBuilder googlePlaceUrl = new StringBuilder("https://maps.googleapis.com/maps/api/place/textsearch/json?");
+        StringBuilder googlePlaceUrl = new StringBuilder(DEFAULT_PLACES_SEARCH_URL);
+
         googlePlaceUrl.append("location=").append(latitude).append(",").append(longitude);
         googlePlaceUrl.append("&radius=").append(distance);
+
         if (!foodType.equals("any")) googlePlaceUrl.append("&query=").append(foodType);
         googlePlaceUrl.append("&type=restaurant");
-        //if (!foodType.equals("any")) googlePlaceUrl.append("&keyword=").append(foodType);
-        googlePlaceUrl.append("&sensor=true"); //take out?
+
         googlePlaceUrl.append("&field=formatted_address,name,permanently_closed,photos,place_id," +
                 "price_level,rating,user_ratings_total");
+
         googlePlaceUrl.append("&key=").append(getResources().getString(R.string.google_maps_key));
 
         Log.d(TAG, "getUrl: " + googlePlaceUrl.toString());
         return googlePlaceUrl.toString();
     }
 
+    /**
+     * logs all of the nearbyPlacesList's HashMaps' name fields for debugging purposes
+     * */
     private void logAllPlacesList(List<HashMap<String, String>> nearbyPlaceList){
         Log.d(TAG, "logAllPlacesList: printing nearbyPlacesList---------------------");
         for(HashMap<String, String> placesInfo : nearbyPlaceList){
