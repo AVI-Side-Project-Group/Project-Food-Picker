@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class RestaurantCardFinder extends AppCompatActivity implements ReceiveData {
 
@@ -37,7 +38,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
     @Override
     public void sendData(List<HashMap<String, String>> nearbyPlaceList) {
         // get random restaurant passed back
-        int index = (int) (Math.random() * (nearbyPlaceList.size() + 1));
+        if(nearbyPlaceList.size() == 0) Log.d(TAG, "sendData: has nearbyPlaceList of size 0");
+        int index = new Random().nextInt(nearbyPlaceList.size());
         HashMap<String, String> selectedRestaurant = nearbyPlaceList.get(index);
 
         // set view values depending on the restaurant values
@@ -82,12 +84,14 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
                             // get locational information
                             double latitude = location.getLatitude();
                             double longitude = location.getLongitude();
-                            Object[] dataTransfer = new Object[2];
+                            Object[] dataTransfer = new Object[3];
 
                             // find restaurants
                             NearbyData getNearbyPlacesData = new NearbyData(RestaurantCardFinder.this);
                             String url = getUrl(latitude, longitude);
                             dataTransfer[0] = url;
+                            dataTransfer[1] = location;
+                            dataTransfer[2] = distance;
                             getNearbyPlacesData.execute(dataTransfer);
                         }
                     }

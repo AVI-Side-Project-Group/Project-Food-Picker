@@ -1,5 +1,6 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.location.Location;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -14,7 +15,7 @@ class DataParser {
 
     // used for storing and loading values into HashMap
     static final String DATA_KEY_NAME = "restaurant_name";
-    static final String DATA_KEY_ADDRESS = "formatted_addresss";
+    static final String DATA_KEY_ADDRESS = "formatted_address";
     static final String DATA_KEY_HOURS = "opening_hours";
     static final String DATA_KEY_CURRENTLY_OPEN = "currently_open";
     static final String DATA_KEY_PHOTO = "restaurant_photo";
@@ -51,19 +52,19 @@ class DataParser {
      * @param jsonData JSON data to be parsed
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
-    List<HashMap<String, String>> parse(String jsonData) {
+    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance) {
         JSONArray jsonArray = null;
         JSONObject jsonObject;
 
-        Log.d("json data", jsonData);
-
         try {
+            Log.d(TAG, "parse: with maxDistance=" + maxDistance);
+            Log.d(TAG, "parse: jsonData=" + jsonData);
             jsonObject = new JSONObject(jsonData);
             jsonArray = jsonObject.getJSONArray("results");
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return getAllPlacesData(jsonArray);
+        return getAllPlacesData(jsonArray, userLocation, maxDistance);
     }
 
     /**
@@ -72,14 +73,19 @@ class DataParser {
      * @param jsonArray all of the JSON to be parsed
      * @return List<HashMap < String, String>>  list of all HashMaps returned for each location
      */
-    private List<HashMap<String, String>> getAllPlacesData(JSONArray jsonArray) {
+    private List<HashMap<String, String>> getAllPlacesData(JSONArray jsonArray, Location userLocation, int maxDistance) {
         List<HashMap<String, String>> placelist = new ArrayList<>();
         HashMap<String, String> placeMap;
 
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                placeMap = getPlaceData((JSONObject) jsonArray.get(i));
-                placelist.add(placeMap);
+                placeMap = getPlaceData((JSONObject) jsonArray.get(i), userLocation, maxDistance);
+                if(placeMap != null) {
+                    placelist.add(placeMap);
+                    Log.d(TAG, "getAllPlacesData: place added");
+                }else {
+                    Log.d(TAG, "getAllPlacesData: place not added");
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -93,7 +99,7 @@ class DataParser {
      * @param googlePlaceJson the JSON to be converted
      * @return HashMap<String, String> key values are declared as constants for easy access
      */
-    private HashMap<String, String> getPlaceData(JSONObject googlePlaceJson) {
+    private HashMap<String, String> getPlaceData(JSONObject googlePlaceJson, Location userLocation, int maxDistance) {
         HashMap<String, String> googlePlaceMap = new HashMap<>();
 
         // initialize all values to default
@@ -112,6 +118,19 @@ class DataParser {
         Log.d("DataParser", "jsonobject =" + googlePlaceJson.toString());
 
         try {
+            double latitude = Double.parseDouble(
+                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lat")
+            );
+            double longitude = Double.parseDouble(
+                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lng")
+            );
+
+            Location restLocation = new Location("");
+            restLocation.setLatitude(latitude);
+            restLocation.setLongitude(longitude);
+
+            if(userLocation.distanceTo(restLocation) > maxDistance ) return null;
+
             // overwrite the values individually if not null
             if (!googlePlaceJson.isNull("name")) {
                 name = googlePlaceJson.getString("name");
@@ -137,7 +156,6 @@ class DataParser {
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");
             }
-
             // add detail search here (for website, opening hours, phone number)
 
             // pass into map
