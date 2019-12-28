@@ -13,6 +13,8 @@ import java.util.List;
 
 class DataParser {
 
+    private static final String TAG = DataParser.class.getSimpleName();
+
     // used for storing and loading values into HashMap
     static final String DATA_KEY_NAME = "restaurant_name";
     static final String DATA_KEY_ADDRESS = "formatted_address";
@@ -28,9 +30,6 @@ class DataParser {
 
     // HashMap value if null or by default
     private static final String DATA_DEFAULT = "--NA--";
-
-    private static final String TAG = DataParser.class.getSimpleName();
-
     private String nextPageToken;
 
     /**
@@ -191,7 +190,7 @@ class DataParser {
 
             // log all values for debugging
 //            Log.d(TAG, "getPlaceData: Values from parse attempt");
-//            MainActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
+//            PreferencesActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
 //                    photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
             Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
         } catch (JSONException e) {

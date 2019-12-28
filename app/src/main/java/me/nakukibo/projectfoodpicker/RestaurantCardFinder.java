@@ -1,8 +1,6 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.location.Location;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +24,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
     private String foodType;
     private int distance;
-    private String pricing;
+    private int pricing;
     private int rating;
 
     private String previousPageToken;
@@ -169,12 +166,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
     }
 
     /**
-     * restore values passed in from MainActivity.java
+     * restore values passed in from PreferencesActivity.java
      */
     private void retrievePassedValues() {
-        foodType = getIntent().getStringExtra(MainActivity.PREF_INTENT_FOOD_TYPE);
-        rating = getIntent().getIntExtra(MainActivity.PREF_INTENT_RATING, ERROR_PASSED_VALUE);
-        distance = getIntent().getIntExtra(MainActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
-        pricing = getIntent().getStringExtra(MainActivity.PREF_INTENT_PRICING);
+        foodType = getIntent().getStringExtra(PreferencesActivity.PREF_INTENT_FOOD_TYPE);
+        rating = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_RATING, ERROR_PASSED_VALUE);
+        distance = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
+        pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
     }
 }

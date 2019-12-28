@@ -4,8 +4,6 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.json.JSONException;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +29,7 @@ public class NearbyData extends AsyncTask<Object, String, String> {
         Log.d(TAG, "doInBackground: url to search=" + url);
         userLocation = (Location) objects[1];
         maxDistance = (int) objects[2];
-        pricingRange = ((String) objects[3]).length();
+        pricingRange = (int) objects[3];
         minRating = (int) objects[4];
 
         DownloadUrl downloadURL = new DownloadUrl();
