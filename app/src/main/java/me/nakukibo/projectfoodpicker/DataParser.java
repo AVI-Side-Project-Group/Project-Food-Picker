@@ -31,6 +31,8 @@ class DataParser {
 
     private static final String TAG = DataParser.class.getSimpleName();
 
+    private String nextPageToken;
+
     /**
      * return the url for detailed informational fetch
      *
@@ -52,18 +54,30 @@ class DataParser {
      * @param jsonData JSON data to be parsed
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
-    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance) {
+    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance) throws RuntimeException {
+
+        nextPageToken = null;
+
         JSONArray jsonArray = null;
         JSONObject jsonObject;
 
         try {
-            Log.d(TAG, "parse: with maxDistance=" + maxDistance);
             Log.d(TAG, "parse: jsonData=" + jsonData);
             jsonObject = new JSONObject(jsonData);
+
+            if(jsonObject.getString("status").equals("INVALID_REQUEST")) throw new RuntimeException("Invalid Request");
+
             jsonArray = jsonObject.getJSONArray("results");
+            try {
+                nextPageToken = jsonObject.getString("next_page_token");
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        Log.d(TAG, "parse: logging new set of jsonData=======================================");
         return getAllPlacesData(jsonArray, userLocation, maxDistance);
     }
 
@@ -172,13 +186,17 @@ class DataParser {
             googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
 
             // log all values for debugging
-            Log.d(TAG, "getPlaceData: Values from parse attempt");
-            MainActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
-                    photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
+//            Log.d(TAG, "getPlaceData: Values from parse attempt");
+//            MainActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
+//                    photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
             Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return googlePlaceMap;
+    }
+
+    String getNextPageToken(){
+        return nextPageToken;
     }
 }

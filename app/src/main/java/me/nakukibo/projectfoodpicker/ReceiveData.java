@@ -7,5 +7,5 @@ public interface ReceiveData {
     /**
      * method used to transmit data
      */
-    void sendData(List<HashMap<String, String>> nearbyPlaceList);
+    void sendData(List<HashMap<String, String>> nearbyPlaceList, String nextPageToken);
 }

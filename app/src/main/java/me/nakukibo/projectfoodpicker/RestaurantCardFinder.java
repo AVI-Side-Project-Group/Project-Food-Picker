@@ -2,6 +2,7 @@ package me.nakukibo.projectfoodpicker;
 
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,28 +20,64 @@ import java.util.Random;
 
 public class RestaurantCardFinder extends AppCompatActivity implements ReceiveData {
 
-    private final static int ERROR_PASSED_VALUE = -1;
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
+    private final static int ERROR_PASSED_VALUE = -1;
+
+    private static List<HashMap<String, String>> nearbyPlaceListCombined;
+
     private String foodType;
     private int distance;
     private String pricing;
     private int rating;
+
+    private String previousPageToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
+        nearbyPlaceListCombined = null;
         retrievePassedValues();
-        fetchLocation();
+        fetchLocation(null);
     }
 
     @Override
-    public void sendData(List<HashMap<String, String>> nearbyPlaceList) {
+    public void sendData(List<HashMap<String, String>> nearbyPlaceList, String nextPageToken) {
         // get random restaurant passed back
-        if(nearbyPlaceList.size() == 0) Log.d(TAG, "sendData: has nearbyPlaceList of size 0");
-        int index = new Random().nextInt(nearbyPlaceList.size());
-        HashMap<String, String> selectedRestaurant = nearbyPlaceList.get(index);
+
+        if(nearbyPlaceList == null){
+            String nextPage = getUrlNextPage(previousPageToken);
+            fetchLocation(nextPage);
+            return;
+        }else {
+            previousPageToken = nextPageToken;
+        }
+
+        Log.d(TAG, "sendData: has nearbyPlaceList of size " + nearbyPlaceList.size() + " with " +
+                "token " + nextPageToken);
+
+        if(nearbyPlaceListCombined == null) {
+            nearbyPlaceListCombined = nearbyPlaceList;
+        } else {
+            nearbyPlaceListCombined.addAll(nearbyPlaceList);
+            Log.d(TAG, "sendData: new size of " + nearbyPlaceListCombined.size());
+        }
+
+//        logAllPlacesList(nearbyPlaceList);
+
+        if(nextPageToken != null){
+            String nextPage = getUrlNextPage(nextPageToken);
+            Log.d(TAG, "sendData: search with pageToken=" + nextPageToken + " and url=" + nextPage);
+            fetchLocation(nextPage);
+            return;
+        }
+
+        Log.d(TAG, "sendData: logging the combined list");
+        logAllPlacesList(nearbyPlaceListCombined);
+
+        int index = new Random().nextInt(nearbyPlaceListCombined.size());
+        HashMap<String, String> selectedRestaurant = nearbyPlaceListCombined.get(index);
 
         // set view values depending on the restaurant values
         TextView txtvwName = findViewById(R.id.txtvw_name);
@@ -73,29 +110,33 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
     /**
      * fetch user current location and find the nearby restaurants based on preferences
      */
-    private void fetchLocation() {
+    private void fetchLocation(String customUrl) {
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known location. In some rare situations this can be null.
-                        if (location != null) {
-                            // get locational information
-                            double latitude = location.getLatitude();
-                            double longitude = location.getLongitude();
-                            Object[] dataTransfer = new Object[3];
+                .addOnSuccessListener(this, location -> {
+                    // Got last known location. In some rare situations this can be null.
+                    if (location != null) {
+                        // get locational information
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        Object[] dataTransfer = new Object[3];
 
-                            // find restaurants
-                            NearbyData getNearbyPlacesData = new NearbyData(RestaurantCardFinder.this);
-                            String url = getUrl(latitude, longitude);
-                            dataTransfer[0] = url;
-                            dataTransfer[1] = location;
-                            dataTransfer[2] = distance;
-                            getNearbyPlacesData.execute(dataTransfer);
-                        }
+                        // find restaurants
+                        NearbyData getNearbyPlacesData = new NearbyData(RestaurantCardFinder.this);
+                        String url = getUrl(latitude, longitude);
+                        dataTransfer[0] = customUrl == null ? url : customUrl;
+                        dataTransfer[1] = location;
+                        dataTransfer[2] = distance;
+                        getNearbyPlacesData.execute(dataTransfer);
                     }
                 });
+    }
+
+    private String getUrlNextPage(String nextPageToken){
+        String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
+        googlePlaceUrl += "pagetoken=" + nextPageToken;
+        googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
+        return googlePlaceUrl;
     }
 
     /**
@@ -115,6 +156,14 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
         Log.d(TAG, "getUrl: " + googlePlaceUrl.toString());
         return googlePlaceUrl.toString();
+    }
+
+    private void logAllPlacesList(List<HashMap<String, String>> nearbyPlaceList){
+        Log.d(TAG, "logAllPlacesList: printing nearbyPlacesList---------------------");
+        for(HashMap<String, String> placesInfo : nearbyPlaceList){
+            Log.d(TAG, "logAllPlacesList: restaurant name=" + placesInfo.get(DataParser.DATA_KEY_NAME));
+        }
+        Log.d(TAG, "logAllPlacesList: -----------------------------------------------");
     }
 
     /**
