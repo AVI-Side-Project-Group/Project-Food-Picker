@@ -119,7 +119,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
                         // get locational information
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        Object[] dataTransfer = new Object[3];
+                        Object[] dataTransfer = new Object[5];
 
                         // find restaurants
                         NearbyData getNearbyPlacesData = new NearbyData(RestaurantCardFinder.this);
@@ -127,6 +127,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
                         dataTransfer[0] = customUrl == null ? url : customUrl;
                         dataTransfer[1] = location;
                         dataTransfer[2] = distance;
+                        dataTransfer[3] = pricing;
+                        dataTransfer[4] = rating;
                         getNearbyPlacesData.execute(dataTransfer);
                     }
                 });

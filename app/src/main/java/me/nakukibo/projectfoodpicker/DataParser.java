@@ -54,7 +54,7 @@ class DataParser {
      * @param jsonData JSON data to be parsed
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
-    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance) throws RuntimeException {
+    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance, int pricingRange, int minRating) throws RuntimeException {
 
         nextPageToken = null;
 
@@ -78,7 +78,7 @@ class DataParser {
         }
 
         Log.d(TAG, "parse: logging new set of jsonData=======================================");
-        return getAllPlacesData(jsonArray, userLocation, maxDistance);
+        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating);
     }
 
     /**
@@ -87,13 +87,14 @@ class DataParser {
      * @param jsonArray all of the JSON to be parsed
      * @return List<HashMap < String, String>>  list of all HashMaps returned for each location
      */
-    private List<HashMap<String, String>> getAllPlacesData(JSONArray jsonArray, Location userLocation, int maxDistance) {
+    private List<HashMap<String, String>> getAllPlacesData(JSONArray jsonArray, Location userLocation,
+                                                           int maxDistance, int pricingRange, int minRating) {
         List<HashMap<String, String>> placelist = new ArrayList<>();
         HashMap<String, String> placeMap;
 
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                placeMap = getPlaceData((JSONObject) jsonArray.get(i), userLocation, maxDistance);
+                placeMap = getPlaceData((JSONObject) jsonArray.get(i), userLocation, maxDistance, pricingRange, minRating);
                 if(placeMap != null) {
                     placelist.add(placeMap);
                     Log.d(TAG, "getAllPlacesData: place added");
@@ -113,7 +114,8 @@ class DataParser {
      * @param googlePlaceJson the JSON to be converted
      * @return HashMap<String, String> key values are declared as constants for easy access
      */
-    private HashMap<String, String> getPlaceData(JSONObject googlePlaceJson, Location userLocation, int maxDistance) {
+    private HashMap<String, String> getPlaceData(JSONObject googlePlaceJson, Location userLocation,
+                                                 int maxDistance, int pricingRange, int minRating) {
         HashMap<String, String> googlePlaceMap = new HashMap<>();
 
         // initialize all values to default
@@ -160,12 +162,14 @@ class DataParser {
             }
             if (!googlePlaceJson.isNull("rating")) {
                 rating = googlePlaceJson.getString("rating");
+                if(Double.parseDouble(rating) < minRating) return null;
             }
             if (!googlePlaceJson.isNull("user_ratings_total")) {
                 totRating = googlePlaceJson.getString("user_ratings_total");
             }
             if (!googlePlaceJson.isNull("price_level")) {
                 priceLevel = googlePlaceJson.getString("price_level");
+                if(Double.parseDouble(priceLevel) != pricingRange) return null;
             }
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");

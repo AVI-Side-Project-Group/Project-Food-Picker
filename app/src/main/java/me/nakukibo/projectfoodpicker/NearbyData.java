@@ -16,6 +16,8 @@ public class NearbyData extends AsyncTask<Object, String, String> {
     private ReceiveData receiveData;
     private Location userLocation;
     private int maxDistance;
+    private int pricingRange;
+    private int minRating;
 
     NearbyData(ReceiveData receiveData) {
         this.receiveData = receiveData;
@@ -29,6 +31,8 @@ public class NearbyData extends AsyncTask<Object, String, String> {
         Log.d(TAG, "doInBackground: url to search=" + url);
         userLocation = (Location) objects[1];
         maxDistance = (int) objects[2];
+        pricingRange = ((String) objects[3]).length();
+        minRating = (int) objects[4];
 
         DownloadUrl downloadURL = new DownloadUrl();
         try {
@@ -45,15 +49,12 @@ public class NearbyData extends AsyncTask<Object, String, String> {
         List<HashMap<String, String>> nearbyPlaceList;
         DataParser parser = new DataParser();
         String nextPageToken;
-        boolean invalidRequest;
         try {
-            nearbyPlaceList = parser.parse(s, userLocation, maxDistance);
+            nearbyPlaceList = parser.parse(s, userLocation, maxDistance, pricingRange, minRating);
             nextPageToken = parser.getNextPageToken();
-            invalidRequest = false;
         }catch (RuntimeException e){
             nearbyPlaceList = null;
             nextPageToken = null;
-            invalidRequest = true;
         }
         // send data to RestaurantCardFinder
         receiveData.sendData(nearbyPlaceList, nextPageToken);
