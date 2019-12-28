@@ -1,5 +1,6 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.location.Location;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -12,9 +13,10 @@ import java.util.List;
 
 class DataParser {
 
-    // used for storing and loading values into HashMap
+    // used for storing and loading values to and from HashMap
     static final String DATA_KEY_NAME = "restaurant_name";
-    static final String DATA_KEY_ADDRESS = "formatted_addresss";
+    private static final String TAG = DataParser.class.getSimpleName();
+    static final String DATA_KEY_ADDRESS = "formatted_address";
     static final String DATA_KEY_HOURS = "opening_hours";
     static final String DATA_KEY_CURRENTLY_OPEN = "currently_open";
     static final String DATA_KEY_PHOTO = "restaurant_photo";
@@ -27,8 +29,7 @@ class DataParser {
 
     // HashMap value if null or by default
     private static final String DATA_DEFAULT = "--NA--";
-
-    private static final String TAG = DataParser.class.getSimpleName();
+    private String nextPageToken;
 
     /**
      * return the url for detailed informational fetch
@@ -36,11 +37,11 @@ class DataParser {
      * @param placeId place_id for the location where the data is to be fetched
      * @return String the url to be used to fetch the said data (phone number, opening hours, website)
      */
-    private static String getDetailsUrl(String placeId, String apiKey) {
+    private static String getDetailsUrl(String placeId) {
         String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/details/json?";
         googlePlaceUrl += "place_id=" + placeId;
         googlePlaceUrl += "&fields=formatted_phone_number,opening_hours,website";
-        googlePlaceUrl += "&key=" + apiKey;
+        googlePlaceUrl += "&key=" + BuildConfig.PlacesApiKey;
 
         return googlePlaceUrl;
     }
@@ -51,19 +52,31 @@ class DataParser {
      * @param jsonData JSON data to be parsed
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
-    List<HashMap<String, String>> parse(String jsonData) {
+    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance, int pricingRange, int minRating) throws RuntimeException {
+
+        nextPageToken = null;
+
         JSONArray jsonArray = null;
         JSONObject jsonObject;
 
-        Log.d("json data", jsonData);
-
         try {
+            Log.d(TAG, "parse: jsonData=" + jsonData);
             jsonObject = new JSONObject(jsonData);
+
+            if(jsonObject.getString("status").equals("INVALID_REQUEST")) throw new RuntimeException("Invalid Request");
+
             jsonArray = jsonObject.getJSONArray("results");
+            try {
+                nextPageToken = jsonObject.getString("next_page_token");
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return getAllPlacesData(jsonArray);
+
+        Log.d(TAG, "parse: logging new set of jsonData=======================================");
+        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating);
     }
 
     /**
@@ -72,14 +85,20 @@ class DataParser {
      * @param jsonArray all of the JSON to be parsed
      * @return List<HashMap < String, String>>  list of all HashMaps returned for each location
      */
-    private List<HashMap<String, String>> getAllPlacesData(JSONArray jsonArray) {
+    private List<HashMap<String, String>> getAllPlacesData(JSONArray jsonArray, Location userLocation,
+                                                           int maxDistance, int pricingRange, int minRating) {
         List<HashMap<String, String>> placelist = new ArrayList<>();
         HashMap<String, String> placeMap;
 
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                placeMap = getPlaceData((JSONObject) jsonArray.get(i));
-                placelist.add(placeMap);
+                placeMap = getPlaceData((JSONObject) jsonArray.get(i), userLocation, maxDistance, pricingRange, minRating);
+                if(placeMap != null) {
+                    placelist.add(placeMap);
+                    Log.d(TAG, "getAllPlacesData: place added");
+                }else {
+                    Log.d(TAG, "getAllPlacesData: place not added");
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -93,7 +112,8 @@ class DataParser {
      * @param googlePlaceJson the JSON to be converted
      * @return HashMap<String, String> key values are declared as constants for easy access
      */
-    private HashMap<String, String> getPlaceData(JSONObject googlePlaceJson) {
+    private HashMap<String, String> getPlaceData(JSONObject googlePlaceJson, Location userLocation,
+                                                 int maxDistance, int pricingRange, int minRating) {
         HashMap<String, String> googlePlaceMap = new HashMap<>();
 
         // initialize all values to default
@@ -112,6 +132,19 @@ class DataParser {
         Log.d("DataParser", "jsonobject =" + googlePlaceJson.toString());
 
         try {
+            double latitude = Double.parseDouble(
+                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lat")
+            );
+            double longitude = Double.parseDouble(
+                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lng")
+            );
+
+            Location restLocation = new Location("");
+            restLocation.setLatitude(latitude);
+            restLocation.setLongitude(longitude);
+
+            if(userLocation.distanceTo(restLocation) > maxDistance ) return null;
+
             // overwrite the values individually if not null
             if (!googlePlaceJson.isNull("name")) {
                 name = googlePlaceJson.getString("name");
@@ -127,17 +160,18 @@ class DataParser {
             }
             if (!googlePlaceJson.isNull("rating")) {
                 rating = googlePlaceJson.getString("rating");
+                if(Double.parseDouble(rating) < minRating) return null;
             }
             if (!googlePlaceJson.isNull("user_ratings_total")) {
                 totRating = googlePlaceJson.getString("user_ratings_total");
             }
             if (!googlePlaceJson.isNull("price_level")) {
                 priceLevel = googlePlaceJson.getString("price_level");
+                if(Double.parseDouble(priceLevel) != pricingRange) return null;
             }
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");
             }
-
             // add detail search here (for website, opening hours, phone number)
 
             // pass into map
@@ -154,13 +188,17 @@ class DataParser {
             googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
 
             // log all values for debugging
-            Log.d(TAG, "getPlaceData: Values from parse attempt");
-            MainActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
-                    photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
+//            Log.d(TAG, "getPlaceData: Values from parse attempt");
+//            MainActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
+//                    photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
             Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return googlePlaceMap;
+    }
+
+    String getNextPageToken(){
+        return nextPageToken;
     }
 }
