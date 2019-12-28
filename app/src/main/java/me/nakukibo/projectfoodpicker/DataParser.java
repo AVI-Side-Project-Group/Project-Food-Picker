@@ -13,9 +13,8 @@ import java.util.List;
 
 class DataParser {
 
-    // used for storing and loading values to and from HashMap
+    // used for storing and loading values into HashMap
     static final String DATA_KEY_NAME = "restaurant_name";
-    private static final String TAG = DataParser.class.getSimpleName();
     static final String DATA_KEY_ADDRESS = "formatted_address";
     static final String DATA_KEY_HOURS = "opening_hours";
     static final String DATA_KEY_CURRENTLY_OPEN = "currently_open";
@@ -29,6 +28,9 @@ class DataParser {
 
     // HashMap value if null or by default
     private static final String DATA_DEFAULT = "--NA--";
+
+    private static final String TAG = DataParser.class.getSimpleName();
+
     private String nextPageToken;
 
     /**
@@ -37,11 +39,11 @@ class DataParser {
      * @param placeId place_id for the location where the data is to be fetched
      * @return String the url to be used to fetch the said data (phone number, opening hours, website)
      */
-    private static String getDetailsUrl(String placeId) {
+    private static String getDetailsUrl(String placeId, String apiKey) {
         String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/details/json?";
         googlePlaceUrl += "place_id=" + placeId;
         googlePlaceUrl += "&fields=formatted_phone_number,opening_hours,website";
-        googlePlaceUrl += "&key=" + BuildConfig.PlacesApiKey;
+        googlePlaceUrl += "&key=" + apiKey;
 
         return googlePlaceUrl;
     }

@@ -1,6 +1,8 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.location.Location;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -9,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.HashMap;
 import java.util.List;
@@ -134,7 +137,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
     private String getUrlNextPage(String nextPageToken){
         String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
         googlePlaceUrl += "pagetoken=" + nextPageToken;
-        googlePlaceUrl += "&key=" + BuildConfig.PlacesApiKey;
+        googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
         return googlePlaceUrl;
     }
 
@@ -151,7 +154,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
         googlePlaceUrl.append("&sensor=true"); //take out?
         googlePlaceUrl.append("&field=formatted_address,name,permanently_closed,photos,place_id," +
                 "price_level,rating,user_ratings_total");
-        googlePlaceUrl.append("&key=").append(BuildConfig.PlacesApiKey);
+        googlePlaceUrl.append("&key=").append(getResources().getString(R.string.google_maps_key));
 
         Log.d(TAG, "getUrl: " + googlePlaceUrl.toString());
         return googlePlaceUrl.toString();
