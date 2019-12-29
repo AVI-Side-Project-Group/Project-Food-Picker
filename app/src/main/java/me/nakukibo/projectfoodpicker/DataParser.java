@@ -133,71 +133,106 @@ class DataParser {
         Log.d("DataParser", "jsonobject =" + googlePlaceJson.toString());
 
         try {
-            double latitude = Double.parseDouble(
-                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lat")
-            );
-            double longitude = Double.parseDouble(
-                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lng")
-            );
-
-            Location restLocation = new Location("");
-            restLocation.setLatitude(latitude);
-            restLocation.setLongitude(longitude);
-
-            if(userLocation.distanceTo(restLocation) > maxDistance ) return null;
-
-            // overwrite the values individually if not null
+            // name
             if (!googlePlaceJson.isNull("name")) {
                 name = googlePlaceJson.getString("name");
             }
+
+            // if too far, then return null
+            if (!isCloseToUser(userLocation, googlePlaceJson, name, maxDistance)) return null;
+
+            // address
             if (!googlePlaceJson.isNull("formatted_address")) {
                 address = googlePlaceJson.getString("formatted_address");
             }
+
+            // is open right now
             if (!googlePlaceJson.isNull("opening_hours")) {
-                isCurrentlyOpen = googlePlaceJson.getJSONObject("opening_hours").getString("open_now");
+                JSONObject openHoursObject = googlePlaceJson.getJSONObject("opening_hours");
+                if (!openHoursObject.isNull("open_now")) {
+                    isCurrentlyOpen = openHoursObject.getString("open_now");
+                }
             }
+
+            // photos
             if (!googlePlaceJson.isNull("photos")) {
                 photo = googlePlaceJson.getJSONArray("photos").get(0).toString(); // TODO: fix this
             }
+
+            // rating
             if (!googlePlaceJson.isNull("rating")) {
                 rating = googlePlaceJson.getString("rating");
-                if(Double.parseDouble(rating) < minRating) return null;
+                // if rating too low, then return null
+                if (Double.parseDouble(rating) < minRating) {
+                    Log.d(TAG, "getPlaceData: " + name + "'s rating is too low. Returning null");
+                    return null;
+                }
             }
+
+            // total rating count
             if (!googlePlaceJson.isNull("user_ratings_total")) {
                 totRating = googlePlaceJson.getString("user_ratings_total");
             }
+
+            // price level
             if (!googlePlaceJson.isNull("price_level")) {
                 priceLevel = googlePlaceJson.getString("price_level");
-                if (Double.parseDouble(priceLevel) != pricingRange && pricingRange != PreferencesActivity.PREF_ANY_INT_REP)
+                // if price level not correct, return null
+                if (Double.parseDouble(priceLevel) != pricingRange && pricingRange != PreferencesActivity.PREF_ANY_INT_REP) {
+                    Log.d(TAG, "getPlaceData: " + name + " has incorrect price level.");
                     return null;
+                }
             }
+
+            // place id
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");
             }
+
             // add detail search here (for website, opening hours, phone number)
-
-            // pass into map
-            googlePlaceMap.put(DATA_KEY_NAME, name);
-            googlePlaceMap.put(DATA_KEY_ADDRESS, address);
-            googlePlaceMap.put(DATA_KEY_HOURS, hours);
-            googlePlaceMap.put(DATA_KEY_CURRENTLY_OPEN, isCurrentlyOpen);
-            googlePlaceMap.put(DATA_KEY_PHOTO, photo);
-            googlePlaceMap.put(DATA_KEY_RATING, rating);
-            googlePlaceMap.put(DATA_KEY_TOT_RATING, totRating);
-            googlePlaceMap.put(DATA_KEY_PRICE_LEVEL, priceLevel);
-            googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, phoneNumber);
-            googlePlaceMap.put(DATA_KEY_WEBSITE, website);
-            googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
-
-            // log all values for debugging
-//            Log.d(TAG, "getPlaceData: Values from parse attempt");
-//            PreferencesActivity.logValues(TAG, "getPlaceData", name, address, isCurrentlyOpen, hours,
-//                    photo, rating, totRating, priceLevel, phoneNumber, website, placeId);
-            Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        // pass into map
+        googlePlaceMap.put(DATA_KEY_NAME, name);
+        googlePlaceMap.put(DATA_KEY_ADDRESS, address);
+        googlePlaceMap.put(DATA_KEY_HOURS, hours);
+        googlePlaceMap.put(DATA_KEY_CURRENTLY_OPEN, isCurrentlyOpen);
+        googlePlaceMap.put(DATA_KEY_PHOTO, photo);
+        googlePlaceMap.put(DATA_KEY_RATING, rating);
+        googlePlaceMap.put(DATA_KEY_TOT_RATING, totRating);
+        googlePlaceMap.put(DATA_KEY_PRICE_LEVEL, priceLevel);
+        googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, phoneNumber);
+        googlePlaceMap.put(DATA_KEY_WEBSITE, website);
+        googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
+
+        Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
         return googlePlaceMap;
+    }
+
+    private boolean isCloseToUser(Location userLocation, JSONObject googlePlaceJson, String name, int maxDistance) {
+        double latitude;
+        double longitude;
+        try {
+            latitude = Double.parseDouble(
+                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lat")
+            );
+            longitude = Double.parseDouble(
+                    googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lng")
+            );
+        } catch (JSONException e) {
+            Log.d(TAG, "getPlaceData: " + name + " cannot determine location. Returning null.");
+            return false;
+        }
+
+        Location restLocation = new Location("");
+        restLocation.setLatitude(latitude);
+        restLocation.setLongitude(longitude);
+
+        boolean closeEnough = userLocation.distanceTo(restLocation) <= maxDistance;
+        if (!closeEnough) Log.d(TAG, "isCloseToUser: " + name + " removed b/c too far.");
+        return closeEnough;
     }
 
     String getNextPageToken(){
