@@ -12,6 +12,7 @@
     <string name="prefs_rdbtn_pricinglv2">$$</string>
     <string name="prefs_rdbtn_pricinglv3">$$$</string>
     <string name="prefs_btn_search">Search</string>
+    <string name="prefs_btn_setting">Settings</string>
 
     <!--    restaurant_card.xml text-->
     <string name="restcard_txtvw_hours">Opening Hours</string>

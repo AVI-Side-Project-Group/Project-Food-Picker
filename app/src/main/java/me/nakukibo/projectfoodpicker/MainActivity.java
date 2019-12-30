@@ -182,4 +182,9 @@ public class MainActivity extends AppCompatActivity {
     private String getDistance(int index) {
         return String.format(Locale.US, "%2.1f miles", distances[index]);
     }
+
+    public void changeSettings(View view) {
+        Intent switchIntent = new Intent(this, Settings.class);
+        startActivity(switchIntent);
+    }
 }
