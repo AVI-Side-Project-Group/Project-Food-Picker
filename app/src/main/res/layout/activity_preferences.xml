@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/vertical_text"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -42,7 +41,7 @@
         app:layout_constraintEnd_toEndOf="@+id/txtvw_foodtype"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/txtvw_foodtype"
-        app:layout_constraintTop_toBottomOf="@+id/spin_foodtype" />
+        app:layout_constraintTop_toBottomOf="@+id/txtvw_foodtype" />
 
     <Spinner
         android:id="@+id/spin_rating"
@@ -56,6 +55,26 @@
         app:layout_constraintTop_toTopOf="@+id/txtvw_rating" />
 
     <TextView
+        android:id="@+id/txtvw_pricing"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/prefs_txtvw_pricing"
+        android:textSize="@dimen/font_size_pref_main"
+        app:layout_constraintEnd_toEndOf="@+id/txtvw_rating"
+        app:layout_constraintStart_toStartOf="@+id/txtvw_rating"
+        app:layout_constraintTop_toBottomOf="@+id/txtvw_rating" />
+
+    <Spinner
+        android:id="@+id/spin_pricing"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/txtvw_pricing"
+        app:layout_constraintEnd_toEndOf="@+id/spin_rating"
+        app:layout_constraintStart_toStartOf="@+id/spin_rating"
+        app:layout_constraintTop_toTopOf="@+id/txtvw_pricing" />
+
+    <TextView
         android:id="@+id/txtvw_distance"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -64,7 +83,7 @@
         android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintEnd_toEndOf="@+id/txtvw_pricing"
         app:layout_constraintStart_toStartOf="@+id/txtvw_pricing"
-        app:layout_constraintTop_toBottomOf="@+id/spin_rating" />
+        app:layout_constraintTop_toBottomOf="@+id/txtvw_pricing" />
 
     <SeekBar
         android:id="@+id/sbr_distance"
@@ -72,54 +91,10 @@
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:max="4"
-        app:layout_constraintBottom_toBottomOf="@+id/txtvw_distance"
+        app:layout_constraintBottom_toBottomOf="@+id/txtvw_distance_progress"
         app:layout_constraintEnd_toEndOf="@+id/spin_rating"
         app:layout_constraintStart_toEndOf="@+id/txtvw_distance_progress"
-        app:layout_constraintTop_toTopOf="@+id/txtvw_distance" />
-
-    <TextView
-        android:id="@+id/txtvw_pricing"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/prefs_txtvw_pricing"
-        android:textSize="@dimen/font_size_pref_main"
-        app:layout_constraintEnd_toEndOf="@+id/txtvw_rating"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/txtvw_rating"
-        app:layout_constraintTop_toBottomOf="@+id/sbr_distance" />
-
-    <RadioGroup
-        android:id="@+id/rdgroup_pricing"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="@+id/sbr_distance"
-        app:layout_constraintStart_toStartOf="@+id/txtvw_distance_progress"
-        app:layout_constraintTop_toTopOf="@+id/txtvw_pricing">
-
-        <RadioButton
-            android:id="@+id/rdbtn_pricinglvl1"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/prefs_rdbtn_pricinglv1"
-            android:checked="true"/>
-
-        <RadioButton
-            android:id="@+id/rdbtn_pricinglvl2"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/prefs_rdbtn_pricinglv2" />
-
-        <RadioButton
-            android:id="@+id/rdbtn_pricinglvl3"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/prefs_rdbtn_pricinglv3" />
-    </RadioGroup>
+        app:layout_constraintTop_toTopOf="@+id/txtvw_distance_progress" />
 
     <Button
         android:id="@+id/btn_search"
@@ -127,14 +102,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:onClick="submitPref"
         android:text="@string/prefs_btn_search"
+        android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintEnd_toEndOf="@+id/sbr_distance"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/txtvw_distance"
-        app:layout_constraintTop_toBottomOf="@+id/rdgroup_pricing" />
+        app:layout_constraintTop_toBottomOf="@+id/txtvw_distance" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/vertical45"
@@ -155,6 +131,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_distance"
         app:layout_constraintEnd_toStartOf="@+id/vertical55"
         app:layout_constraintStart_toStartOf="@+id/vertical45" />

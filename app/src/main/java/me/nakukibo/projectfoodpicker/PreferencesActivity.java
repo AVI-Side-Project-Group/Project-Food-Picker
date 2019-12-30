@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -21,16 +19,17 @@ import java.util.Locale;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class MainActivity extends AppCompatActivity {
+public class PreferencesActivity extends AppCompatActivity {
 
-    // variables used to pass data between MainActivity and RestaurantCardFinder
+    // variables used to pass data between PreferencesActivity and RestaurantCardFinder
     public static final String PREF_INTENT_FOOD_TYPE = "food_type";
+    public static final String PREF_ANY_STR_REP = "Any";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
     public static final String PREF_INTENT_PRICING = "pricing";
-
+    public static final int PREF_ANY_INT_REP = 0;
     // tag for logging
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = PreferencesActivity.class.getSimpleName();
 
     // flag for checking whether the user allowed for location data
     private boolean isLocationOn;
@@ -38,15 +37,16 @@ public class MainActivity extends AppCompatActivity {
     // views from layout
     private Spinner spinFoodType;
     private Spinner spinRating;
+    private Spinner spinPricing;
     private SeekBar sbrDistance;
-    private RadioGroup rdgroupPricing;
 
     // values for views
-    private String[] foodTypes = {"Any", "American", "African", "Asian",
-            "Barbecue", "European", "Hamburger", "Mediterranean",
+    private String[] foodTypes = {PREF_ANY_STR_REP, "American", "Asian",
+            "Barbecue", "Dessert", "European", "Hamburger", "Mediterranean",
             "Mexican", "Pizza", "Seafood", "Steak"};
     private int[] minRatings = {0, 1, 2, 3, 4};
-    private Float[] distances = {.5f, 1f, 5f, 10f, 20f};
+    private int[] priceRanges = {0, 1, 2, 3, 4};
+    private float[] distances = {.5f, 1f, 5f, 10f, 20f};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,25 +83,23 @@ public class MainActivity extends AppCompatActivity {
             // retrieve value from preferences
             String foodType = spinFoodType.getSelectedItem().toString();
             int rating = spinRating.getSelectedItemPosition();
+            int pricing = spinPricing.getSelectedItemPosition();
             int distMeters = milesToMeters(distances[sbrDistance.getProgress()]);
-            String pricing = ((RadioButton) findViewById(rdgroupPricing.getCheckedRadioButtonId()))
-                    .getText()
-                    .toString();
 
             // log the values
-            Log.d(TAG, "submitPref: Attempting to submit preferences");
+            Log.d(TAG, "submitPref: Attempting to submit preferences:");
             logValues(TAG, "submitPref", foodType, String.valueOf(rating),
-                    String.valueOf(distMeters), pricing);
+                    String.valueOf(distMeters), String.valueOf(pricing));
 
             // go to RestaurantCardFinder.java and pass along values
             Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
             switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
             switchIntent.putExtra(PREF_INTENT_RATING, rating);
-            switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);
             switchIntent.putExtra(PREF_INTENT_PRICING, pricing);
+            switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);
             startActivity(switchIntent);
         } else {
-            // tell user error message
+            // notify user error message
             Toast toast = Toast.makeText(getApplicationContext(), "You cannot search with location off.",
                     Toast.LENGTH_LONG);
             toast.show();
@@ -113,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
      * */
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{ACCESS_FINE_LOCATION}, 1);
+            ActivityCompat.requestPermissions(PreferencesActivity.this, new String[]{ACCESS_FINE_LOCATION}, 1);
             if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 isLocationOn = false;
             }
@@ -125,21 +123,27 @@ public class MainActivity extends AppCompatActivity {
      * initializes the view globals and the values
      */
     private void initPrefViews() {
-        spinFoodType = findViewById(R.id.spin_foodtype);
-        spinRating = findViewById(R.id.spin_rating);
-        sbrDistance = findViewById(R.id.sbr_distance);
-        rdgroupPricing = findViewById(R.id.rdgroup_pricing);
+        initFoodTypesView();
+        initRatingsView();
+        initDistancesView();
+        initPriceRangesView();
+    }
 
+    private void initFoodTypesView() {
+        spinFoodType = findViewById(R.id.spin_foodtype);
         ArrayAdapter<String> adapterFood = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, foodTypes);
         spinFoodType.setAdapter(adapterFood);
         spinFoodType.setSelection(0);
+    }
 
+    private void initRatingsView() {
+        spinRating = findViewById(R.id.spin_rating);
         String[] ratingString = new String[minRatings.length];
         for (int i = 0; i < minRatings.length; i++) {
             int rating = minRatings[i];
-            if (rating == 0) {
-                ratingString[i] = "Any";
+            if (rating == PREF_ANY_INT_REP) {
+                ratingString[i] = PREF_ANY_STR_REP;
             } else {
                 ratingString[i] = String.format(Locale.US, "%d stars", rating);
             }
@@ -148,7 +152,27 @@ public class MainActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_dropdown_item, ratingString);
         spinRating.setAdapter(adapterRating);
         spinRating.setSelection(0);
+    }
 
+    private void initPriceRangesView() {
+        spinPricing = findViewById(R.id.spin_pricing);
+        String[] pricingString = new String[priceRanges.length];
+        for (int i = 0; i < priceRanges.length; i++) {
+            int pricing = priceRanges[i];
+            if (pricing == PREF_ANY_INT_REP) {
+                pricingString[i] = PREF_ANY_STR_REP;
+            } else {
+                pricingString[i] = "$$$$".substring(0, pricing);
+            }
+        }
+        ArrayAdapter<String> adapterPricing = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, pricingString);
+        spinPricing.setAdapter(adapterPricing);
+        spinPricing.setSelection(0);
+    }
+
+    private void initDistancesView() {
+        sbrDistance = findViewById(R.id.sbr_distance);
         final TextView distanceVal = findViewById(R.id.txtvw_distance_progress);
         distanceVal.setText(getDistance(sbrDistance.getProgress()));
         sbrDistance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
