@@ -1,15 +1,27 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import java.util.HashMap;
 import java.util.Locale;
 
 public class RestaurantCard extends CardView {
@@ -25,6 +37,34 @@ public class RestaurantCard extends CardView {
     public RestaurantCard(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initCard(context, attrs);
+    }
+
+    void setValues(HashMap<String, String> values){
+        TextView txtvwName = findViewById(R.id.txtvw_name);
+        txtvwName.setText(values.get(DataParser.DATA_KEY_NAME));
+
+        ImageView restPhoto = findViewById(R.id.imgvw_restaurant);
+        restPhoto.setImageResource(R.drawable.ic_launcher_background);
+
+        TextView txtvwRating = findViewById(R.id.txtvw_rating);
+        txtvwRating.setText(String.format(Locale.US, "%s stars (%s)",
+                values.get(DataParser.DATA_KEY_RATING), values.get(DataParser.DATA_KEY_TOT_RATING)));
+
+        TextView txtvwPricing = findViewById(R.id.txtvw_price_level);
+        txtvwPricing.setText(String.format(Locale.US, "Pricing Level: %s",
+                values.get(DataParser.DATA_KEY_PRICE_LEVEL)));
+
+        TextView txtvwAddress = findViewById(R.id.txtvw_address);
+        txtvwAddress.setText(values.get(DataParser.DATA_KEY_ADDRESS));
+
+        TextView txtvwPhoneNumber = findViewById(R.id.txtvw_phone_number);
+        txtvwPhoneNumber.setText(values.get(DataParser.DATA_KEY_PHONE_NUMBER));
+
+        TextView txtvwWebsite = findViewById(R.id.txtvw_website);
+        txtvwWebsite.setText(values.get(DataParser.DATA_KEY_WEBSITE));
+
+        TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
+        txtvwHours.setText(values.get(DataParser.DATA_KEY_HOURS));
     }
 
     /**
