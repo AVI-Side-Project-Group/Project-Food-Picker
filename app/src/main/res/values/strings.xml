@@ -16,7 +16,7 @@
     <!--    restaurant_card.xml text-->
     <string name="restcard_txtvw_hours">Opening Hours</string>
     <string name="restcard_txtvw_hours_label">
-        Mon:\nTue:\nWed:\nThu:\nFri:\nSat:\nSun:
+        Sun:\nMon:\nTue:\nWed:\nThu:\nFri:\nSat:
     </string>
     <string name="restcard_txtvw_hours_placeholder">
         12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM

@@ -102,7 +102,8 @@ class DataParser {
                     Log.d(TAG, "parseDetails: opening hour periods errors");
                 }
             }
-            hours = getHours(periodsArray);
+
+            if(periodsArray != null) hours = getHours(periodsArray);
 
             // formatted_phone_number
             if (!jsonObject.isNull("formatted_phone_number")) {
@@ -124,54 +125,67 @@ class DataParser {
     }
 
     private String getHours(JSONArray periodsArray) {
-        if(periodsArray == null) return DATA_DEFAULT;
+
         StringBuilder hours = new StringBuilder();
-        String[] dayHours = new String[7];
-        try {
-            for(int i=0; i<periodsArray.length(); i++){
-                Log.d(TAG, "getHours: " + periodsArray.getString(i));
-                if(!periodsArray.isNull(i)){
-                    JSONObject dayObj = periodsArray.getJSONObject(i);
-
-                    JSONObject closed = null;
-                    JSONObject open = null;
-
-                    if(!dayObj.isNull("close")) {
-                        closed = dayObj.getJSONObject("close");
-                    }
-
-                    if(!dayObj.isNull("open")) {
-                        open = dayObj.getJSONObject("open");
-                    }
-
-                    if(closed == null || open == null) continue;
-
-                    int currentDay = Integer.parseInt(closed.getString("day"));
-                    String openingHours = open.getString("time");
-                    String closingHours = closed.getString("time");
-                    Log.d(TAG, "getHours: " + i + " " + openingHours + " " + closingHours);
-
-                    int index = currentDay - 1;
-                    if(index < 0) index = dayHours.length - 1;
-                    dayHours[index] = String.format(Locale.US, "%s-%s",
-                            getTimeFormat(openingHours), getTimeFormat(closingHours)) ;
-                }
-            }
-        }catch (JSONException e){
-            e.printStackTrace();
-            return DATA_DEFAULT;
-        }
+        String[] dayHours = getDayHoursStr(periodsArray);
+        if(dayHours == null) return DATA_DEFAULT;
 
         for(String day: dayHours){
             if(day == null) hours.append(DATA_DEFAULT);
             hours.append(day).append("\n");
         }
 
-        return hours.toString();
+//        return hours.toString();
+        return DATA_DEFAULT;
     }
 
-    private String getTimeFormat(String time){
-        int timeInt = Integer.parseInt(time);
+    private String[] getDayHoursStr(JSONArray periodsArray){
+        String[] dayHours = new String[7];
+
+        for(int i=0; i<periodsArray.length(); i++){
+            try {
+                JSONObject dayObj = periodsArray.getJSONObject(i);
+                Log.d(TAG, "getDayHoursStr: data=" + i + ", data=" + dayObj);
+//
+//                JSONObject closed = null;
+//                JSONObject open = null;
+//
+//                if(!dayObj.isNull("open")) {
+//                    open = dayObj.getJSONObject("open");
+//                }
+//
+//                if(!dayObj.isNull("close")) {
+//                    closed = dayObj.getJSONObject("close");
+//                }
+//
+//                int currentDay = -1;
+//                String openingHours = null;
+//                String closingHours = null;
+//
+//                if(open == null && closed == null) continue;
+//
+//                if(open != null) {
+//                    currentDay = Integer.parseInt(open.getString("day"));
+//                    openingHours = open.getString("time");
+//                }
+//
+//                if(closed != null){
+//                    currentDay = Integer.parseInt(closed.getString("day"));
+//                    closingHours = closed.getString("time");
+//                }
+//
+//                Integer openInt = openingHours == null ? null : Integer.parseInt(openingHours);
+//                Integer closeInt = closingHours == null ? null : Integer.parseInt(closingHours);
+//
+//                dayHours[currentDay] = new DayHours(openInt, closeInt);
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+        return dayHours;
+    }
+
+    private String getTimeFormat(int timeInt){;
         boolean isAM = timeInt < 1200;
         if(timeInt >= 1200) timeInt -= 1200;
         if(timeInt == 0) timeInt = 1200;
@@ -223,14 +237,11 @@ class DataParser {
         // initialize all values to default
         String name = DATA_DEFAULT;
         String address = DATA_DEFAULT;
-        String hours = DATA_DEFAULT;
         String isCurrentlyOpen = DATA_DEFAULT;
         String photo = DATA_DEFAULT;
         String rating = DATA_DEFAULT;
         String totRating = DATA_DEFAULT;
         String priceLevel = DATA_DEFAULT;
-        String phoneNumber = DATA_DEFAULT;
-        String website = DATA_DEFAULT;
         String placeId = DATA_DEFAULT;
 
         Log.d("DataParser", "jsonobject =" + googlePlaceJson.toString());
@@ -259,7 +270,7 @@ class DataParser {
 
             // photos
             if (!googlePlaceJson.isNull("photos")) {
-                photo = googlePlaceJson.getJSONArray("photos").get(0).toString(); // TODO: fix this
+                photo = googlePlaceJson.getJSONArray("photos").get(0).toString();
             }
 
             // rating
@@ -298,14 +309,14 @@ class DataParser {
         // pass into map
         googlePlaceMap.put(DATA_KEY_NAME, name);
         googlePlaceMap.put(DATA_KEY_ADDRESS, address);
-        googlePlaceMap.put(DATA_KEY_HOURS, hours);
+        googlePlaceMap.put(DATA_KEY_HOURS, DATA_DEFAULT);
         googlePlaceMap.put(DATA_KEY_CURRENTLY_OPEN, isCurrentlyOpen);
         googlePlaceMap.put(DATA_KEY_PHOTO, photo);
         googlePlaceMap.put(DATA_KEY_RATING, rating);
         googlePlaceMap.put(DATA_KEY_TOT_RATING, totRating);
         googlePlaceMap.put(DATA_KEY_PRICE_LEVEL, priceLevel);
-        googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, phoneNumber);
-        googlePlaceMap.put(DATA_KEY_WEBSITE, website);
+        googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, DATA_DEFAULT);
+        googlePlaceMap.put(DATA_KEY_WEBSITE, DATA_DEFAULT);
         googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
 
         Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
