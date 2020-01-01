@@ -7,9 +7,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 class DataParser {
 
@@ -33,27 +35,13 @@ class DataParser {
     private String nextPageToken;
 
     /**
-     * return the url for detailed informational fetch
-     *
-     * @param placeId place_id for the location where the data is to be fetched
-     * @return String the url to be used to fetch the said data (phone number, opening hours, website)
-     */
-    private static String getDetailsUrl(String placeId, String apiKey) {
-        String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/details/json?";
-        googlePlaceUrl += "place_id=" + placeId;
-        googlePlaceUrl += "&fields=formatted_phone_number,opening_hours,website";
-        googlePlaceUrl += "&key=" + apiKey;
-
-        return googlePlaceUrl;
-    }
-
-    /**
      * return list of HashMaps for the JSON passed
      *
      * @param jsonData JSON data to be parsed
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
-    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance, int pricingRange, int minRating) throws RuntimeException {
+    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance,
+                                        int pricingRange, int minRating) throws RuntimeException {
 
         nextPageToken = null;
 
@@ -77,7 +65,136 @@ class DataParser {
         }
 
         Log.d(TAG, "parse: logging new set of jsonData=======================================");
+        if(jsonArray == null) return null;
         return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating);
+    }
+
+    void parseDetails(String jsonData, HashMap<String, String> selectedRestaurant){
+        String hours = DATA_DEFAULT;
+        String phoneNumber = DATA_DEFAULT;
+        String website = DATA_DEFAULT;
+
+        JSONObject jsonObject = null;
+
+        try {
+            Log.d(TAG, "parseDetails: jsonData=" + jsonData);
+            jsonObject = new JSONObject(jsonData);
+
+            if(jsonObject.getString("status").equals("INVALID_REQUEST")) return;
+
+            jsonObject = jsonObject.getJSONObject("result");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            jsonObject = null;
+        }
+
+        if(jsonObject == null) return;
+
+        try {
+            // opening_hours
+            JSONArray periodsArray = null;
+            if (!jsonObject.isNull("opening_hours")) {
+                JSONObject hoursObj = jsonObject.getJSONObject("opening_hours");
+                try {
+                    periodsArray = hoursObj.getJSONArray("periods");
+                } catch (JSONException e){
+                    e.printStackTrace();
+                    Log.d(TAG, "parseDetails: opening hour periods errors");
+                }
+            }
+
+            if(periodsArray != null) hours = getHours(periodsArray);
+
+            // formatted_phone_number
+            if (!jsonObject.isNull("formatted_phone_number")) {
+                phoneNumber = jsonObject.getString("formatted_phone_number");
+            }
+
+            // website
+            if (!jsonObject.isNull("website")) {
+                website = jsonObject.getString("website");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // pass into map
+        selectedRestaurant.put(DATA_KEY_HOURS, hours);
+        selectedRestaurant.put(DATA_KEY_PHONE_NUMBER, phoneNumber);
+        selectedRestaurant.put(DATA_KEY_WEBSITE, website);
+    }
+
+    private String getHours(JSONArray periodsArray) {
+
+        StringBuilder hours = new StringBuilder();
+        String[] dayHours = getDayHoursStr(periodsArray);
+        if(dayHours == null) return DATA_DEFAULT;
+
+        for(String day: dayHours){
+            if(day == null) hours.append(DATA_DEFAULT);
+            hours.append(day).append("\n");
+        }
+
+//        return hours.toString();
+        return DATA_DEFAULT;
+    }
+
+    private String[] getDayHoursStr(JSONArray periodsArray){
+        String[] dayHours = new String[7];
+
+        for(int i=0; i<periodsArray.length(); i++){
+            try {
+                JSONObject dayObj = periodsArray.getJSONObject(i);
+                Log.d(TAG, "getDayHoursStr: data=" + i + ", data=" + dayObj);
+//
+//                JSONObject closed = null;
+//                JSONObject open = null;
+//
+//                if(!dayObj.isNull("open")) {
+//                    open = dayObj.getJSONObject("open");
+//                }
+//
+//                if(!dayObj.isNull("close")) {
+//                    closed = dayObj.getJSONObject("close");
+//                }
+//
+//                int currentDay = -1;
+//                String openingHours = null;
+//                String closingHours = null;
+//
+//                if(open == null && closed == null) continue;
+//
+//                if(open != null) {
+//                    currentDay = Integer.parseInt(open.getString("day"));
+//                    openingHours = open.getString("time");
+//                }
+//
+//                if(closed != null){
+//                    currentDay = Integer.parseInt(closed.getString("day"));
+//                    closingHours = closed.getString("time");
+//                }
+//
+//                Integer openInt = openingHours == null ? null : Integer.parseInt(openingHours);
+//                Integer closeInt = closingHours == null ? null : Integer.parseInt(closingHours);
+//
+//                dayHours[currentDay] = new DayHours(openInt, closeInt);
+            } catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+        return dayHours;
+    }
+
+    private String getTimeFormat(int timeInt){;
+        boolean isAM = timeInt < 1200;
+        if(timeInt >= 1200) timeInt -= 1200;
+        if(timeInt == 0) timeInt = 1200;
+
+        String timeStr = String.valueOf(timeInt);
+        if(timeStr.length() < 4) timeStr = "0" + timeStr;
+
+        return timeStr.substring(0, 2) + ":" + timeStr.substring(2) + (isAM ? "AM":"PM");
+
     }
 
     /**
@@ -120,14 +237,11 @@ class DataParser {
         // initialize all values to default
         String name = DATA_DEFAULT;
         String address = DATA_DEFAULT;
-        String hours = DATA_DEFAULT;
         String isCurrentlyOpen = DATA_DEFAULT;
         String photo = DATA_DEFAULT;
         String rating = DATA_DEFAULT;
         String totRating = DATA_DEFAULT;
         String priceLevel = DATA_DEFAULT;
-        String phoneNumber = DATA_DEFAULT;
-        String website = DATA_DEFAULT;
         String placeId = DATA_DEFAULT;
 
         Log.d("DataParser", "jsonobject =" + googlePlaceJson.toString());
@@ -156,7 +270,7 @@ class DataParser {
 
             // photos
             if (!googlePlaceJson.isNull("photos")) {
-                photo = googlePlaceJson.getJSONArray("photos").get(0).toString(); // TODO: fix this
+                photo = googlePlaceJson.getJSONArray("photos").get(0).toString();
             }
 
             // rating
@@ -188,8 +302,6 @@ class DataParser {
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");
             }
-
-            // add detail search here (for website, opening hours, phone number)
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -197,14 +309,14 @@ class DataParser {
         // pass into map
         googlePlaceMap.put(DATA_KEY_NAME, name);
         googlePlaceMap.put(DATA_KEY_ADDRESS, address);
-        googlePlaceMap.put(DATA_KEY_HOURS, hours);
+        googlePlaceMap.put(DATA_KEY_HOURS, DATA_DEFAULT);
         googlePlaceMap.put(DATA_KEY_CURRENTLY_OPEN, isCurrentlyOpen);
         googlePlaceMap.put(DATA_KEY_PHOTO, photo);
         googlePlaceMap.put(DATA_KEY_RATING, rating);
         googlePlaceMap.put(DATA_KEY_TOT_RATING, totRating);
         googlePlaceMap.put(DATA_KEY_PRICE_LEVEL, priceLevel);
-        googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, phoneNumber);
-        googlePlaceMap.put(DATA_KEY_WEBSITE, website);
+        googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, DATA_DEFAULT);
+        googlePlaceMap.put(DATA_KEY_WEBSITE, DATA_DEFAULT);
         googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
 
         Log.d(TAG, "getPlaceData: ---------------------------------------------------------");

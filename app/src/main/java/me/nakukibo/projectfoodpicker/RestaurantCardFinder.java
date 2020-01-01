@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class RestaurantCardFinder extends AppCompatActivity implements ReceiveData {
+public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData {
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
     private static final int ERROR_PASSED_VALUE = -1;
@@ -37,6 +37,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(android.R.style.Theme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
@@ -72,6 +73,22 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
         int index = new Random().nextInt(nearbyPlaceListCombined.size());
         HashMap<String, String> selectedRestaurant = nearbyPlaceListCombined.get(index);
+
+        Object[] dataTransfer = new Object[5];
+
+        //TODO: TAKE AWAY MCDONALD TEST
+        selectedRestaurant.put(DataParser.DATA_KEY_PLACE_ID, "ChIJ5dSGmZ92ToYRMUIHWB6SQOA");
+
+        // find restaurants
+        DetailData getDetailData = new DetailData(selectedRestaurant, this);
+        String url = getDetailsUrl(selectedRestaurant.get(DataParser.DATA_KEY_PLACE_ID));
+        dataTransfer[0] = url;
+        getDetailData.execute(dataTransfer);
+    }
+
+
+    @Override
+    public void sendDetailData(HashMap<String, String> selectedRestaurant) {
         setViewValues(selectedRestaurant);
     }
 
@@ -172,6 +189,21 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveDa
 
         Log.d(TAG, "getUrl: " + googlePlaceUrl.toString());
         return googlePlaceUrl.toString();
+    }
+
+    /**
+     * return the url for detailed informational fetch
+     *
+     * @param placeId place_id for the location where the data is to be fetched
+     * @return String the url to be used to fetch the said data (phone number, opening hours, website)
+     */
+    private String getDetailsUrl(String placeId) {
+        String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/details/json?";
+        googlePlaceUrl += "place_id=" + placeId;
+        googlePlaceUrl += "&fields=formatted_phone_number,opening_hours,website";
+        googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
+
+        return googlePlaceUrl;
     }
 
     /**
