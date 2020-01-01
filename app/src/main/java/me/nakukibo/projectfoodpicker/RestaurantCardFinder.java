@@ -3,10 +3,16 @@ package me.nakukibo.projectfoodpicker;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -16,7 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData {
+public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData,
+        View.OnTouchListener {
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
     private static final int ERROR_PASSED_VALUE = -1;
@@ -32,6 +39,15 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private int pricing;
     private int rating;
 
+    private float startX;
+    private float startY;
+    private float width;
+
+    private float dx = 0;
+    private float dy = 0;
+    private RestaurantCard restCard1;
+    private RestaurantCard restCard2;
+
     // previous pageToken for multiple calls
     private String previousPageToken;
 
@@ -41,8 +57,64 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         setContentView(R.layout.activity_restaurant_card_finder);
 
         nearbyPlaceListCombined = null;
+        initCards();
         retrievePassedValues();
         fetchLocation(null);
+    }
+
+    private void initCards() {
+        restCard1 = findViewById(R.id.restcard);
+        restCard2 = findViewById(R.id.restcard2);
+
+        startX = restCard1.getX();
+        startY = restCard1.getY();
+
+        restCard1.setOnTouchListener(this);
+        restCard2.setOnTouchListener(this);
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        width = view.getWidth();
+        float newX = motionEvent.getRawX() + dx;
+        float newY = motionEvent.getRawY() + dy;
+
+        if(view.getVisibility() == View.INVISIBLE) return true;
+        switch(motionEvent.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                dx = view.getX() - motionEvent.getRawX();
+                dy = view.getY() - motionEvent.getRawY();
+                return true;
+            case MotionEvent.ACTION_MOVE:
+                view.setX(newX);
+                view.setY(newY);
+                break;
+            case MotionEvent.ACTION_UP:
+
+                if(newX <= startX - width/2){
+                    Log.d(TAG, "initCards: is swiped");
+                    view.startAnimation(outToLeftAnimation());
+                    view.setVisibility(View.INVISIBLE);
+
+                    RestaurantCard otherCard;
+                    if(view.getId() == R.id.restcard){
+                        otherCard = restCard2;
+                    }else {
+                        otherCard = restCard1;
+                    }
+                    otherCard.setVisibility(View.VISIBLE);
+                    getRandomRestaurant();
+                    otherCard.setAnimation(inFromRightAnimation());
+                    otherCard.setX(startX);
+                    otherCard.setY(startY);
+                }
+
+                view.setX(startX);
+                view.setY(startY);
+
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -70,6 +142,23 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         Log.d(TAG, "sendData: logging the combined list");
         logAllPlacesList(nearbyPlaceListCombined);
 
+        getRandomRestaurant();
+    }
+
+
+    @Override
+    public void sendDetailData(HashMap<String, String> selectedRestaurant) {
+        RestaurantCard selectedCard;
+        if(restCard1.getVisibility() == View.VISIBLE){
+            selectedCard = restCard1;
+        }else{
+            selectedCard = restCard2;
+        }
+
+        setViewValues(selectedRestaurant, selectedCard);
+    }
+
+    private void getRandomRestaurant(){
         int index = new Random().nextInt(nearbyPlaceListCombined.size());
         HashMap<String, String> selectedRestaurant = nearbyPlaceListCombined.get(index);
 
@@ -82,41 +171,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         getDetailData.execute(dataTransfer);
     }
 
-
-    @Override
-    public void sendDetailData(HashMap<String, String> selectedRestaurant) {
-        setViewValues(selectedRestaurant);
-    }
-
     /**
      * set values of views to values in HashMap<String, String>
      */
-    private void setViewValues(HashMap<String, String> selectedRestaurant) {
-        TextView txtvwName = findViewById(R.id.txtvw_name);
-        txtvwName.setText(selectedRestaurant.get(DataParser.DATA_KEY_NAME));
-
-        ImageView restPhoto = findViewById(R.id.imgvw_restaurant);
-        restPhoto.setImageResource(R.drawable.ic_launcher_background);
-
-        TextView txtvwRating = findViewById(R.id.txtvw_rating);
-        txtvwRating.setText(String.format(Locale.US, "%s stars (%s)",
-                selectedRestaurant.get(DataParser.DATA_KEY_RATING), selectedRestaurant.get(DataParser.DATA_KEY_TOT_RATING)));
-
-        TextView txtvwPricing = findViewById(R.id.txtvw_price_level);
-        txtvwPricing.setText(String.format(Locale.US, "Pricing Level: %s",
-                selectedRestaurant.get(DataParser.DATA_KEY_PRICE_LEVEL)));
-
-        TextView txtvwAddress = findViewById(R.id.txtvw_address);
-        txtvwAddress.setText(selectedRestaurant.get(DataParser.DATA_KEY_ADDRESS));
-
-        TextView txtvwPhoneNumber = findViewById(R.id.txtvw_phone_number);
-        txtvwPhoneNumber.setText(selectedRestaurant.get(DataParser.DATA_KEY_PHONE_NUMBER));
-
-        TextView txtvwWebsite = findViewById(R.id.txtvw_website);
-        txtvwWebsite.setText(selectedRestaurant.get(DataParser.DATA_KEY_WEBSITE));
-
-        TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
-        txtvwHours.setText(selectedRestaurant.get(DataParser.DATA_KEY_HOURS));
+    private void setViewValues(HashMap<String, String> selectedRestaurant, RestaurantCard card) {
+        card.setValues(selectedRestaurant);
     }
 
     /**
@@ -221,5 +280,27 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         rating = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_RATING, ERROR_PASSED_VALUE);
         distance = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
         pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
+    }
+
+    private Animation inFromRightAnimation() {
+        Animation inFromRight = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, +1.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f);
+        inFromRight.setDuration(400);
+        inFromRight.setInterpolator(new AccelerateInterpolator());
+        return inFromRight;
+    }
+
+    private Animation outToLeftAnimation() {
+        Animation outToLeft = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, -1.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f);
+        outToLeft.setDuration(200);
+        outToLeft.setInterpolator(new AccelerateInterpolator());
+        return outToLeft;
     }
 }
