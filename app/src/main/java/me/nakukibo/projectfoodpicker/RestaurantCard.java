@@ -1,18 +1,32 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.util.Locale;
 
 public class RestaurantCard extends CardView {
+
+    private float startX;
+    private float startY;
+
+    private float dx;
+    private float dy;
+
+    private static final String TAG = RestaurantCard.class.getSimpleName();
 
     public RestaurantCard(@NonNull Context context) {
         this(context, null);
@@ -56,5 +70,28 @@ public class RestaurantCard extends CardView {
         txtvwHours.setText(attributes.getString(R.styleable.RestaurantCard_hours));
 
         attributes.recycle();
+
+        ConstraintLayout restCardLayout = findViewById(R.id.restcard_layout);
+        startX = restCardLayout.getX();
+        startY = restCardLayout.getY();
+
+        restCardLayout.setOnTouchListener((view, motionEvent) -> {
+            Log.d(TAG, "initCard: initiated motion event=" + motionEvent.getAction());
+            switch(motionEvent.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    dx = view.getX() - motionEvent.getRawX();
+                    dy = view.getY() - motionEvent.getRawY();
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    view.setX(motionEvent.getRawX() + dx);
+                    view.setY(motionEvent.getRawY() + dy);
+                    break;
+                case MotionEvent.ACTION_UP:
+                    view.setX(startX);
+                    view.setY(startY);
+                    return true;
+            }
+            return false;
+        });
     }
 }

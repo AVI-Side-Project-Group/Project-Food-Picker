@@ -37,7 +37,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(android.R.style.Theme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
@@ -75,9 +74,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         HashMap<String, String> selectedRestaurant = nearbyPlaceListCombined.get(index);
 
         Object[] dataTransfer = new Object[5];
-
-        //TODO: TAKE AWAY MCDONALD TEST
-        selectedRestaurant.put(DataParser.DATA_KEY_PLACE_ID, "ChIJ5dSGmZ92ToYRMUIHWB6SQOA");
 
         // find restaurants
         DetailData getDetailData = new DetailData(selectedRestaurant, this);
