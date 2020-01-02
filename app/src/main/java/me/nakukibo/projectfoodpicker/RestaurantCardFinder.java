@@ -8,18 +8,14 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 
 public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData,
@@ -41,7 +37,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     private float startX;
     private float startY;
-    private float width;
 
     private float dx = 0;
     private float dy = 0;
@@ -83,7 +78,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if(view.getVisibility() == View.INVISIBLE) return true;
 
-        width = view.getWidth();
+        float width = view.getWidth();
         float newX = motionEvent.getRawX() + dx;
         float newY = motionEvent.getRawY() + dy;
 
