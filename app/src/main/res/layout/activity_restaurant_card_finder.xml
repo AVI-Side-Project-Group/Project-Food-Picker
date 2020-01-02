@@ -8,42 +8,63 @@
 
     <me.nakukibo.projectfoodpicker.RestaurantCard
         android:id="@+id/restcard"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:src="@drawable/ic_launcher_background"
-        android:visibility="visible"
-        app:address="Num Street\nCity, State, ZipCode"
-        app:hours="business hours"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:name="Restaurant Name"
-        app:phone_number="phone number"
-        app:price_level="1"
-        app:rating="0"
-        app:website="website" />
-
-    <me.nakukibo.projectfoodpicker.RestaurantCard
-        android:id="@+id/restcard2"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:src="@drawable/ic_launcher_background"
         android:visibility="invisible"
         app:address="Num Street\nCity, State, ZipCode"
         app:hours="business hours"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
         app:name="Restaurant Name"
         app:phone_number="phone number"
         app:price_level="1"
         app:rating="0"
-        app:website="website" />
+        app:website="website" >
+
+    </me.nakukibo.projectfoodpicker.RestaurantCard>
+
+    <me.nakukibo.projectfoodpicker.RestaurantCard
+        android:id="@+id/restcard2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_launcher_background"
+        android:visibility="invisible"
+        app:address="Num Street\nCity, State, ZipCode"
+        app:hours="business hours"
+        app:name="Restaurant Name"
+        app:phone_number="phone number"
+        app:price_level="1"
+        app:rating="0"
+        app:website="website" >
+
+    </me.nakukibo.projectfoodpicker.RestaurantCard>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/restcard_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/cardview_light_background">
+
+        <TextView
+            android:id="@+id/restcard_loading_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="@string/restcardfinder_default_load_txt"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="@+id/restcard_loading_txt"
+            app:layout_constraintStart_toStartOf="@+id/restcard_loading_txt"
+            app:layout_constraintTop_toBottomOf="@+id/restcard_loading_txt" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

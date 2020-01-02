@@ -47,6 +47,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private float dy = 0;
     private RestaurantCard restCard1;
     private RestaurantCard restCard2;
+    private boolean firstCard;
 
     // previous pageToken for multiple calls
     private String previousPageToken;
@@ -57,6 +58,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         setContentView(R.layout.activity_restaurant_card_finder);
 
         nearbyPlaceListCombined = null;
+        firstCard = true;
         initCards();
         retrievePassedValues();
         fetchLocation(null);
@@ -65,6 +67,10 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private void initCards() {
         restCard1 = findViewById(R.id.restcard);
         restCard2 = findViewById(R.id.restcard2);
+        restCard1.setDefaultValues();
+        restCard2.setDefaultValues();
+        restCard1.setVisibility(View.GONE);
+        restCard2.setVisibility(View.GONE);
 
         startX = restCard1.getX();
         startY = restCard1.getY();
@@ -75,11 +81,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+        if(view.getVisibility() == View.INVISIBLE) return true;
+
         width = view.getWidth();
         float newX = motionEvent.getRawX() + dx;
         float newY = motionEvent.getRawY() + dy;
 
-        if(view.getVisibility() == View.INVISIBLE) return true;
         switch(motionEvent.getAction()){
             case MotionEvent.ACTION_DOWN:
                 dx = view.getX() - motionEvent.getRawX();
@@ -92,21 +99,24 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
             case MotionEvent.ACTION_UP:
 
                 if(newX <= startX - width/2){
+                    RestaurantCard thisCard = (RestaurantCard) view;
+
                     Log.d(TAG, "initCards: is swiped");
-                    view.startAnimation(outToLeftAnimation());
-                    view.setVisibility(View.INVISIBLE);
+                    thisCard.startAnimation(outToLeftAnimation());
+                    thisCard.setVisibility(View.GONE);
+
+                    thisCard.setDefaultValues();
 
                     RestaurantCard otherCard;
-                    if(view.getId() == R.id.restcard){
+                    if(thisCard.getId() == restCard1.getId()){
                         otherCard = restCard2;
                     }else {
                         otherCard = restCard1;
                     }
+
                     otherCard.setVisibility(View.VISIBLE);
                     getRandomRestaurant();
                     otherCard.setAnimation(inFromRightAnimation());
-                    otherCard.setX(startX);
-                    otherCard.setY(startY);
                 }
 
                 view.setX(startX);
@@ -142,12 +152,21 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         Log.d(TAG, "sendData: logging the combined list");
         logAllPlacesList(nearbyPlaceListCombined);
 
+        View loadingView = findViewById(R.id.restcard_loading);
+        loadingView.setAnimation(outToLeftAnimation());
+        loadingView.setVisibility(View.GONE);
         getRandomRestaurant();
     }
 
 
     @Override
     public void sendDetailData(HashMap<String, String> selectedRestaurant) {
+        if(firstCard) {
+            restCard1.setVisibility(View.VISIBLE);
+            firstCard = false;
+        }
+
+
         RestaurantCard selectedCard;
         if(restCard1.getVisibility() == View.VISIBLE){
             selectedCard = restCard1;
