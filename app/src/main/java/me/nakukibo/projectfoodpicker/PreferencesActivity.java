@@ -1,7 +1,10 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -78,6 +81,17 @@ public class PreferencesActivity extends AppCompatActivity {
     public void submitPref(View view) {
         // if not search button then wrong view
         if (view.getId() != R.id.btn_search) return;
+
+        boolean connected = false;
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(!(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)) {
+            // notify user error message
+            Toast toast = Toast.makeText(getApplicationContext(), "There is no internet connection. Please try again later.",
+                    Toast.LENGTH_LONG);
+            toast.show();
+            return;
+        }
 
         if (isLocationOn) {
             // retrieve value from preferences

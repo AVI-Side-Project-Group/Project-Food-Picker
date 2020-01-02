@@ -22,6 +22,7 @@ import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 public class RestaurantCard extends CardView {
@@ -40,31 +41,57 @@ public class RestaurantCard extends CardView {
     }
 
     void setValues(HashMap<String, String> values){
+        setValues(
+                values.get(DataParser.DATA_KEY_NAME),
+                R.drawable.ic_launcher_background,
+                String.format(Locale.US, "%s stars (%s)",
+                        values.get(DataParser.DATA_KEY_RATING), values.get(DataParser.DATA_KEY_TOT_RATING)),
+                String.format(Locale.US, "Pricing Level: %s",
+                        values.get(DataParser.DATA_KEY_PRICE_LEVEL)),
+                values.get(DataParser.DATA_KEY_ADDRESS),
+                values.get(DataParser.DATA_KEY_PHONE_NUMBER),
+                values.get(DataParser.DATA_KEY_WEBSITE),
+                values.get(DataParser.DATA_KEY_HOURS)
+        );
+    }
+
+    private void setValues(String name, int photoSource, String rating, String pricing, String address,
+                           String phoneNumber, String website, String hours){
         TextView txtvwName = findViewById(R.id.txtvw_name);
-        txtvwName.setText(values.get(DataParser.DATA_KEY_NAME));
+        txtvwName.setText(name);
 
         ImageView restPhoto = findViewById(R.id.imgvw_restaurant);
-        restPhoto.setImageResource(R.drawable.ic_launcher_background);
+        restPhoto.setImageResource(photoSource);
 
         TextView txtvwRating = findViewById(R.id.txtvw_rating);
-        txtvwRating.setText(String.format(Locale.US, "%s stars (%s)",
-                values.get(DataParser.DATA_KEY_RATING), values.get(DataParser.DATA_KEY_TOT_RATING)));
+        txtvwRating.setText(rating);
 
         TextView txtvwPricing = findViewById(R.id.txtvw_price_level);
-        txtvwPricing.setText(String.format(Locale.US, "Pricing Level: %s",
-                values.get(DataParser.DATA_KEY_PRICE_LEVEL)));
+        txtvwPricing.setText(pricing);
 
         TextView txtvwAddress = findViewById(R.id.txtvw_address);
-        txtvwAddress.setText(values.get(DataParser.DATA_KEY_ADDRESS));
+        txtvwAddress.setText(address);
 
         TextView txtvwPhoneNumber = findViewById(R.id.txtvw_phone_number);
-        txtvwPhoneNumber.setText(values.get(DataParser.DATA_KEY_PHONE_NUMBER));
+        txtvwPhoneNumber.setText(phoneNumber);
 
         TextView txtvwWebsite = findViewById(R.id.txtvw_website);
-        txtvwWebsite.setText(values.get(DataParser.DATA_KEY_WEBSITE));
+        txtvwWebsite.setText(website);
 
         TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
-        txtvwHours.setText(values.get(DataParser.DATA_KEY_HOURS));
+        txtvwHours.setText(hours);
+    }
+
+    void setDefaultValues(){
+        setValues(
+                getResources().getString(R.string.restcard_default_name),
+                R.drawable.ic_launcher_background,
+                getResources().getString(R.string.restcard_default_rating),
+                getResources().getString(R.string.restcard_default_pricing),
+                getResources().getString(R.string.restcard_default_address),
+                getResources().getString(R.string.restcard_default_phone_number),
+                getResources().getString(R.string.restcard_default_website),
+                getResources().getString(R.string.restcard_default_hours));
     }
 
     /**

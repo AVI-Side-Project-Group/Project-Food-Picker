@@ -24,6 +24,16 @@
     <string name="restcard_txtvw_addr_placeholder">
         123 NE 123th Street\nCity, State, ZipCode
     </string>
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_maps2">Map</string>
+    String name, int photoSource, String rating, String pricing, String address,
+    String phoneNumber, String website, String hours
+    <!--    restaurant_card.xml default values-->
+    <string name="restcard_default_name">Restaurant Name</string>
+    <string name="restcard_default_rating">Rating (total)</string>
+    <string name="restcard_default_pricing">Pricing</string>
+    <string name="restcard_default_address">123 Example St,\nCity, State ZipCode</string>
+    <string name="restcard_default_phone_number">(123)456 7890</string>
+    <string name="restcard_default_website">www.example.com</string>
+    <string name="restcard_default_hours">Restaurant hours</string>
+    <string name="restcardfinder_default_load_txt">waiting...</string>
+
 </resources>
