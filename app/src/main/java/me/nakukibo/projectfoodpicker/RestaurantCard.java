@@ -1,28 +1,16 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 public class RestaurantCard extends CardView {
@@ -40,6 +28,9 @@ public class RestaurantCard extends CardView {
         initCard(context, attrs);
     }
 
+    /**
+     * set restaurant card to values passed as HashMap<String, String> with keys used by DataParser class
+     */
     void setValues(HashMap<String, String> values){
         setValues(
                 values.get(DataParser.DATA_KEY_NAME),
@@ -55,6 +46,9 @@ public class RestaurantCard extends CardView {
         );
     }
 
+    /**
+     * set restaurant card to values passed
+     */
     private void setValues(String name, int photoSource, String rating, String pricing, String address,
                            String phoneNumber, String website, String hours){
         TextView txtvwName = findViewById(R.id.txtvw_name);
@@ -82,6 +76,9 @@ public class RestaurantCard extends CardView {
         txtvwHours.setText(hours);
     }
 
+    /**
+     * set restaurant card to default values
+     */
     void setDefaultValues(){
         setValues(
                 getResources().getString(R.string.restcard_default_name),

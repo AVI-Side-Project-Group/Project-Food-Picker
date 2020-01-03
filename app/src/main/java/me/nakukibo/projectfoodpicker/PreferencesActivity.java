@@ -4,7 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -25,12 +28,14 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 public class PreferencesActivity extends AppCompatActivity {
 
     // variables used to pass data between PreferencesActivity and RestaurantCardFinder
-    public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_ANY_STR_REP = "Any";
+    public static final int PREF_ANY_INT_REP = 0;
+
+    public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
     public static final String PREF_INTENT_PRICING = "pricing";
-    public static final int PREF_ANY_INT_REP = 0;
+
     // tag for logging
     private static final String TAG = PreferencesActivity.class.getSimpleName();
 
@@ -61,7 +66,7 @@ public class PreferencesActivity extends AppCompatActivity {
     }
 
     /**
-     * logs all values as debug
+     * logs all values for debugging purposes
      *
      * @param tag:      the tag for the messages
      * @param funcName: function name where this function is called from
@@ -73,19 +78,22 @@ public class PreferencesActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // reactivate the button (was deactivate during onSubmit)
+        findViewById(R.id.btn_search).setClickable(true);
+    }
+
     /**
      * gets the preference values and opens the results activity (RestaurantCardFinder.java)
-     *
-     * @param view the view to be interfaced
      */
     public void submitPref(View view) {
         // if not search button then wrong view
         if (view.getId() != R.id.btn_search) return;
 
-        boolean connected = false;
-        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        if(!(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED)) {
+        // check if user is connected to the internet
+        if (!checkNetworkConnection()) {
             // notify user error message
             Toast toast = Toast.makeText(getApplicationContext(), "There is no internet connection. Please try again later.",
                     Toast.LENGTH_LONG);
@@ -94,6 +102,8 @@ public class PreferencesActivity extends AppCompatActivity {
         }
 
         if (isLocationOn) {
+            findViewById(R.id.btn_search).setClickable(false);
+
             // retrieve value from preferences
             String foodType = spinFoodType.getSelectedItem().toString();
             int rating = spinRating.getSelectedItemPosition();
@@ -131,6 +141,43 @@ public class PreferencesActivity extends AppCompatActivity {
             }
         }
         isLocationOn = true;
+    }
+
+    /**
+     * checks to see if the user is connected to the internet
+     *
+     * @return boolean true if connected, false otherwise
+     */
+    private boolean checkNetworkConnection() {
+        final ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager != null) {
+            if (Build.VERSION.SDK_INT < 23) {
+                final NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
+
+                if (ni != null) {
+                    return (ni.isConnected() && (ni.getType() == ConnectivityManager.TYPE_WIFI || ni.getType() == ConnectivityManager.TYPE_MOBILE));
+                }
+            } else {
+                final Network n = connectivityManager.getActiveNetwork();
+
+                if (n != null) {
+                    final NetworkCapabilities nc = connectivityManager.getNetworkCapabilities(n);
+
+                    if (nc == null) {
+                        Log.d(TAG, "checkNetworkConnection: NetworkCapabilities instance is null. " +
+                                "User is not connected.");
+                        return false;
+                    }
+
+                    return nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                            nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                            nc.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

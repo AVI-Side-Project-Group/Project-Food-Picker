@@ -1,20 +1,24 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 
 public class DetailData extends AsyncTask<Object, String, String> {
 
-    private String googlePlacesData;
+    /**
+     * takes in the HashMap<String, String> selectedRestaurant and fills it with the detailed info
+     * the reference will be sent back to the ReceiveDetailData instance that was passed as argument
+     */
+
+    private static final String TAG = NearbyData.class.getSimpleName();
+
     private HashMap<String, String> selectedRestaurant;
     private ReceiveDetailData receiveDetailData;
 
-    private static final String TAG = NearbyData.class.getSimpleName();
+    private String googlePlacesData;
 
     DetailData(HashMap<String, String> selectedRestaurant, ReceiveDetailData receiveDetailData) {
         this.selectedRestaurant = selectedRestaurant;
