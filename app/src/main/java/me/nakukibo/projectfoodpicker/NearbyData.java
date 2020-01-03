@@ -10,6 +10,11 @@ import java.util.List;
 
 public class NearbyData extends AsyncTask<Object, String, String> {
 
+    /**
+     * fetches the restaurants from Google Places and then parses the data and sends it back
+     * to the ReceiveNearbyData instance that was passed as argument
+     */
+
     private String googlePlacesData;
     private ReceiveNearbyData receiveNearbyData;
     private Location userLocation;

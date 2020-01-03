@@ -35,11 +35,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private int pricing;
     private int rating;
 
-    private float startX;
-    private float startY;
+    // values for the RestaurantCard
+    private float restCardStartX;
+    private float restCardStartY;
+    private float restCardDx = 0;
+    private float restCardDy = 0;
 
-    private float dx = 0;
-    private float dy = 0;
     private RestaurantCard restCard1;
     private RestaurantCard restCard2;
     private boolean firstCard;
@@ -52,14 +53,19 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
-        nearbyPlaceListCombined = null;
-        firstCard = true;
         initCards();
         retrievePassedValues();
         fetchLocation(null);
     }
 
+    /**
+     * initialize the cards and certain global variables
+     * cards will also initialize their setOnTouchListener and be set to View.GONE
+     */
     private void initCards() {
+        nearbyPlaceListCombined = null;
+        firstCard = true;
+
         restCard1 = findViewById(R.id.restcard);
         restCard2 = findViewById(R.id.restcard2);
         restCard1.setDefaultValues();
@@ -67,8 +73,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         restCard1.setVisibility(View.GONE);
         restCard2.setVisibility(View.GONE);
 
-        startX = restCard1.getX();
-        startY = restCard1.getY();
+        restCardStartX = restCard1.getX();
+        restCardStartY = restCard1.getY();
 
         restCard1.setOnTouchListener(this);
         restCard2.setOnTouchListener(this);
@@ -76,30 +82,34 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        if(view.getVisibility() == View.INVISIBLE) return true;
+        // if invisible or gone, then no response
+        if (view.getVisibility() == View.GONE || view.getVisibility() == View.INVISIBLE)
+            return true;
 
         float width = view.getWidth();
-        float newX = motionEvent.getRawX() + dx;
-        float newY = motionEvent.getRawY() + dy;
+        float newX = motionEvent.getRawX() + restCardDx;
+        float newY = motionEvent.getRawY() + restCardDy;
 
         switch(motionEvent.getAction()){
             case MotionEvent.ACTION_DOWN:
-                dx = view.getX() - motionEvent.getRawX();
-                dy = view.getY() - motionEvent.getRawY();
+                restCardDx = view.getX() - motionEvent.getRawX();
+                restCardDy = view.getY() - motionEvent.getRawY();
                 return true;
+
             case MotionEvent.ACTION_MOVE:
                 view.setX(newX);
                 view.setY(newY);
                 break;
-            case MotionEvent.ACTION_UP:
 
-                if(newX <= startX - width/2){
+            case MotionEvent.ACTION_UP:
+                // if pass threshold, then new card, else place card back in center
+                if (newX <= restCardStartX - width / 2) {
                     RestaurantCard thisCard = (RestaurantCard) view;
 
-                    Log.d(TAG, "initCards: is swiped");
+                    Log.d(TAG, "initCards: card is swiped left");
+
                     thisCard.startAnimation(outToLeftAnimation());
                     thisCard.setVisibility(View.GONE);
-
                     thisCard.setDefaultValues();
 
                     RestaurantCard otherCard;
@@ -109,19 +119,24 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
                         otherCard = restCard1;
                     }
 
+                    // get new restaurant info on other card
                     otherCard.setVisibility(View.VISIBLE);
                     getRandomRestaurant();
                     otherCard.setAnimation(inFromRightAnimation());
                 }
 
-                view.setX(startX);
-                view.setY(startY);
+                view.setX(restCardStartX);
+                view.setY(restCardStartY);
 
                 return true;
         }
         return false;
     }
 
+    /**
+     * called when the NearbyData AsyncTask has finished retrieving the information for the restaurants
+     * nearby
+     */
     @Override
     public void sendData(List<HashMap<String, String>> nearbyPlaceList, String nextPageToken) {
         if(nearbyPlaceList == null){
@@ -154,13 +169,15 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
 
+    /**
+     * called when DetailData AsyncTask has finished fetching the detailed information
+     */
     @Override
     public void sendDetailData(HashMap<String, String> selectedRestaurant) {
         if(firstCard) {
             restCard1.setVisibility(View.VISIBLE);
             firstCard = false;
         }
-
 
         RestaurantCard selectedCard;
         if(restCard1.getVisibility() == View.VISIBLE){
@@ -172,6 +189,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         setViewValues(selectedRestaurant, selectedCard);
     }
 
+    /**
+     * get a random restaurant from the List of HashMaps and find the detailed data on it
+     * */
     private void getRandomRestaurant(){
         int index = new Random().nextInt(nearbyPlaceListCombined.size());
         HashMap<String, String> selectedRestaurant = nearbyPlaceListCombined.get(index);
@@ -183,23 +203,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         String url = getDetailsUrl(selectedRestaurant.get(DataParser.DATA_KEY_PLACE_ID));
         dataTransfer[0] = url;
         getDetailData.execute(dataTransfer);
-    }
-
-    /**
-     * set values of views to values in HashMap<String, String>
-     */
-    private void setViewValues(HashMap<String, String> selectedRestaurant, RestaurantCard card) {
-        card.setValues(selectedRestaurant);
-    }
-
-    /**
-     * send search request with nextPageToken
-     */
-    private void requestNextPageSearch(String nextPageToken) {
-        SystemClock.sleep(DEFAULT_WAIT_MS);
-        String nextPage = getUrlNextPage(nextPageToken);
-        Log.d(TAG, "sendData: search with url=" + nextPage);
-        fetchLocation(nextPage);
     }
 
     /**
@@ -227,6 +230,16 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
                         getNearbyPlacesData.execute(dataTransfer);
                     }
                 });
+    }
+
+    /**
+     * send search request with nextPageToken
+     */
+    private void requestNextPageSearch(String nextPageToken) {
+        SystemClock.sleep(DEFAULT_WAIT_MS);
+        String nextPage = getUrlNextPage(nextPageToken);
+        Log.d(TAG, "sendData: search with url=" + nextPage);
+        fetchLocation(nextPage);
     }
 
     /**
@@ -296,6 +309,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
     }
 
+    /**
+     * Animation for a card to move from out of screen to into screen
+     * */
     private Animation inFromRightAnimation() {
         Animation inFromRight = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, +1.0f,
@@ -307,6 +323,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         return inFromRight;
     }
 
+    /**
+     * Animation for a card to move from in card to out of screen
+     * */
     private Animation outToLeftAnimation() {
         Animation outToLeft = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, 0.0f,
@@ -316,5 +335,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         outToLeft.setDuration(200);
         outToLeft.setInterpolator(new AccelerateInterpolator());
         return outToLeft;
+    }
+
+    /**
+     * set values of views to values in HashMap<String, String>
+     */
+    private void setViewValues(HashMap<String, String> selectedRestaurant, RestaurantCard card) {
+        card.setValues(selectedRestaurant);
     }
 }
