@@ -17,7 +17,7 @@
     <!--    restaurant_card.xml text-->
     <string name="restcard_txtvw_hours">Opening Hours</string>
     <string name="restcard_txtvw_hours_label">
-        Mon:\nTue:\nWed:\nThu:\nFri:\nSat:\nSun:
+        Sun:\nMon:\nTue:\nWed:\nThu:\nFri:\nSat:
     </string>
     <string name="restcard_txtvw_hours_placeholder">
         12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM
@@ -25,6 +25,7 @@
     <string name="restcard_txtvw_addr_placeholder">
         123 NE 123th Street\nCity, State, ZipCode
     </string>
+
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_maps2">Map</string>
     <string name="title_activity_settings">Settings</string>
@@ -35,4 +36,23 @@
 
     <!-- shared preferences key -->
     <string name="sp_theme">theme_key</string>
+
+    <!--    restaurant_card.xml default values-->
+    <string name="restcard_default_name">Restaurant Name</string>
+    <string name="restcard_default_rating">Rating (total)</string>
+    <string name="restcard_default_pricing">Pricing</string>
+    <string name="restcard_default_address">123 Example St,\nCity, State ZipCode</string>
+    <string name="restcard_default_phone_number">(123)456 7890</string>
+    <string name="restcard_default_website">www.example.com</string>
+    <string name="restcard_default_hours">Restaurant hours</string>
+
+    <!--    restaurant_card_finder values-->
+    <string name="restcardfinder_default_load_txt">loading restaurants&#8230;</string>
+    <string name="restcard_finder_no_more_restaurants">
+        It seems you have ran out of restaurants matching your preferences.
+    </string>
+    <string name="restcard_finder_no_restaurants">
+        There are no restaurants matching your preferences.
+    </string>
+
 </resources>

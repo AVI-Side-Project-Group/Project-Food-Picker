@@ -10,15 +10,20 @@ import java.util.List;
 
 public class NearbyData extends AsyncTask<Object, String, String> {
 
+    /**
+     * fetches the restaurants from Google Places and then parses the data and sends it back
+     * to the ReceiveNearbyData instance that was passed as argument
+     */
+
     private String googlePlacesData;
-    private ReceiveData receiveData;
+    private ReceiveNearbyData receiveNearbyData;
     private Location userLocation;
     private int maxDistance;
     private int pricingRange;
     private int minRating;
 
-    NearbyData(ReceiveData receiveData) {
-        this.receiveData = receiveData;
+    NearbyData(ReceiveNearbyData receiveNearbyData) {
+        this.receiveNearbyData = receiveNearbyData;
     }
 
     private static final String TAG = NearbyData.class.getSimpleName();
@@ -57,6 +62,6 @@ public class NearbyData extends AsyncTask<Object, String, String> {
             nextPageToken = null;
         }
         // send data to RestaurantCardFinder
-        receiveData.sendData(nearbyPlaceList, nextPageToken);
+        receiveNearbyData.sendData(nearbyPlaceList, nextPageToken);
     }
 }

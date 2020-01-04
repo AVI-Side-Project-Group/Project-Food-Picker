@@ -3,7 +3,7 @@ package me.nakukibo.projectfoodpicker;
 import java.util.HashMap;
 import java.util.List;
 
-public interface ReceiveData {
+public interface ReceiveNearbyData {
     /**
      * method used to transmit data
      */
