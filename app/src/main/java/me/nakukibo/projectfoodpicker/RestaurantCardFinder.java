@@ -8,15 +8,20 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData,
         View.OnTouchListener {
@@ -26,8 +31,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private static final String DEFAULT_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
     private static final int DEFAULT_WAIT_MS = 500;
 
-    // accumulates the list over several calls
-    private static List<HashMap<String, String>> nearbyPlaceListCombined;
+    private static List<HashMap<String, String>> nearbyPlaceListCombined; // accumulates the list over several calls
+    private static List<HashMap<String, String>> previouslyAccessed; // stores the restaurants that have been accessed
 
     // data passed from PreferencesActivity.java
     private String foodType;
@@ -43,6 +48,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     private RestaurantCard restCard1;
     private RestaurantCard restCard2;
+    private ConstraintLayout noRestaurantsError;
     private boolean firstCard;
 
     // previous pageToken for multiple calls
@@ -53,7 +59,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
-        initCards();
+        initViews();
         retrievePassedValues();
         fetchLocation(null);
     }
@@ -62,8 +68,13 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      * initialize the cards and certain global variables
      * cards will also initialize their setOnTouchListener and be set to View.GONE
      */
-    private void initCards() {
-        nearbyPlaceListCombined = null;
+    private void initViews() {
+        noRestaurantsError = findViewById(R.id.no_restaurants_layout);
+        noRestaurantsError.setVisibility(View.GONE);
+
+        nearbyPlaceListCombined = new ArrayList<>();
+        previouslyAccessed = new ArrayList<>();
+
         firstCard = true;
 
         restCard1 = findViewById(R.id.restcard);
@@ -106,7 +117,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
                 if (newX <= restCardStartX - width / 2) {
                     RestaurantCard thisCard = (RestaurantCard) view;
 
-                    Log.d(TAG, "initCards: card is swiped left");
+                    Log.d(TAG, "initViews: card is swiped left");
 
                     thisCard.startAnimation(outToLeftAnimation());
                     thisCard.setVisibility(View.GONE);
@@ -121,7 +132,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
                     // get new restaurant info on other card
                     otherCard.setVisibility(View.VISIBLE);
-                    getRandomRestaurant();
+                    if (!attemptRandomRestaurant(R.string.restcard_finder_no_more_restaurants))
+                        return true;
                     otherCard.setAnimation(inFromRightAnimation());
                 }
 
@@ -147,12 +159,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
             previousPageToken = nextPageToken;
         }
 
-        if(nearbyPlaceListCombined == null) {
-            nearbyPlaceListCombined = nearbyPlaceList;
-        } else {
-            nearbyPlaceListCombined.addAll(nearbyPlaceList);
-            Log.d(TAG, "sendData: combined list has new size of " + nearbyPlaceListCombined.size());
-        }
+        nearbyPlaceListCombined.addAll(nearbyPlaceList);
+        Log.d(TAG, "sendData: combined list has new size of " + nearbyPlaceListCombined.size());
 
         if(nextPageToken != null){
             requestNextPageSearch(nextPageToken);
@@ -165,7 +173,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         View loadingView = findViewById(R.id.restcard_loading);
         loadingView.setAnimation(outToLeftAnimation());
         loadingView.setVisibility(View.GONE);
-        getRandomRestaurant();
+
+        attemptRandomRestaurant(R.string.restcard_finder_no_restaurants);
     }
 
 
@@ -174,6 +183,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      */
     @Override
     public void sendDetailData(HashMap<String, String> selectedRestaurant) {
+        previouslyAccessed.add(selectedRestaurant); // selectedRestaurant has been accessed
+
         if(firstCard) {
             restCard1.setVisibility(View.VISIBLE);
             firstCard = false;
@@ -190,11 +201,42 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     /**
-     * get a random restaurant from the List of HashMaps and find the detailed data on it
+     * finish activity and return back to preferences
      * */
-    private void getRandomRestaurant(){
-        int index = new Random().nextInt(nearbyPlaceListCombined.size());
-        HashMap<String, String> selectedRestaurant = nearbyPlaceListCombined.get(index);
+    public void finishCardFinder(View view){
+        finish();
+    }
+
+    private void turnOffBothCards(){
+        restCard1.setVisibility(View.GONE);
+        restCard2.setVisibility(View.GONE);
+    }
+
+    private boolean attemptRandomRestaurant(int errorTxt){
+        boolean success = getRandomRestaurant();
+        if(!success){
+            TextView txtvwNoRestaurants = findViewById(R.id.txtvw_no_restaurants);
+            txtvwNoRestaurants.setText(getResources().getString(errorTxt));
+            turnOffBothCards();
+            noRestaurantsError.setVisibility(View.VISIBLE);
+        }
+        return success;
+    }
+
+    /**
+     * get a random restaurant from the List of HashMaps and find the detailed data on it
+     * @return boolean - true if successfully retrieved a random restaurant
+     *                 - false otherwise (eg 0 possible restaurants)
+     * */
+    private boolean getRandomRestaurant(){
+        Set<HashMap<String, String>> potentials = new HashSet<>(nearbyPlaceListCombined);
+        potentials.removeAll(previouslyAccessed);
+
+        if (potentials.size() == 0) return false;
+
+        List<HashMap<String, String>> potentialsList = new ArrayList<>(potentials);
+        int index = new Random().nextInt(potentialsList.size());
+        HashMap<String, String> selectedRestaurant = potentialsList.get(index);
 
         Object[] dataTransfer = new Object[5];
 
@@ -203,6 +245,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         String url = getDetailsUrl(selectedRestaurant.get(DataParser.DATA_KEY_PLACE_ID));
         dataTransfer[0] = url;
         getDetailData.execute(dataTransfer);
+
+        return true;
     }
 
     /**

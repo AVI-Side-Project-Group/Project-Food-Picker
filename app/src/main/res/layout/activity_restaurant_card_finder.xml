@@ -7,6 +7,43 @@
     android:layout_height="match_parent"
     tools:context=".RestaurantCardFinder">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/no_restaurants_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/txtvw_no_restaurants"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/restcard_finder_no_restaurants"
+            android:textAlignment="center"
+            android:textSize="@dimen/font_size_restaurant_text"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_no_restaurants_ok"
+            style="@android:style/Widget.Holo.Light.Button.Borderless.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:onClick="finishCardFinder"
+            android:text="@android:string/ok"
+            app:layout_constraintEnd_toEndOf="@+id/txtvw_no_restaurants"
+            app:layout_constraintStart_toStartOf="@+id/txtvw_no_restaurants"
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_no_restaurants" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <me.nakukibo.projectfoodpicker.RestaurantCard
         android:id="@+id/restcard"
         android:layout_width="match_parent"
@@ -15,11 +52,15 @@
         android:visibility="invisible"
         app:address="Num Street\nCity, State, ZipCode"
         app:hours="business hours"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:name="Restaurant Name"
         app:phone_number="phone number"
         app:price_level="1"
         app:rating="0"
-        app:website="website" >
+        app:website="website">
 
     </me.nakukibo.projectfoodpicker.RestaurantCard>
 
@@ -31,11 +72,15 @@
         android:visibility="invisible"
         app:address="Num Street\nCity, State, ZipCode"
         app:hours="business hours"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/restcard"
         app:name="Restaurant Name"
         app:phone_number="phone number"
         app:price_level="1"
         app:rating="0"
-        app:website="website" >
+        app:website="website">
 
     </me.nakukibo.projectfoodpicker.RestaurantCard>
 
@@ -43,7 +88,12 @@
         android:id="@+id/restcard_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/cardview_light_background">
+        android:background="@color/cardview_light_background"
+        tools:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/restcard_loading_txt"
