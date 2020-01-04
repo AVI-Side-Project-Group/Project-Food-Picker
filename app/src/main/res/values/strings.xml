@@ -26,6 +26,7 @@
     </string>
     String name, int photoSource, String rating, String pricing, String address,
     String phoneNumber, String website, String hours
+
     <!--    restaurant_card.xml default values-->
     <string name="restcard_default_name">Restaurant Name</string>
     <string name="restcard_default_rating">Rating (total)</string>
@@ -36,4 +37,11 @@
     <string name="restcard_default_hours">Restaurant hours</string>
     <string name="restcardfinder_default_load_txt">waiting...</string>
 
+    <!--    restaurant_card_finder values-->
+    <string name="restcard_finder_no_more_restaurants">
+        It seems you have ran out of restaurants matching your preferences.
+    </string>
+    <string name="restcard_finder_no_restaurants">
+        There are no restaurants matching your preferences.
+    </string>
 </resources>
