@@ -1,5 +1,6 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -59,6 +60,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         initViews();
         retrievePassedValues();
         fetchLocation(null);
