@@ -50,6 +50,7 @@ public class PreferencesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
@@ -208,7 +209,7 @@ public class PreferencesActivity extends AppCompatActivity {
     }
 
     public void changeSettings(View view) {
-        Intent switchIntent = new Intent(this, Settings.class);
+        Intent switchIntent = new Intent(this, SettingsActivity.class);
         startActivity(switchIntent);
     }
 }
