@@ -54,18 +54,11 @@ public class SettingsActivity extends AppCompatActivity {
         spinTheme.setSelection(findThemePosition(currentTheme));
     }
 
-    /*public static class SettingsFragment extends PreferenceFragmentCompat {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.root_preferences, rootKey);
-        }
-    }*/
-
     private void checkSharedPreference() {
         int pos = findThemePosition(currentTheme);
         spinTheme.setSelection(pos);
 
-        Log.d("string", "checkSharedPreference: " + currentTheme);
+        //Log.d("string", "checkSharedPreference: " + currentTheme);
     }
 
     private int findThemePosition(int themeID) {
@@ -91,10 +84,13 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void applySettings(View view){
         selectedTheme = findThemeID(findPos(spinTheme.getSelectedItem().toString()));
-        Log.d("selectedtheme", "applySettings: " + selectedTheme);
+        //Log.d(TAG, "applySettings: " + selectedTheme);
         setTheme(selectedTheme);
         editor.putInt(getString(R.string.sp_theme), selectedTheme);
         editor.commit();
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 
     public void finishSettings(View view){

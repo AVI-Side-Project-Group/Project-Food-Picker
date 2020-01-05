@@ -1,15 +1,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <!-- <FrameLayout
-        android:id="@+id/settings"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" /> -->
-
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -23,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/setting_txtvw_theme"
+        android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintEnd_toStartOf="@+id/spin_theme"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
@@ -36,25 +30,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline" />
 
-    <ImageButton
-        android:id="@+id/setting_btn_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:onClick="finishSettings"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/quantum_ic_arrow_back_grey600_24" />
-
     <Button
         android:id="@+id/btn_apply"
+        style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="32dp"
         android:onClick="applySettings"
         android:text="@string/setting_btn_apply"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline" />
+        app:layout_constraintTop_toBottomOf="@+id/spin_theme" />
 </androidx.constraintlayout.widget.ConstraintLayout>
