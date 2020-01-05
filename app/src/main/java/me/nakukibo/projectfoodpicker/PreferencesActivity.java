@@ -22,6 +22,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.Locale;
+import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -58,6 +59,10 @@ public class PreferencesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.d(TAG, "onCreate: " + FoodPicker.getSharedPreferences().getInt(getString(R.string.sp_theme), R.style.Light));
+
+        setTheme(FoodPicker.getSharedPreferences().getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
@@ -270,7 +275,7 @@ public class PreferencesActivity extends AppCompatActivity {
     }
 
     public void changeSettings(View view) {
-        Intent switchIntent = new Intent(this, SettingsActivity.class);
-        startActivity(switchIntent);
+        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+        startActivity(intent);
     }
 }

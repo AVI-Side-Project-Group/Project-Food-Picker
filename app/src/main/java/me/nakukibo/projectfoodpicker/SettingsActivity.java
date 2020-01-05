@@ -3,6 +3,7 @@ package me.nakukibo.projectfoodpicker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -14,56 +15,35 @@ import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
-public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-
-    public static final String SETTING_THEME = "theme";
-
+public class SettingsActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
+    private static final String TAG = SettingsActivity.class.getSimpleName();
+
     private Spinner spinTheme;
-
     private String[] themes = {"Light", "Purple"};
-
-    private String currentTheme;
-
-    private boolean schduledRestart = false;
+    private int currentTheme;
+    private int selectedTheme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        editor = sharedPreferences.edit();
+        sharedPreferences = FoodPicker.getSharedPreferences();
+        editor = FoodPicker.getEditor();
+        currentTheme = sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light);
+
+        setTheme(currentTheme);
         setContentView(R.layout.settings_activity);
 
         initTheme();
         checkSharedPreference();
-        changeTheme(currentTheme);
 
         super.onCreate(savedInstanceState);
+    }
 
-        /*getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.settings, new SettingsFragment())
-                .commit();
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }*/
-
-        /*sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        editor = sharedPreferences.edit();
-
-        checkSharedPreference();*/
-
-        //String selectedTheme = spinTheme.getSelectedItem().toString();
-       // changeTheme(selectedTheme);
-        /*if(currentTheme == selectedTheme) {
-            editor.putString(getString(R.string.sp_theme), currentTheme);
-            editor.commit();
-        } else {
-            editor.putString(getString(R.string.sp_theme), selectedTheme);
-            editor.commit();
-        }*/
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     private void initTheme() {
@@ -81,56 +61,46 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
         }
     }*/
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(schduledRestart){
-            schduledRestart = false;
-            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-        }
-    }
-
     private void checkSharedPreference() {
-        currentTheme = sharedPreferences.getString(getString(R.string.sp_theme), "Light");
         int pos = findThemePosition(currentTheme);
         spinTheme.setSelection(pos);
+
+        Log.d("string", "checkSharedPreference: " + currentTheme);
     }
 
-    private int findThemePosition(String theme) {
-        for(int i = 0; i < themes.length; i++) {
-            if(themes[i] == theme) return i;
+    private int findThemePosition(int themeID) {
+        if(themeID == R.style.Light) return 0;
+        else if(themeID == R.style.Purple) return 1;
+        else return -1;
+    }
+
+    private int findThemeID(int pos){
+        switch(pos){
+            case 0: return R.style.Light;
+            case 1: return R.style.Purple;
+        }
+        return R.style.Light;
+    }
+
+    private int findPos(String theme){
+        for(int i = 0; i < themes.length; i++){
+            if(theme == themes[i]) return i;
         }
         return -1;
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences spref, String key) {
-        if(key.equals(getString(R.string.sp_theme)) && !spref.getString(getString(R.string.sp_theme), "Light").equals(currentTheme))
-        {
-            changeTheme(spref.getString(getString(R.string.sp_theme), "Light"));
-            schduledRestart = true;
-        }
+    public void applySettings(View view){
+        selectedTheme = findThemeID(findPos(spinTheme.getSelectedItem().toString()));
+        Log.d("selectedtheme", "applySettings: " + selectedTheme);
+        setTheme(selectedTheme);
+        editor.putInt(getString(R.string.sp_theme), selectedTheme);
+        editor.commit();
     }
 
-    public void changeTheme(String theme) {
-        int pos = findThemePosition(theme);
-        switch(pos){
-            case 0:
-                setTheme(R.style.Light);
-                break;
-            case 1:
-                setTheme(R.style.Purple);
-                break;
-            //case 2:
-            case -1:
-                break;
-        }
-    }
-
-    public void returnPreferenceActivity(View view){
-        Intent switchIntent = new Intent(this, PreferencesActivity.class);
-        startActivity(switchIntent);
+    public void finishSettings(View view){
+        finish();
+        Intent intent = new Intent(getApplicationContext(), PreferencesActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 }

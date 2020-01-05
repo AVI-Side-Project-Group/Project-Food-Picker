@@ -40,8 +40,21 @@
         android:id="@+id/setting_btn_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="returnPreferenceActivity"
-        app:srcCompat="@drawable/quantum_ic_arrow_back_grey600_24"
-        tools:layout_editor_absoluteX="5dp"
-        tools:layout_editor_absoluteY="7dp" />
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:onClick="finishSettings"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/quantum_ic_arrow_back_grey600_24" />
+
+    <Button
+        android:id="@+id/btn_apply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="applySettings"
+        android:text="@string/setting_btn_apply"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline" />
 </androidx.constraintlayout.widget.ConstraintLayout>
