@@ -95,6 +95,9 @@ public class SettingsActivity extends AppCompatActivity {
         setTheme(selectedTheme);
         editor.putInt(getString(R.string.sp_theme), selectedTheme);
         editor.commit();
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 
     public void finishSettings(View view){
