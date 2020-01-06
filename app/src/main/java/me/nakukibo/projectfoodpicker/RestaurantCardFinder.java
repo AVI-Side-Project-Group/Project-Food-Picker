@@ -1,6 +1,7 @@
 package me.nakukibo.projectfoodpicker;
 
 import android.content.pm.ActivityInfo;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,8 +57,17 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     // previous pageToken for multiple calls
     private String previousPageToken;
 
+    private SharedPreferences sharedPreferences = FoodPicker.getSharedPreferences();
+    private SharedPreferences.Editor editor = FoodPicker.getEditor();
+
+    private Set tempSet;
+    private Calendar calendar = Calendar.getInstance();
+    private int today = calendar.get(calendar.DAY_OF_MONTH);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(FoodPicker.getSharedPreferences().getInt(getString(R.string.sp_theme), R.style.Light));
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
@@ -64,6 +75,15 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         initViews();
         retrievePassedValues();
         fetchLocation(null);
+        cleanPreviouslyAccessed();
+    }
+
+    private void cleanPreviouslyAccessed() {
+        int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
+        if(today != lastDay){
+            editor.remove(getString(R.string.sp_previously_accessed));
+            editor.commit();
+        }
     }
 
     /**
@@ -210,6 +230,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     @Override
     public void sendDetailData(HashMap<String, String> selectedRestaurant) {
         previouslyAccessed.add(selectedRestaurant); // selectedRestaurant has been accessed
+        savePreviouslyAccessedData(previouslyAccessed);
 
         if(firstCard) {
             restCard1.setVisibility(View.VISIBLE);
@@ -224,6 +245,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         }
 
         setViewValues(selectedRestaurant, selectedCard);
+    }
+
+    private void savePreviouslyAccessedData(List<HashMap<String, String>> previouslyAccessed) {
+        tempSet = new HashSet(previouslyAccessed);
+        editor.putStringSet(getString(R.string.sp_previously_accessed), tempSet);
+        editor.commit();
     }
 
     /**
@@ -256,6 +283,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      * */
     private boolean getRandomRestaurant(){
         Set<HashMap<String, String>> potentials = new HashSet<>(nearbyPlaceListCombined);
+        previouslyAccessed = getPreviouslyAccessed();
         potentials.removeAll(previouslyAccessed);
 
         if (potentials.size() == 0) return false;
@@ -273,6 +301,19 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         getDetailData.execute(dataTransfer);
 
         return true;
+    }
+
+    private List<HashMap<String, String>> getPreviouslyAccessed() {
+        tempSet = sharedPreferences.getStringSet(getString(R.string.sp_previously_accessed), null);
+        List<HashMap<String, String>> tempList;
+        if(tempSet == null){
+            tempList = new ArrayList<>();
+        }
+        else {
+            tempList = new ArrayList<>(tempSet);
+        }
+
+        return tempList;
     }
 
     /**
