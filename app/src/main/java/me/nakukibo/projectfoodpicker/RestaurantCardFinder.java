@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData,
-        View.OnTouchListener {
+public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData{
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
     private static final int ERROR_PASSED_VALUE = -1;
@@ -42,12 +41,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private int distance;
     private int pricing;
     private int rating;
-
-    // values for the RestaurantCard
-    private float restCardStartX;
-    private float restCardStartY;
-    private float restCardDx = 0;
-    private float restCardDy = 0;
 
     private RestaurantCard restCard1;
     private RestaurantCard restCard2;
@@ -116,89 +109,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         restCard1.setVisibility(View.GONE);
         restCard2.setVisibility(View.GONE);
 
-        restCardStartX = restCard1.getX();
-        restCardStartY = restCard1.getY();
+        restCard1.setOnSwipeEvent(() -> defaultSwipeEvent(restCard1, restCard2));
+        restCard2.setOnSwipeEvent(() -> defaultSwipeEvent(restCard2, restCard1));
 
-        restCard1.setOnSwipeEvent(new OnSwipe() {
-            @Override
-            public void onSwipe() {
-                defaultSwipeEvent(restCard1, restCard2);
-            }
-        });
-
-        restCard2.setOnSwipeEvent(new OnSwipe() {
-            @Override
-            public void onSwipe() {
-                defaultSwipeEvent(restCard2, restCard1);
-            }
-        });
-
-//        restCard1.setOnTouchListener(this);
-//        restCard2.setOnTouchListener(this);
-    }
-
-    private void defaultSwipeEvent(RestaurantCard thisCard, RestaurantCard otherCard){
-        thisCard.setVisibility(View.INVISIBLE);
-        thisCard.setDefaultValues();
-        otherCard.setVisibility(View.VISIBLE);
-
-        if(attemptRandomRestaurant(R.string.restcard_finder_no_more_restaurants)) {
-            otherCard.setAnimation(inFromRightAnimation());
-        }
-    }
-
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        // if invisible or gone, then no response
-        if (view.getVisibility() == View.GONE || view.getVisibility() == View.INVISIBLE)
-            return true;
-
-        float width = view.getWidth();
-        float newX = motionEvent.getRawX() + restCardDx;
-        float newY = motionEvent.getRawY() + restCardDy;
-
-        switch(motionEvent.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                restCardDx = view.getX() - motionEvent.getRawX();
-                restCardDy = view.getY() - motionEvent.getRawY();
-                return true;
-
-            case MotionEvent.ACTION_MOVE:
-                view.setX(newX);
-                view.setY(newY);
-                break;
-
-            case MotionEvent.ACTION_UP:
-                // if pass threshold, then new card, else place card back in center
-                if (newX <= restCardStartX - width / 2) {
-                    RestaurantCard thisCard = (RestaurantCard) view;
-
-                    Log.d(TAG, "initViews: card is swiped left");
-
-                    thisCard.startAnimation(outToLeftAnimation());
-                    thisCard.setVisibility(View.GONE);
-                    thisCard.setDefaultValues();
-
-                    RestaurantCard otherCard;
-                    if(thisCard.getId() == restCard1.getId()){
-                        otherCard = restCard2;
-                    }else {
-                        otherCard = restCard1;
-                    }
-
-                    // get new restaurant info on other card
-                    otherCard.setVisibility(View.VISIBLE);
-                    if (!attemptRandomRestaurant(R.string.restcard_finder_no_more_restaurants))
-                        return true;
-                    otherCard.setAnimation(inFromRightAnimation());
-                }
-
-                view.setX(restCardStartX);
-                view.setY(restCardStartY);
-
-                return true;
-        }
-        return false;
+        View loadingView = findViewById(R.id.restcard_loading);
+        loadingView.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -329,8 +244,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         List<HashMap<String, String>> tempList;
         if(tempSet == null){
             tempList = new ArrayList<>();
-        }
-        else {
+        } else {
             tempList = new ArrayList<>(tempSet);
         }
 
@@ -441,24 +355,20 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
     }
 
-    /**
-     * Animation for a card to move from out of screen to into screen
-     * */
-    private Animation inFromRightAnimation() {
-        Animation inFromRight = new TranslateAnimation(
-                Animation.RELATIVE_TO_PARENT, +1.0f,
-                Animation.RELATIVE_TO_PARENT, 0.0f,
-                Animation.RELATIVE_TO_PARENT, 0.0f,
-                Animation.RELATIVE_TO_PARENT, 0.0f);
-        inFromRight.setDuration(400);
-        inFromRight.setInterpolator(new AccelerateInterpolator());
-        return inFromRight;
+    private void defaultSwipeEvent(RestaurantCard thisCard, RestaurantCard otherCard){
+        thisCard.setVisibility(View.INVISIBLE);
+        thisCard.setDefaultValues();
+        otherCard.setVisibility(View.VISIBLE);
+
+        if(attemptRandomRestaurant(R.string.restcard_finder_no_more_restaurants)) {
+            otherCard.setAnimation(inFromRightAnimation());
+        }
     }
 
     /**
      * Animation for a card to move from in card to out of screen
      * */
-    private Animation outToLeftAnimation() {
+    static Animation outToLeftAnimation() {
         Animation outToLeft = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, 0.0f,
                 Animation.RELATIVE_TO_PARENT, -1.0f,
@@ -467,6 +377,20 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         outToLeft.setDuration(200);
         outToLeft.setInterpolator(new AccelerateInterpolator());
         return outToLeft;
+    }
+
+    /**
+     * Animation for a card to move from out of screen to into screen
+     * */
+    private static Animation inFromRightAnimation() {
+        Animation inFromRight = new TranslateAnimation(
+                Animation.RELATIVE_TO_PARENT, +1.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f,
+                Animation.RELATIVE_TO_PARENT, 0.0f);
+        inFromRight.setDuration(400);
+        inFromRight.setInterpolator(new AccelerateInterpolator());
+        return inFromRight;
     }
 
     /**

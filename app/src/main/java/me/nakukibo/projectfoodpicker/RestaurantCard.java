@@ -268,7 +268,7 @@ public class RestaurantCard extends ScrollView {
 
                     if (newX <= restCardStartX - width / 2) {
                         Log.d(TAG, "initViews: card is swiped left");
-                        this.startAnimation(outToLeftAnimation());
+                        this.startAnimation(RestaurantCardFinder.outToLeftAnimation());
                         if(onSwipeEvent != null) onSwipeEvent.onSwipe();
                     }
 
@@ -280,20 +280,6 @@ public class RestaurantCard extends ScrollView {
                 }
         }
         return false;
-    }
-
-    /**
-     * Animation for a card to move from in card to out of screen
-     * */
-    private Animation outToLeftAnimation() {
-        Animation outToLeft = new TranslateAnimation(
-                Animation.RELATIVE_TO_PARENT, 0.0f,
-                Animation.RELATIVE_TO_PARENT, -1.0f,
-                Animation.RELATIVE_TO_PARENT, 0.0f,
-                Animation.RELATIVE_TO_PARENT, 0.0f);
-        outToLeft.setDuration(200);
-        outToLeft.setInterpolator(new AccelerateInterpolator());
-        return outToLeft;
     }
 
     public boolean isContentsVisible(){
