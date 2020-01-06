@@ -12,7 +12,6 @@
     <string name="prefs_rdbtn_pricinglv2">$$</string>
     <string name="prefs_rdbtn_pricinglv3">$$$</string>
     <string name="prefs_btn_search">Search</string>
-    <string name="prefs_btn_setting">Settings</string>
 
     <!--    restaurant_card.xml text-->
     <string name="restcard_txtvw_hours">Opening Hours</string>
@@ -27,20 +26,6 @@
     </string>
     <string name="restcard_open_now_placeholder">Open Now!</string>
     <string name="restcard_distance_placeholder">20.22 miles</string>
-
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_maps2">Map</string>
-    <string name="title_activity_settings">Settings</string>
-
-    <!-- settings_activity.xml text -->
-    <string name="setting_txtvw_theme">Theme</string>
-    <string name="setting_txtvw_general">General</string>
-    <string name="setting_btn_apply">Apply</string>
-
-    <!-- shared preferences key -->
-    <string name="sp_theme">theme_key</string>
-    <string name="sp_previously_accessed">previously_accessed_key</string>
-    <string name="sp_date">date</string>
 
     <!--    restaurant_card.xml default values-->
     <string name="restcard_default_name">Restaurant Name</string>
@@ -59,5 +44,4 @@
     <string name="restcard_finder_no_restaurants">
         There are no restaurants matching your preferences.
     </string>
-
 </resources>

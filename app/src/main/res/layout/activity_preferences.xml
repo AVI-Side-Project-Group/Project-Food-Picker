@@ -107,8 +107,9 @@
         android:onClick="submitPref"
         android:text="@string/prefs_btn_search"
         android:textSize="@dimen/font_size_pref_main"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/sbr_distance"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/txtvw_distance"
         app:layout_constraintTop_toBottomOf="@+id/txtvw_distance" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -123,7 +124,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.10123119" />
+        app:layout_constraintGuide_percent="0.1" />
 
     <TextView
         android:id="@+id/txtvw_distance_progress"
@@ -141,21 +142,5 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5523114" />
-
-    <Button
-        android:id="@+id/btn_setting"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="200dp"
-        android:layout_marginEnd="16dp"
-        android:onClick="changeSettings"
-        android:text="@string/prefs_btn_setting"
-        android:textSize="@dimen/font_size_pref_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_search" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
