@@ -15,9 +15,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 class DataParser {
     // used for storing and loading values into HashMap
+    static final String DATA_KEY_DISTANCE = "distance";
     static final String DATA_KEY_NAME = "restaurant_name";
     static final String DATA_KEY_ADDRESS = "formatted_address";
     static final String DATA_KEY_HOURS = "opening_hours";
@@ -270,6 +272,7 @@ class DataParser {
         HashMap<String, String> googlePlaceMap = new HashMap<>();
 
         // initialize all values to default
+        Float distFromUser = null;
         String name = DATA_DEFAULT;
         String address = DATA_DEFAULT;
         String isCurrentlyOpen = DATA_DEFAULT;
@@ -288,7 +291,8 @@ class DataParser {
             }
 
             // if too far, then return null
-            if (!isCloseToUser(userLocation, googlePlaceJson, name, maxDistance)) return null;
+            distFromUser = distFromUser(userLocation, googlePlaceJson, name, maxDistance);
+            if (distFromUser == null) return null;
 
             // address
             if (!googlePlaceJson.isNull("formatted_address")) {
@@ -342,6 +346,7 @@ class DataParser {
         }
 
         // pass into map
+        googlePlaceMap.put(DATA_KEY_DISTANCE, String.valueOf(distFromUser));
         googlePlaceMap.put(DATA_KEY_NAME, name);
         googlePlaceMap.put(DATA_KEY_ADDRESS, address);
         googlePlaceMap.put(DATA_KEY_HOURS, DATA_DEFAULT);
@@ -363,12 +368,10 @@ class DataParser {
      * @param userLocation Location object representing user's location with latitude and longitude
      * @param googlePlaceJson the JSONObject representing the data retrieved from Google Places
      * @param name  name of the restaurant
-     * @param maxDistance maxDistance set by the user
      *
-     * @return boolean - true if is within the correct distance
-     *                 - false otherwise or if cannot determine location
+     * @return Float - distance from user in meters, null if out of range
      * */
-    private boolean isCloseToUser(Location userLocation, JSONObject googlePlaceJson, String name, int maxDistance) {
+    private Float distFromUser(Location userLocation, JSONObject googlePlaceJson, String name, int maxDistance) {
         double latitude;
         double longitude;
         try {
@@ -380,7 +383,7 @@ class DataParser {
             );
         } catch (JSONException e) {
             Log.d(TAG, "getPlaceData: " + name + " cannot determine location. Returning false.");
-            return false;
+            return null;
         }
 
         Location restLocation = new Location("");
@@ -388,8 +391,8 @@ class DataParser {
         restLocation.setLongitude(longitude);
 
         boolean closeEnough = userLocation.distanceTo(restLocation) <= maxDistance;
-        if (!closeEnough) Log.d(TAG, "isCloseToUser: " + name + " removed b/c too far.");
-        return closeEnough;
+        if (!closeEnough) Log.d(TAG, "distFromUser: " + name + " removed b/c too far.");
+        return closeEnough ? userLocation.distanceTo(restLocation) : null;
     }
 
     /**

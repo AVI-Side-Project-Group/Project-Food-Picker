@@ -25,6 +25,8 @@
     <string name="restcard_txtvw_addr_placeholder">
         123 NE 123th Street\nCity, State, ZipCode
     </string>
+    <string name="restcard_open_now_placeholder">Open Now!</string>
+    <string name="restcard_distance_placeholder">20.22 miles</string>
 
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_maps2">Map</string>
