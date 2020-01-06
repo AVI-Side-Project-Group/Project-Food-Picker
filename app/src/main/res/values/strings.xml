@@ -41,6 +41,7 @@
     <string name="sp_theme">theme_key</string>
     <string name="sp_previously_accessed">previously_accessed_key</string>
     <string name="sp_date">date</string>
+    <string name="sp_remained_rerolls">remained_rerolls</string>
 
     <!--    restaurant_card.xml default values-->
     <string name="restcard_default_name">Restaurant Name</string>
