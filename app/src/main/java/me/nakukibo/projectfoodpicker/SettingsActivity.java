@@ -22,8 +22,8 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
     private Spinner spinTheme;
-    private String[] themes = {"Light", "Purple", "Dark"};
-    private int[] themeIDs = {R.style.Light, R.style.Purple, R.style.Dark};
+    private String[] themes = {"Light", "Dark", "Purple"};
+    private int[] themeIDs = {R.style.Light, R.style.Dark, R.style.Purple};
     private int currentTheme;
     private int selectedTheme;
 
