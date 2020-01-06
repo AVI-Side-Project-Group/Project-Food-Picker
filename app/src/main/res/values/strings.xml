@@ -24,8 +24,8 @@
     <string name="restcard_txtvw_addr_placeholder">
         123 NE 123th Street\nCity, State, ZipCode
     </string>
-    String name, int photoSource, String rating, String pricing, String address,
-    String phoneNumber, String website, String hours
+    <string name="restcard_open_now_placeholder">Open Now!</string>
+    <string name="restcard_distance_placeholder">20.22 miles</string>
 
     <!--    restaurant_card.xml default values-->
     <string name="restcard_default_name">Restaurant Name</string>

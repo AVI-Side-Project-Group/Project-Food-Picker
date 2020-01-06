@@ -257,8 +257,12 @@ public class PreferencesActivity extends AppCompatActivity {
      * @param miles miles value
      * @return int rounded up value of meters
      * */
-    private int milesToMeters(double miles){
+    private static int milesToMeters(double miles){
         return (int) Math.ceil(miles*1609.34);
+    }
+
+    public static double metersToMiles(float meters){
+        return meters * 0.000621371;
     }
 
     /**

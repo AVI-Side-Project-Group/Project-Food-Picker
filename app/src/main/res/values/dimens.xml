@@ -3,4 +3,9 @@
     <dimen name="font_size_pref_main">18sp</dimen>
     <dimen name="font_size_restaurant_title">20sp</dimen>
     <dimen name="font_size_restaurant_text">16sp</dimen>
+
+    <dimen name="font_size_restaurant_title_name_text">30sp</dimen>
+    <dimen name="restcard_img_height">380dp</dimen>
+    <dimen name="restcard_contents_padding_top_hours">0dp</dimen>
+    <dimen name="restcard_padding_top_img">32dp</dimen>
 </resources>
