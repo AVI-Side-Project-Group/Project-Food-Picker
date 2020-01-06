@@ -1,5 +1,6 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.content.pm.ActivityInfo;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -70,6 +71,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         initViews();
         retrievePassedValues();
         fetchLocation(null);
@@ -107,8 +109,32 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         restCardStartX = restCard1.getX();
         restCardStartY = restCard1.getY();
 
-        restCard1.setOnTouchListener(this);
-        restCard2.setOnTouchListener(this);
+        restCard1.setOnSwipeEvent(new OnSwipe() {
+            @Override
+            public void onSwipe() {
+                defaultSwipeEvent(restCard1, restCard2);
+            }
+        });
+
+        restCard2.setOnSwipeEvent(new OnSwipe() {
+            @Override
+            public void onSwipe() {
+                defaultSwipeEvent(restCard2, restCard1);
+            }
+        });
+
+//        restCard1.setOnTouchListener(this);
+//        restCard2.setOnTouchListener(this);
+    }
+
+    private void defaultSwipeEvent(RestaurantCard thisCard, RestaurantCard otherCard){
+        thisCard.setVisibility(View.INVISIBLE);
+        thisCard.setDefaultValues();
+        otherCard.setVisibility(View.VISIBLE);
+
+        if(attemptRandomRestaurant(R.string.restcard_finder_no_more_restaurants)) {
+            otherCard.setAnimation(inFromRightAnimation());
+        }
     }
 
     @Override
@@ -424,7 +450,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     /**
      * set values of views to values in HashMap<String, String>
-     */
+     * */
     private void setViewValues(HashMap<String, String> selectedRestaurant, RestaurantCard card) {
         card.setValues(selectedRestaurant);
     }

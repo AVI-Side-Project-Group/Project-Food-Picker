@@ -2,6 +2,7 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -67,6 +68,7 @@ public class PreferencesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         requestLocationPermission();
         initPrefViews();
     }
@@ -261,8 +263,12 @@ public class PreferencesActivity extends AppCompatActivity {
      * @param miles miles value
      * @return int rounded up value of meters
      * */
-    private int milesToMeters(double miles){
+    private static int milesToMeters(double miles){
         return (int) Math.ceil(miles*1609.34);
+    }
+
+    public static double metersToMiles(float meters){
+        return meters * 0.000621371;
     }
 
     /**
