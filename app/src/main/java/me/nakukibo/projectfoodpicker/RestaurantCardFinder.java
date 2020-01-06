@@ -54,8 +54,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private SharedPreferences.Editor editor = FoodPicker.getEditor();
 
     private Set tempSet;
+
     private Calendar calendar = Calendar.getInstance();
     private int today = calendar.get(calendar.DAY_OF_MONTH);
+
+    private int remainedRerolls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +71,22 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         initViews();
         retrievePassedValues();
         fetchLocation(null);
-        cleanPreviouslyAccessed();
+        resetValues();
     }
 
-    private void cleanPreviouslyAccessed() {
+    private void resetValues() {
+        Log.d(TAG, "resetValues: " + today);
         int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
+        Log.d(TAG, "resetValues: " + lastDay);
         if(today != lastDay){
             editor.remove(getString(R.string.sp_previously_accessed));
             editor.commit();
+            editor.remove(getString(R.string.sp_remained_rerolls));
+            editor.commit();
+            Log.d(TAG, "resetValues: " + "removed");
         }
+        editor.putInt(getString(R.string.sp_date), today);
+        editor.commit();
     }
 
     /**
@@ -88,7 +98,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         noRestaurantsError.setVisibility(View.GONE);
 
         nearbyPlaceListCombined = new ArrayList<>();
-        previouslyAccessed = new ArrayList<>();
+        previouslyAccessed = getPreviouslyAccessed();
 
         firstCard = true;
 
@@ -203,6 +213,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
         if (potentials.size() == 0) return false;
 
+        remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
+        Log.d(TAG, "getRandomRestaurant: " + remainedRerolls);
+
+        if(remainedRerolls <= 0) return false;
+
         List<HashMap<String, String>> potentialsList = new ArrayList<>(potentials);
         int index = new Random().nextInt(potentialsList.size());
         HashMap<String, String> selectedRestaurant = potentialsList.get(index);
@@ -214,6 +229,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         String url = getDetailsUrl(selectedRestaurant.get(DataParser.DATA_KEY_PLACE_ID));
         dataTransfer[0] = url;
         getDetailData.execute(dataTransfer);
+
+        remainedRerolls--;
+        Log.d(TAG, "getRandomRestaurant: " + remainedRerolls);
+        editor.putInt(getString(R.string.sp_remained_rerolls), remainedRerolls);
+        editor.commit();
+        Log.d(TAG, "getRandomRestaurant: " + sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10));
 
         return true;
     }

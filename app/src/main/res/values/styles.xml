@@ -15,4 +15,11 @@
         <item name="colorAccent">#FFC107</item>
         <item name="android:textColor">#212121</item>
     </style>
+
+    <style name="Dark" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorPrimary">#434343</item>
+        <item name="colorPrimaryDark">#212121</item>
+        <item name="colorAccent">#ca3e47</item>
+        <item name="android:textColor">#9E9E9E</item>
+    </style>
 </resources>

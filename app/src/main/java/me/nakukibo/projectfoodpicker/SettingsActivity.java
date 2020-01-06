@@ -22,7 +22,8 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
     private Spinner spinTheme;
-    private String[] themes = {"Light", "Purple"};
+    private String[] themes = {"Light", "Purple", "Dark"};
+    private int[] themeIDs = {R.style.Light, R.style.Purple, R.style.Dark};
     private int currentTheme;
     private int selectedTheme;
 
@@ -30,7 +31,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         sharedPreferences = FoodPicker.getSharedPreferences();
         editor = FoodPicker.getEditor();
-        currentTheme = sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light);
+        currentTheme = sharedPreferences.getInt(getString(R.string.sp_theme), themeIDs[0]);
 
         setTheme(currentTheme);
         setContentView(R.layout.settings_activity);
@@ -51,40 +52,33 @@ public class SettingsActivity extends AppCompatActivity {
         ArrayAdapter<String> adapterTheme = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, themes);
         spinTheme.setAdapter(adapterTheme);
-        spinTheme.setSelection(findThemePosition(currentTheme));
+        spinTheme.setSelection(getThemeIDPosition(currentTheme));
     }
 
     private void checkSharedPreference() {
-        int pos = findThemePosition(currentTheme);
+        int pos = getThemeIDPosition(currentTheme);
         spinTheme.setSelection(pos);
 
-        //Log.d("string", "checkSharedPreference: " + currentTheme);
+        Log.d(TAG, "checkSharedPreference: " + currentTheme);
     }
 
-    private int findThemePosition(int themeID) {
-        if(themeID == R.style.Light) return 0;
-        else if(themeID == R.style.Purple) return 1;
-        else return -1;
-    }
-
-    private int findThemeID(int pos){
-        switch(pos){
-            case 0: return R.style.Light;
-            case 1: return R.style.Purple;
-        }
-        return R.style.Light;
-    }
-
-    private int findPos(String theme){
+    private int findThemeIDByName(String theme){
         for(int i = 0; i < themes.length; i++){
-            if(theme == themes[i]) return i;
+            if(theme.equals(themes[i])) return themeIDs[i];
+        }
+        return -1;
+    }
+
+    private int getThemeIDPosition(int id){
+        for(int i = 0; i < themes.length; i++){
+            if(id == themeIDs[i]) return i;
         }
         return -1;
     }
 
     public void applySettings(View view){
-        selectedTheme = findThemeID(findPos(spinTheme.getSelectedItem().toString()));
-        //Log.d(TAG, "applySettings: " + selectedTheme);
+        selectedTheme = findThemeIDByName(spinTheme.getSelectedItem().toString());
+        Log.d(TAG, "applySettings: " + selectedTheme);
         setTheme(selectedTheme);
         editor.putInt(getString(R.string.sp_theme), selectedTheme);
         editor.commit();
