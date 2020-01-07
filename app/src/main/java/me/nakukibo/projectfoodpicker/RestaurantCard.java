@@ -6,9 +6,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -29,6 +26,8 @@ public class RestaurantCard extends ScrollView {
     private RestaurantCardContents restaurantCardContents;
 
     private OnSwipe onSwipeEvent;
+    private OnOpenContents onOpenContents;
+    private OnCloseContents onCloseContents;
 
     private View viewLastPhoto;
     private View viewNextPhoto;
@@ -54,6 +53,8 @@ public class RestaurantCard extends ScrollView {
     public RestaurantCard(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        onOpenContents = null;
+        onCloseContents = null;
         onSwipeEvent = null;
         initCard(context, attrs);
         initSwipeVariables();
@@ -224,10 +225,12 @@ public class RestaurantCard extends ScrollView {
 
     public void openContents(){
         restaurantCardContents.setVisibility(VISIBLE);
+        if(onOpenContents != null) onOpenContents.onOpen();
     }
 
     public void closeContents(){
         restaurantCardContents.setVisibility(GONE);
+        if(onCloseContents != null) onCloseContents.onClose();
     }
 
     private boolean cannotPerformEvents(){
@@ -296,5 +299,13 @@ public class RestaurantCard extends ScrollView {
 
     public void setOnSwipeEvent(OnSwipe onSwipeEvent){
         this.onSwipeEvent = onSwipeEvent;
+    }
+
+    public void setOnOpenContents(OnOpenContents onOpenContents){
+        this.onOpenContents = onOpenContents;
+    }
+
+    public void setOnCloseContents(OnCloseContents onCloseContents){
+        this.onCloseContents = onCloseContents;
     }
 }

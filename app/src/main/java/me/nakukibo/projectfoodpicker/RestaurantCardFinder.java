@@ -17,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -115,6 +116,16 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
         restCard1.setOnSwipeEvent(() -> defaultSwipeEvent(restCard1, restCard2));
         restCard2.setOnSwipeEvent(() -> defaultSwipeEvent(restCard2, restCard1));
+
+        FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
+
+        OnOpenContents onOpenContents = btnSwipe::hide;
+        OnCloseContents onCloseContents = btnSwipe::show;
+
+        restCard1.setOnOpenContents(onOpenContents);
+        restCard2.setOnOpenContents(onOpenContents);
+        restCard1.setOnCloseContents(onCloseContents);
+        restCard2.setOnCloseContents(onCloseContents);
 
         View loadingView = findViewById(R.id.restcard_loading);
         loadingView.setVisibility(View.VISIBLE);
@@ -225,8 +236,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         if (potentials.size() == 0) return false;
 
         remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
-        Log.d(TAG, "getRandomRestaurant: " + remainedRerolls);
+        Log.d(TAG, "getRandomRestaurant: remainingRolls = " + remainedRerolls);
 
+        //TODO: remove the comment out
         if(remainedRerolls <= 0) return false;
 
         List<HashMap<String, String>> potentialsList = new ArrayList<>(potentials);
