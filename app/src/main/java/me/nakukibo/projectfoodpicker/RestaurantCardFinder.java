@@ -17,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -44,7 +45,10 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     private RestaurantCard restCard1;
     private RestaurantCard restCard2;
+    private RestaurantCard activeCard = null;
+
     private ConstraintLayout noRestaurantsError;
+    private ConstraintLayout buttonSet;
     private boolean firstCard;
 
     // previous pageToken for multiple calls
@@ -57,7 +61,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     private Calendar calendar = Calendar.getInstance();
     private int today = calendar.get(calendar.DAY_OF_MONTH);
-
     private int remainedRerolls;
 
     @Override
@@ -96,6 +99,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private void initViews() {
         noRestaurantsError = findViewById(R.id.no_restaurants_layout);
         noRestaurantsError.setVisibility(View.GONE);
+        buttonSet = findViewById(R.id.restcard_finder_btn_set);
+        buttonSet.setVisibility(View.GONE);
 
         nearbyPlaceListCombined = new ArrayList<>();
         previouslyAccessed = getPreviouslyAccessed();
@@ -111,6 +116,16 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
         restCard1.setOnSwipeEvent(() -> defaultSwipeEvent(restCard1, restCard2));
         restCard2.setOnSwipeEvent(() -> defaultSwipeEvent(restCard2, restCard1));
+
+        FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
+
+        OnOpenContents onOpenContents = btnSwipe::hide;
+        OnCloseContents onCloseContents = btnSwipe::show;
+
+        restCard1.setOnOpenContents(onOpenContents);
+        restCard2.setOnOpenContents(onOpenContents);
+        restCard1.setOnCloseContents(onCloseContents);
+        restCard2.setOnCloseContents(onCloseContents);
 
         View loadingView = findViewById(R.id.restcard_loading);
         loadingView.setVisibility(View.VISIBLE);
@@ -143,6 +158,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
         View loadingView = findViewById(R.id.restcard_loading);
         loadingView.setAnimation(outToLeftAnimation());
+        activeCard = restCard1;
         loadingView.setVisibility(View.GONE);
 
         attemptRandomRestaurant(R.string.restcard_finder_no_restaurants);
@@ -159,17 +175,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
         if(firstCard) {
             restCard1.setVisibility(View.VISIBLE);
+            buttonSet.setVisibility(View.VISIBLE);
             firstCard = false;
         }
 
-        RestaurantCard selectedCard;
-        if(restCard1.getVisibility() == View.VISIBLE){
-            selectedCard = restCard1;
-        }else{
-            selectedCard = restCard2;
-        }
-
-        setViewValues(selectedRestaurant, selectedCard);
+        setViewValues(selectedRestaurant, activeCard);
     }
 
     private void savePreviouslyAccessedData(List<HashMap<String, String>> previouslyAccessed) {
@@ -183,6 +193,18 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      * */
     public void finishCardFinder(View view){
         finish();
+    }
+
+    public void swipeCard(View view){
+        activeCard.swipeCard();
+    }
+
+    public void toggleContents(View view){
+        if(activeCard.isContentsVisible()){
+            activeCard.closeContents();
+        }else {
+            activeCard.openContents();
+        }
     }
 
     private void turnOffBothCards(){
@@ -214,8 +236,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         if (potentials.size() == 0) return false;
 
         remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
-        Log.d(TAG, "getRandomRestaurant: " + remainedRerolls);
+        Log.d(TAG, "getRandomRestaurant: remainingRolls = " + remainedRerolls);
 
+        //TODO: remove the comment out
         if(remainedRerolls <= 0) return false;
 
         List<HashMap<String, String>> potentialsList = new ArrayList<>(potentials);
@@ -359,6 +382,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         thisCard.setVisibility(View.INVISIBLE);
         thisCard.setDefaultValues();
         otherCard.setVisibility(View.VISIBLE);
+        activeCard = otherCard;
 
         if(attemptRandomRestaurant(R.string.restcard_finder_no_more_restaurants)) {
             otherCard.setAnimation(inFromRightAnimation());

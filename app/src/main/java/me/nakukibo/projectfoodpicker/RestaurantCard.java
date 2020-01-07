@@ -6,9 +6,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -20,9 +17,6 @@ import java.util.HashMap;
 import java.util.Locale;
 
 public class RestaurantCard extends ScrollView {
-
-    // TODO: add distance and open now
-
     private static final String TAG = RestaurantCard.class.getSimpleName();
 
     private TextView txtvwName;
@@ -32,6 +26,8 @@ public class RestaurantCard extends ScrollView {
     private RestaurantCardContents restaurantCardContents;
 
     private OnSwipe onSwipeEvent;
+    private OnOpenContents onOpenContents;
+    private OnCloseContents onCloseContents;
 
     private View viewLastPhoto;
     private View viewNextPhoto;
@@ -42,7 +38,7 @@ public class RestaurantCard extends ScrollView {
     private float restCardStartY;
     private float restCardDx = 0;
     private float restCardDy = 0;
-    boolean isBeingSwiped = false;
+    private boolean isBeingSwiped = false;
 
 //    private static final String TAG = RestaurantCard.class.getSimpleName();
 
@@ -57,6 +53,8 @@ public class RestaurantCard extends ScrollView {
     public RestaurantCard(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        onOpenContents = null;
+        onCloseContents = null;
         onSwipeEvent = null;
         initCard(context, attrs);
         initSwipeVariables();
@@ -150,7 +148,6 @@ public class RestaurantCard extends ScrollView {
 
         // set view values to attribute values
         TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.RestaurantCard);
-        // TODO: make attributes for distance and open_now
         setValues(
                 attributes.getString(R.styleable.RestaurantCard_name),
                 true,
@@ -203,9 +200,9 @@ public class RestaurantCard extends ScrollView {
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
                 Log.d(TAG, "initEvents: opening contents");
                 if(!isContentsVisible()) {
-                    restaurantCardContents.setVisibility(VISIBLE);
+                    openContents();
                 } else {
-                        restaurantCardContents.setVisibility(GONE);
+                    closeContents();
                 }
             }
 
@@ -224,6 +221,16 @@ public class RestaurantCard extends ScrollView {
             checkForSwipe(ev);
             return true;
         }
+    }
+
+    public void openContents(){
+        restaurantCardContents.setVisibility(VISIBLE);
+        if(onOpenContents != null) onOpenContents.onOpen();
+    }
+
+    public void closeContents(){
+        restaurantCardContents.setVisibility(GONE);
+        if(onCloseContents != null) onCloseContents.onClose();
     }
 
     private boolean cannotPerformEvents(){
@@ -266,10 +273,8 @@ public class RestaurantCard extends ScrollView {
                 // if pass threshold, then new card, else place card back in center
                 if(isBeingSwiped){
 
-                    if (newX <= restCardStartX - width / 2) {
-                        Log.d(TAG, "initViews: card is swiped left");
-                        this.startAnimation(RestaurantCardFinder.outToLeftAnimation());
-                        if(onSwipeEvent != null) onSwipeEvent.onSwipe();
+                    if (newX <= restCardStartX - width/2) {
+                        swipeCard();
                     }
 
                     this.setX(restCardStartX);
@@ -282,11 +287,25 @@ public class RestaurantCard extends ScrollView {
         return false;
     }
 
+    public void swipeCard(){
+        Log.d(TAG, "initViews: card is swiped left");
+        this.startAnimation(RestaurantCardFinder.outToLeftAnimation());
+        if(onSwipeEvent != null) onSwipeEvent.onSwipe();
+    }
+
     public boolean isContentsVisible(){
         return restaurantCardContents.getVisibility() == VISIBLE;
     }
 
     public void setOnSwipeEvent(OnSwipe onSwipeEvent){
         this.onSwipeEvent = onSwipeEvent;
+    }
+
+    public void setOnOpenContents(OnOpenContents onOpenContents){
+        this.onOpenContents = onOpenContents;
+    }
+
+    public void setOnCloseContents(OnCloseContents onCloseContents){
+        this.onCloseContents = onCloseContents;
     }
 }
