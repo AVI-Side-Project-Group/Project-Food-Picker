@@ -118,9 +118,15 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         restCard2.setOnSwipeEvent(() -> defaultSwipeEvent(restCard2, restCard1));
 
         FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
-
-        OnOpenContents onOpenContents = btnSwipe::hide;
-        OnCloseContents onCloseContents = btnSwipe::show;
+        FloatingActionButton btnToggleContents = findViewById(R.id.btn_open_contents);
+        OnOpenContents onOpenContents = () -> {
+            btnSwipe.hide();
+            btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
+        };
+        OnCloseContents onCloseContents = () -> {
+            btnSwipe.show();
+            btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
+        };
 
         restCard1.setOnOpenContents(onOpenContents);
         restCard2.setOnOpenContents(onOpenContents);
@@ -200,13 +206,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     public void toggleContents(View view){
-        FloatingActionButton btnToggleContents = (FloatingActionButton) view;
-
         if(activeCard.isContentsVisible()){
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
             activeCard.closeContents();
         }else {
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
             activeCard.openContents();
         }
     }
