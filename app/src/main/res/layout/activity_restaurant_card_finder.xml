@@ -133,12 +133,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
+            android:focusable="true"
             android:onClick="swipeCard"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/vertical50"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="?attr/actionModeCloseDrawable"
+            app:srcCompat="@drawable/reload"
             tools:srcCompat="@drawable/reload" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -146,12 +147,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
+            android:focusable="true"
             android:onClick="toggleContents"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/vertical50"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="?attr/actionModeShareDrawable"
+            app:srcCompat="@drawable/down"
             tools:srcCompat="@drawable/down" />
 
         <androidx.constraintlayout.widget.Guideline

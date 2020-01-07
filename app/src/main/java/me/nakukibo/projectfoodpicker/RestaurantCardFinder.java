@@ -200,9 +200,13 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     public void toggleContents(View view){
+        FloatingActionButton btnToggleContents = (FloatingActionButton) view;
+
         if(activeCard.isContentsVisible()){
+            btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
             activeCard.closeContents();
         }else {
+            btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
             activeCard.openContents();
         }
     }
@@ -239,7 +243,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         Log.d(TAG, "getRandomRestaurant: remainingRolls = " + remainedRerolls);
 
         //TODO: remove the comment out
-        if(remainedRerolls <= 0) return false;
+        //if(remainedRerolls <= 0) return false;
 
         List<HashMap<String, String>> potentialsList = new ArrayList<>(potentials);
         int index = new Random().nextInt(potentialsList.size());
