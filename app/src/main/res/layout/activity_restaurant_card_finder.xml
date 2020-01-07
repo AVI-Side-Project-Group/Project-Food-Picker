@@ -94,8 +94,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="gone">
+        app:layout_constraintTop_toTopOf="parent" >
 
         <TextView
             android:id="@+id/restcard_loading_txt"
@@ -139,7 +138,8 @@
             app:layout_constraintEnd_toStartOf="@+id/vertical50"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="?attr/actionModeCloseDrawable" />
+            app:srcCompat="?attr/actionModeCloseDrawable"
+            tools:srcCompat="@drawable/reload" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_open_contents"
@@ -151,7 +151,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/vertical50"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="?attr/actionModeShareDrawable" />
+            app:srcCompat="?attr/actionModeShareDrawable"
+            tools:srcCompat="@drawable/down" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/vertical50"
