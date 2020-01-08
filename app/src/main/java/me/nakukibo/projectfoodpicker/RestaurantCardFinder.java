@@ -65,6 +65,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private int day = calendar.get(calendar.DATE);
     private int month = calendar.get(calendar.MONTH);
     private int year = calendar.get(calendar.YEAR);
+    private String date = "" + month + day + year;
     private int remainedRerolls;
 
     @Override
@@ -85,8 +86,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
         int lastMonth = sharedPreferences.getInt(getString(R.string.sp_month), 0);
         int lastYear = sharedPreferences.getInt(getString(R.string.sp_year), 0);
+        String lastDate = "" + lastMonth + lastDay + lastYear;
 
-        if(day != lastDay || month != lastMonth || year != lastYear){
+        if(!lastDate.equals(date)){
             editor.remove(getString(R.string.sp_previously_accessed));
             editor.commit();
             editor.remove(getString(R.string.sp_remained_rerolls));

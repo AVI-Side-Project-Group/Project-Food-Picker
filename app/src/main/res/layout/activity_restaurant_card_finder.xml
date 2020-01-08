@@ -33,7 +33,7 @@
 
         <Button
             android:id="@+id/btn_no_restaurants_ok"
-            style="@android:style/Widget.Holo.Light.Button.Borderless.Small"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
