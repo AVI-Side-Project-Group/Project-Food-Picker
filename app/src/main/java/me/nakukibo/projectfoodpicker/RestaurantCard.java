@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -289,8 +290,26 @@ public class RestaurantCard extends ScrollView {
 
     public void swipeCard(){
         Log.d(TAG, "initViews: card is swiped left");
-        this.startAnimation(RestaurantCardFinder.outToLeftAnimation());
-        if(onSwipeEvent != null) onSwipeEvent.onSwipe();
+        Animation exitAnimation = RestaurantCardFinder.outToLeftAnimation();
+        exitAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                Log.d(TAG, "onAnimationEnd: animation finished");
+                if(onSwipeEvent != null) onSwipeEvent.onSwipe();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        this.startAnimation(exitAnimation);
     }
 
     public boolean isContentsVisible(){

@@ -1,11 +1,10 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.content.pm.ActivityInfo;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -21,13 +20,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData{
+public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData {
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
     private static final int ERROR_PASSED_VALUE = -1;
@@ -36,6 +37,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     private static List<HashMap<String, String>> nearbyPlaceListCombined; // accumulates the list over several calls
     private static List<HashMap<String, String>> previouslyAccessed; // stores the restaurants that have been accessed
+    private static LinkedList<HashMap<String, String>> placesProcessed;
 
     // data passed from PreferencesActivity.java
     private String foodType;
@@ -50,6 +52,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private ConstraintLayout noRestaurantsError;
     private ConstraintLayout buttonSet;
     private boolean firstCard;
+    private boolean needNextCard;
 
     // previous pageToken for multiple calls
     private String previousPageToken;
@@ -58,10 +61,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private SharedPreferences.Editor editor = FoodPicker.getEditor();
 
     private Set tempSet;
+    View loadingView;
 
     private Calendar calendar = Calendar.getInstance();
     private int today = calendar.get(calendar.DAY_OF_MONTH);
-    private int remainedRerolls;
+    boolean isOutOfRolls = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,71 +74,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_card_finder);
 
+        needNextCard = true;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         initViews();
         retrievePassedValues();
         fetchLocation(null);
         resetValues();
-    }
-
-    private void resetValues() {
-        Log.d(TAG, "resetValues: " + today);
-        int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
-        Log.d(TAG, "resetValues: " + lastDay);
-        if(today != lastDay){
-            editor.remove(getString(R.string.sp_previously_accessed));
-            editor.commit();
-            editor.remove(getString(R.string.sp_remained_rerolls));
-            editor.commit();
-            Log.d(TAG, "resetValues: " + "removed");
-        }
-        editor.putInt(getString(R.string.sp_date), today);
-        editor.commit();
-    }
-
-    /**
-     * initialize the cards and certain global variables
-     * cards will also initialize their setOnTouchListener and be set to View.GONE
-     */
-    private void initViews() {
-        noRestaurantsError = findViewById(R.id.no_restaurants_layout);
-        noRestaurantsError.setVisibility(View.GONE);
-        buttonSet = findViewById(R.id.restcard_finder_btn_set);
-        buttonSet.setVisibility(View.GONE);
-
-        nearbyPlaceListCombined = new ArrayList<>();
-        previouslyAccessed = getPreviouslyAccessed();
-
-        firstCard = true;
-
-        restCard1 = findViewById(R.id.restcard);
-        restCard2 = findViewById(R.id.restcard2);
-        restCard1.setDefaultValues();
-        restCard2.setDefaultValues();
-        restCard1.setVisibility(View.GONE);
-        restCard2.setVisibility(View.GONE);
-
-        restCard1.setOnSwipeEvent(() -> defaultSwipeEvent(restCard1, restCard2));
-        restCard2.setOnSwipeEvent(() -> defaultSwipeEvent(restCard2, restCard1));
-
-        FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
-        FloatingActionButton btnToggleContents = findViewById(R.id.btn_open_contents);
-        OnOpenContents onOpenContents = () -> {
-            btnSwipe.hide();
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
-        };
-        OnCloseContents onCloseContents = () -> {
-            btnSwipe.show();
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
-        };
-
-        restCard1.setOnOpenContents(onOpenContents);
-        restCard2.setOnOpenContents(onOpenContents);
-        restCard1.setOnCloseContents(onCloseContents);
-        restCard2.setOnCloseContents(onCloseContents);
-
-        View loadingView = findViewById(R.id.restcard_loading);
-        loadingView.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -143,7 +88,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      */
     @Override
     public void sendData(List<HashMap<String, String>> nearbyPlaceList, String nextPageToken) {
-        if(nearbyPlaceList == null){
+        if (nearbyPlaceList == null) {
             // if null then that means the nextPageToken request failed so search again
             requestNextPageSearch(previousPageToken);
             return;
@@ -154,7 +99,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         nearbyPlaceListCombined.addAll(nearbyPlaceList);
         Log.d(TAG, "sendData: combined list has new size of " + nearbyPlaceListCombined.size());
 
-        if(nextPageToken != null){
+        if (nextPageToken != null) {
             requestNextPageSearch(nextPageToken);
             return;
         }
@@ -162,12 +107,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         Log.d(TAG, "sendData: logging the combined list");
         logAllPlacesList(nearbyPlaceListCombined);
 
-        View loadingView = findViewById(R.id.restcard_loading);
-        loadingView.setAnimation(outToLeftAnimation());
-        activeCard = restCard1;
-        loadingView.setVisibility(View.GONE);
+        // randomize list
+        Collections.shuffle(nearbyPlaceListCombined);
 
-        attemptRandomRestaurant(R.string.restcard_finder_no_restaurants);
+        // fetch first restaurant
+        fetchNextRestaurant(R.string.restcard_finder_no_restaurants, false);
     }
 
 
@@ -179,77 +123,118 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         previouslyAccessed.add(selectedRestaurant); // selectedRestaurant has been accessed
         savePreviouslyAccessedData(previouslyAccessed);
 
-        if(firstCard) {
+        if (firstCard) {
+            // make loading screen invisible
+            View loadingView = findViewById(R.id.restcard_loading);
+            loadingView.setAnimation(outToLeftAnimation());
+            activeCard = restCard1;
+
             restCard1.setVisibility(View.VISIBLE);
             buttonSet.setVisibility(View.VISIBLE);
             firstCard = false;
         }
 
-        setViewValues(selectedRestaurant, activeCard);
+        if(needNextCard){
+            needNextCard = false;
+            loadingView.setVisibility(View.GONE);
+            setViewValues(selectedRestaurant, activeCard);
+        } else {
+            placesProcessed.add(selectedRestaurant);
+            Log.d(TAG, "sendDetailData: adding to placesProcessed");
+            logAllPlacesList(placesProcessed);
+        }
+
+        Set<HashMap<String, String>> potentials = removeVisited(nearbyPlaceListCombined);
+        removeProcessed(potentials);
+        // if zero then all of the potentials are already processed
+        if(potentials.size() == 0) return;
+        rollNextRestaurant(potentials);
     }
 
-    private void savePreviouslyAccessedData(List<HashMap<String, String>> previouslyAccessed) {
-        tempSet = new HashSet(previouslyAccessed);
-        editor.putStringSet(getString(R.string.sp_previously_accessed), tempSet);
-        editor.commit();
-    }
-
-    /**
-     * finish activity and return back to preferences
-     * */
-    public void finishCardFinder(View view){
-        finish();
-    }
-
-    public void swipeCard(View view){
+    public void swipeCard(View view) {
         activeCard.swipeCard();
     }
 
-    public void toggleContents(View view){
-        if(activeCard.isContentsVisible()){
+    public void toggleContents(View view) {
+        if (activeCard.isContentsVisible()) {
             activeCard.closeContents();
-        }else {
+        } else {
             activeCard.openContents();
         }
     }
 
-    private void turnOffBothCards(){
-        restCard1.setVisibility(View.GONE);
-        restCard2.setVisibility(View.GONE);
+    /**
+     * finish activity and return back to preferences
+     */
+    public void finishCardFinder(View view) {
+        finish();
     }
 
-    private boolean attemptRandomRestaurant(int errorTxt){
-        boolean success = getRandomRestaurant();
-        if(!success){
-            TextView txtvwNoRestaurants = findViewById(R.id.txtvw_no_restaurants);
-            txtvwNoRestaurants.setText(getResources().getString(errorTxt));
-            turnOffBothCards();
-            noRestaurantsError.setVisibility(View.VISIBLE);
+    private void fetchNextRestaurant(int errorTxt, boolean needSetCard) {
+
+        if(needSetCard && placesProcessed.size() > 0){
+            if(haveRolls()) {
+                makeRoll();
+                setViewValues(placesProcessed.pop(), activeCard);
+                return;
+            } else {
+                isOutOfRolls = true;
+            }
+        } else if (placesProcessed.size() == 0){
+            loadingView.setVisibility(View.VISIBLE);
+            needNextCard = true;
         }
-        return success;
+        if(isOutOfRolls) {
+            showRestaurantError(R.string.restcard_finder_no_rolls);
+            return;
+        }
+        boolean success = getNextRestaurantDetails();
+        if(isOutOfRolls) {
+            showRestaurantError(R.string.restcard_finder_no_rolls);
+            return;
+        }
+        if (!success) {
+            showRestaurantError(errorTxt);
+        }
+    }
+
+    private void showRestaurantError(int errorTxt){
+        loadingView.setVisibility(View.GONE);
+        TextView txtvwNoRestaurants = findViewById(R.id.txtvw_no_restaurants);
+        txtvwNoRestaurants.setText(getResources().getString(errorTxt));
+        turnOffBothCards();
+        noRestaurantsError.setVisibility(View.VISIBLE);
     }
 
     /**
      * get a random restaurant from the List of HashMaps and find the detailed data on it
+     *
      * @return boolean - true if successfully retrieved a random restaurant
      *                 - false otherwise (eg 0 possible restaurants)
-     * */
-    private boolean getRandomRestaurant(){
-        Set<HashMap<String, String>> potentials = new HashSet<>(nearbyPlaceListCombined);
-        previouslyAccessed = getPreviouslyAccessed();
-        potentials.removeAll(previouslyAccessed);
-
+     */
+    private boolean getNextRestaurantDetails() {
+        Set<HashMap<String, String>> potentials = removeVisited(nearbyPlaceListCombined);
+        // if zero then user has went through all restaurants
         if (potentials.size() == 0) return false;
 
-        remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
-        Log.d(TAG, "getRandomRestaurant: remainingRolls = " + remainedRerolls);
+        if(haveRolls()) makeRoll();
+        else {
+            isOutOfRolls = true;
+            return false;
+        }
 
-        //TODO: remove the comment out
-        //if(remainedRerolls <= 0) return false;
+        removeProcessed(potentials);
+        // if zero then all of the potentials are already processed
+        if(potentials.size() == 0) return true;
 
+        rollNextRestaurant(potentials);
+
+        return true;
+    }
+
+    private void rollNextRestaurant(Set<HashMap<String, String>> potentials){
         List<HashMap<String, String>> potentialsList = new ArrayList<>(potentials);
-        int index = new Random().nextInt(potentialsList.size());
-        HashMap<String, String> selectedRestaurant = potentialsList.get(index);
+        HashMap<String, String> selectedRestaurant = potentialsList.get(0);
 
         Object[] dataTransfer = new Object[5];
 
@@ -259,19 +244,40 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         dataTransfer[0] = url;
         getDetailData.execute(dataTransfer);
 
-        remainedRerolls--;
-        Log.d(TAG, "getRandomRestaurant: " + remainedRerolls);
+        makeRoll();
+        Log.d(TAG, "getNextRestaurantDetails: " + sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10));
+    }
+
+    private boolean haveRolls(){
+        int remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
+        Log.d(TAG, "getNextRestaurantDetails: remainingRolls = " + remainedRerolls);
+        //TODO: remove the comment out
+        return remainedRerolls > 0;
+    }
+
+    private void makeRoll(){
+        int remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
+        remainedRerolls --;
+        Log.d(TAG, "getNextRestaurantDetails: " + remainedRerolls);
         editor.putInt(getString(R.string.sp_remained_rerolls), remainedRerolls);
         editor.commit();
-        Log.d(TAG, "getRandomRestaurant: " + sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10));
+    }
 
-        return true;
+    private Set<HashMap<String, String>> removeVisited(List<HashMap<String, String>> list){
+        Set<HashMap<String, String>> potentials = new HashSet<>(list);
+        previouslyAccessed = getPreviouslyAccessed();
+        potentials.removeAll(previouslyAccessed);
+        return potentials;
+    }
+
+    private void removeProcessed(Set<HashMap<String, String>> set){
+        set.removeAll(placesProcessed);
     }
 
     private List<HashMap<String, String>> getPreviouslyAccessed() {
         tempSet = sharedPreferences.getStringSet(getString(R.string.sp_previously_accessed), null);
         List<HashMap<String, String>> tempList;
-        if(tempSet == null){
+        if (tempSet == null) {
             tempList = new ArrayList<>();
         } else {
             tempList = new ArrayList<>(tempSet);
@@ -308,6 +314,52 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     /**
+     * initialize the cards and certain global variables
+     * cards will also initialize their setOnTouchListener and be set to View.GONE
+     */
+    private void initViews() {
+        noRestaurantsError = findViewById(R.id.no_restaurants_layout);
+        noRestaurantsError.setVisibility(View.GONE);
+        buttonSet = findViewById(R.id.restcard_finder_btn_set);
+        buttonSet.setVisibility(View.GONE);
+
+        nearbyPlaceListCombined = new ArrayList<>();
+        placesProcessed = new LinkedList<>();
+        previouslyAccessed = getPreviouslyAccessed();
+
+        firstCard = true;
+
+        restCard1 = findViewById(R.id.restcard);
+        restCard2 = findViewById(R.id.restcard2);
+        restCard1.setDefaultValues();
+        restCard2.setDefaultValues();
+        restCard1.setVisibility(View.GONE);
+        restCard2.setVisibility(View.GONE);
+
+        restCard1.setOnSwipeEvent(() -> defaultSwipeEvent(restCard1, restCard2));
+        restCard2.setOnSwipeEvent(() -> defaultSwipeEvent(restCard2, restCard1));
+
+        FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
+        FloatingActionButton btnToggleContents = findViewById(R.id.btn_open_contents);
+        OnOpenContents onOpenContents = () -> {
+            btnSwipe.hide();
+            btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
+        };
+        OnCloseContents onCloseContents = () -> {
+            btnSwipe.show();
+            btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
+        };
+
+        restCard1.setOnOpenContents(onOpenContents);
+        restCard2.setOnOpenContents(onOpenContents);
+        restCard1.setOnCloseContents(onCloseContents);
+        restCard2.setOnCloseContents(onCloseContents);
+
+        loadingView = findViewById(R.id.restcard_loading);
+        loadingView.setVisibility(View.VISIBLE);
+    }
+
+    /**
      * send search request with nextPageToken
      */
     private void requestNextPageSearch(String nextPageToken) {
@@ -320,7 +372,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     /**
      * get the google place url based on nextPageToken only
      */
-    private String getUrlNextPage(String nextPageToken){
+    private String getUrlNextPage(String nextPageToken) {
         String googlePlaceUrl = DEFAULT_PLACES_SEARCH_URL;
         googlePlaceUrl += "pagetoken=" + nextPageToken;
         googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
@@ -364,17 +416,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     /**
-     * logs all of the nearbyPlacesList's HashMaps' name fields for debugging purposes
-     * */
-    private void logAllPlacesList(List<HashMap<String, String>> nearbyPlaceList){
-        Log.d(TAG, "logAllPlacesList: printing nearbyPlacesList---------------------");
-        for(HashMap<String, String> placesInfo : nearbyPlaceList){
-            Log.d(TAG, "logAllPlacesList: restaurant name=" + placesInfo.get(DataParser.DATA_KEY_NAME));
-        }
-        Log.d(TAG, "logAllPlacesList: -----------------------------------------------");
-    }
-
-    /**
      * restore values passed in from PreferencesActivity.java
      */
     private void retrievePassedValues() {
@@ -384,20 +425,55 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
     }
 
-    private void defaultSwipeEvent(RestaurantCard thisCard, RestaurantCard otherCard){
+    private void savePreviouslyAccessedData(List<HashMap<String, String>> previouslyAccessed) {
+        tempSet = new HashSet(previouslyAccessed);
+        editor.putStringSet(getString(R.string.sp_previously_accessed), tempSet);
+        editor.commit();
+    }
+
+    private void defaultSwipeEvent(RestaurantCard thisCard, RestaurantCard otherCard) {
         thisCard.setVisibility(View.INVISIBLE);
         thisCard.setDefaultValues();
         otherCard.setVisibility(View.VISIBLE);
         activeCard = otherCard;
 
-        if(attemptRandomRestaurant(R.string.restcard_finder_no_more_restaurants)) {
-            otherCard.setAnimation(inFromRightAnimation());
+        fetchNextRestaurant(R.string.restcard_finder_no_more_restaurants, true);
+    }
+
+    private void resetValues() {
+        Log.d(TAG, "resetValues: " + today);
+        int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
+        Log.d(TAG, "resetValues: " + lastDay);
+        if (today != lastDay) {
+            editor.remove(getString(R.string.sp_previously_accessed));
+            editor.commit();
+            editor.remove(getString(R.string.sp_remained_rerolls));
+            editor.commit();
+            Log.d(TAG, "resetValues: " + "removed");
         }
+        editor.putInt(getString(R.string.sp_date), today);
+        editor.commit();
+    }
+
+    private void turnOffBothCards() {
+        restCard1.setVisibility(View.GONE);
+        restCard2.setVisibility(View.GONE);
+    }
+
+    /**
+     * logs all of the nearbyPlacesList's HashMaps' name fields for debugging purposes
+     */
+    private void logAllPlacesList(List<HashMap<String, String>> nearbyPlaceList) {
+        Log.d(TAG, "logAllPlacesList: printing nearbyPlacesList---------------------");
+        for (HashMap<String, String> placesInfo : nearbyPlaceList) {
+            Log.d(TAG, "logAllPlacesList: restaurant name=" + placesInfo.get(DataParser.DATA_KEY_NAME));
+        }
+        Log.d(TAG, "logAllPlacesList: -----------------------------------------------");
     }
 
     /**
      * Animation for a card to move from in card to out of screen
-     * */
+     */
     static Animation outToLeftAnimation() {
         Animation outToLeft = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, 0.0f,
@@ -411,7 +487,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     /**
      * Animation for a card to move from out of screen to into screen
-     * */
+     */
     private static Animation inFromRightAnimation() {
         Animation inFromRight = new TranslateAnimation(
                 Animation.RELATIVE_TO_PARENT, +1.0f,
@@ -425,8 +501,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     /**
      * set values of views to values in HashMap<String, String>
-     * */
+     */
     private void setViewValues(HashMap<String, String> selectedRestaurant, RestaurantCard card) {
         card.setValues(selectedRestaurant);
+        activeCard.setAnimation(inFromRightAnimation());
     }
 }

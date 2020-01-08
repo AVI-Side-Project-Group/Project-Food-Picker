@@ -60,5 +60,7 @@
     <string name="restcard_finder_no_restaurants">
         There are no restaurants matching your preferences.
     </string>
-
+    <string name="restcard_finder_no_rolls">
+        You are out of rolls.
+    </string>
 </resources>
