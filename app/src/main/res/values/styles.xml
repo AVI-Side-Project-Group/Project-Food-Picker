@@ -19,7 +19,7 @@
     <style name="Dark" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorPrimary">#434343</item>
         <item name="colorPrimaryDark">#212121</item>
-        <item name="colorAccent">#ca3e47</item>
+        <item name="colorAccent">#0892d0</item>
         <item name="android:textColor">#e0e0e0</item>
     </style>
 </resources>
