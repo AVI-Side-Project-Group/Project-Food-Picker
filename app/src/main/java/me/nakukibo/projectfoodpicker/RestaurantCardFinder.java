@@ -2,10 +2,6 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -84,84 +80,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         retrievePassedValues();
         fetchLocation(null);
         resetValues();
-    }
-
-    private void resetValues() {
-        Log.d(TAG, "resetValues: " + today);
-        int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
-        Log.d(TAG, "resetValues: " + lastDay);
-        if(today != lastDay){
-            editor.remove(getString(R.string.sp_previously_accessed));
-            editor.commit();
-            editor.remove(getString(R.string.sp_remained_rerolls));
-            editor.commit();
-            Log.d(TAG, "resetValues: " + "removed");
-        }
-        editor.putInt(getString(R.string.sp_date), today);
-        editor.commit();
-    }
-
-    /**
-     * initialize the cards and certain global variables
-     * cards will also initialize their setOnTouchListener and be set to View.GONE
-     */
-    private void initViews() {
-        noRestaurantsError = findViewById(R.id.no_restaurants_layout);
-        noRestaurantsError.setVisibility(View.GONE);
-        buttonSet = findViewById(R.id.restcard_finder_btn_set);
-        buttonSet.setVisibility(View.GONE);
-
-        nearbyPlaceListCombined = new ArrayList<>();
-        previouslyAccessed = getPreviouslyAccessed();
-
-        firstCard = true;
-
-        restCard1 = findViewById(R.id.restcard);
-        restCard2 = findViewById(R.id.restcard2);
-        restCard1.setDefaultValues();
-        restCard2.setDefaultValues();
-        restCard1.setVisibility(View.GONE);
-        restCard2.setVisibility(View.GONE);
-
-        restCard1.setOnSwipeEvent(() -> defaultSwipeEvent(restCard1, restCard2));
-        restCard2.setOnSwipeEvent(() -> defaultSwipeEvent(restCard2, restCard1));
-
-        FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
-        FloatingActionButton btnToggleContents = findViewById(R.id.btn_open_contents);
-        OnOpenContents onOpenContents = () -> {
-            btnSwipe.hide();
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
-        };
-        OnCloseContents onCloseContents = () -> {
-            btnSwipe.show();
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
-        };
-
-        restCard1.setOnOpenContents(onOpenContents);
-        restCard2.setOnOpenContents(onOpenContents);
-        restCard1.setOnCloseContents(onCloseContents);
-        restCard2.setOnCloseContents(onCloseContents);
-
-        View loadingView = findViewById(R.id.restcard_loading);
-        loadingView.setVisibility(View.VISIBLE);
-    }
-
-    public void goToWebsite(View view){
-        Uri uriUrl = Uri.parse(activeCard.getURL());
-        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
-        startActivity(launchBrowser);
-    }
-
-    public void callNumber(View view){
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:" + activeCard.getPhoneNumber()));
-        startActivity(intent);
-    }
-
-    public void openMap(View view){
-        String map = "http://maps.google.co.in/maps?q=" + activeCard.getAddress();
-        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(map));
-        startActivity(i);
     }
 
     /**
