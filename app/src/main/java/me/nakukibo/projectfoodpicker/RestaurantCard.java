@@ -82,6 +82,7 @@ public class RestaurantCard extends ScrollView {
                 values.get(DataParser.DATA_KEY_ADDRESS),
                 values.get(DataParser.DATA_KEY_PHONE_NUMBER),
                 values.get(DataParser.DATA_KEY_WEBSITE),
+                //getResources().getString(R.string.restcard_default_website),
                 values.get(DataParser.DATA_KEY_HOURS)
         );
     }
@@ -307,5 +308,17 @@ public class RestaurantCard extends ScrollView {
 
     public void setOnCloseContents(OnCloseContents onCloseContents){
         this.onCloseContents = onCloseContents;
+    }
+
+    public String getURL() {
+        return restaurantCardContents.getUrl();
+    }
+
+    public String getPhoneNumber(){
+        return restaurantCardContents.getPhoneNumber();
+    }
+
+    public String getAddress() {
+        return restaurantCardContents.getAddress();
     }
 }

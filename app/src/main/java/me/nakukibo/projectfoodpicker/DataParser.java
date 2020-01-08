@@ -31,9 +31,9 @@ class DataParser {
     static final String DATA_KEY_PHONE_NUMBER = "phone_number";
     static final String DATA_KEY_WEBSITE = "website";
     static final String DATA_KEY_PLACE_ID = "restaurant_place_id";
+    static final String DATA_DEFAULT = "--NA--"; // HashMap value if null or by default
 
     private static final String TAG = DataParser.class.getSimpleName();
-    private static final String DATA_DEFAULT = "--NA--"; // HashMap value if null or by default
 
     private String nextPageToken; // for storing and later accessing the nextPageToken since the process runs in background
 
