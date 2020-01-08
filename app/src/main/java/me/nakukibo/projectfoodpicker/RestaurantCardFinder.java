@@ -1,9 +1,7 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -137,24 +135,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
         View loadingView = findViewById(R.id.restcard_loading);
         loadingView.setVisibility(View.VISIBLE);
-    }
-
-    public void goToWebsite(View view){
-        Uri uriUrl = Uri.parse(activeCard.getURL());
-        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
-        startActivity(launchBrowser);
-    }
-
-    public void callNumber(View view){
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:" + activeCard.getPhoneNumber()));
-        startActivity(intent);
-    }
-
-    public void openMap(View view){
-        String map = "http://maps.google.co.in/maps?q=" + activeCard.getAddress();
-        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(map));
-        startActivity(i);
     }
 
     /**
