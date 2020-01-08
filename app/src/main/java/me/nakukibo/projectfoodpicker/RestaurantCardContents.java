@@ -89,7 +89,7 @@ public class RestaurantCardContents extends ScrollView {
         btnPhoneNumber.setText(phoneNumber);
         this.phoneNumber = phoneNumber;
         btnPhoneNumber.setPaintFlags(btnPhoneNumber.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnAddress.setOnLongClickListener(v -> {
+        btnPhoneNumber.setOnLongClickListener(v -> {
             ClipData clipData = ClipData.newPlainText("Phone Number", phoneNumber);
             clipboardManager.setPrimaryClip(clipData);
             Toast toast = Toast.makeText(FoodPicker.getApp(), "Phone number copied to clipboard",
@@ -109,7 +109,7 @@ public class RestaurantCardContents extends ScrollView {
         btnWebsite.setText(websiteURL);
         this.url = websiteURL;
         btnWebsite.setPaintFlags(btnWebsite.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnAddress.setOnLongClickListener(v -> {
+        btnWebsite.setOnLongClickListener(v -> {
             ClipData clipData = ClipData.newPlainText("Website URL", url);
             clipboardManager.setPrimaryClip(clipData);
             Toast toast = Toast.makeText(FoodPicker.getApp(), "Website URL copied to clipboard",
