@@ -1,7 +1,9 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -154,6 +156,24 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         // if zero then all of the potentials are already processed
         if(potentials.size() == 0) return;
         rollNextRestaurant(potentials);
+    }
+
+    public void goToWebsite(View view){
+        Uri uriUrl = Uri.parse(activeCard.getURL());
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        startActivity(launchBrowser);
+    }
+
+    public void callNumber(View view){
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + activeCard.getPhoneNumber()));
+        startActivity(intent);
+    }
+
+    public void openMap(View view){
+        String map = "http://maps.google.co.in/maps?q=" + activeCard.getAddress();
+        Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(map));
+        startActivity(i);
     }
 
     public void swipeCard(View view) {
@@ -374,8 +394,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         loadingView = findViewById(R.id.restcard_loading);
         loadingView.setVisibility(View.VISIBLE);
     }
-  
-  
 
     /**
      * send search request with nextPageToken
