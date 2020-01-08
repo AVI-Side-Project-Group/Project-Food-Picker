@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -69,13 +70,13 @@ public class RestaurantCardContents extends ScrollView {
         btnAddress.setText(address);
         this.address = address;
         btnAddress.setPaintFlags(btnAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnAddress.setOnLongClickListener(new View.OnLongClickListener(){
-            @Override
-            public boolean onLongClick(View v) {
-                ClipData clipData = ClipData.newPlainText("Address", address);
-                clipboardManager.setPrimaryClip(clipData);
-                return true;
-            }
+        btnAddress.setOnLongClickListener(v -> {
+            ClipData clipData = ClipData.newPlainText("Address", address);
+            clipboardManager.setPrimaryClip(clipData);
+            Toast toast = Toast.makeText(FoodPicker.getApp(), "Address copied to clipboard",
+                    Toast.LENGTH_LONG);
+            toast.show();
+            return true;
         });
 
 
@@ -88,13 +89,13 @@ public class RestaurantCardContents extends ScrollView {
         btnPhoneNumber.setText(phoneNumber);
         this.phoneNumber = phoneNumber;
         btnPhoneNumber.setPaintFlags(btnPhoneNumber.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnAddress.setOnLongClickListener(new View.OnLongClickListener(){
-            @Override
-            public boolean onLongClick(View v) {
-                ClipData clipData = ClipData.newPlainText("Phone Number", phoneNumber);
-                clipboardManager.setPrimaryClip(clipData);
-                return true;
-            }
+        btnAddress.setOnLongClickListener(v -> {
+            ClipData clipData = ClipData.newPlainText("Phone Number", phoneNumber);
+            clipboardManager.setPrimaryClip(clipData);
+            Toast toast = Toast.makeText(FoodPicker.getApp(), "Phone number copied to clipboard",
+                    Toast.LENGTH_LONG);
+            toast.show();
+            return true;
         });
 
 
@@ -108,13 +109,13 @@ public class RestaurantCardContents extends ScrollView {
         btnWebsite.setText(websiteURL);
         this.url = websiteURL;
         btnWebsite.setPaintFlags(btnWebsite.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnAddress.setOnLongClickListener(new View.OnLongClickListener(){
-            @Override
-            public boolean onLongClick(View v) {
-                ClipData clipData = ClipData.newPlainText("Website URL", url);
-                clipboardManager.setPrimaryClip(clipData);
-                return true;
-            }
+        btnAddress.setOnLongClickListener(v -> {
+            ClipData clipData = ClipData.newPlainText("Website URL", url);
+            clipboardManager.setPrimaryClip(clipData);
+            Toast toast = Toast.makeText(FoodPicker.getApp(), "Website URL copied to clipboard",
+                    Toast.LENGTH_LONG);
+            toast.show();
+            return true;
         });
 
 
