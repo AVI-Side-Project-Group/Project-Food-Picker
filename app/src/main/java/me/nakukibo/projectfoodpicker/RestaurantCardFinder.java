@@ -253,7 +253,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         int remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
         Log.d(TAG, "getNextRestaurantDetails: remainingRolls = " + remainedRerolls);
         //TODO: remove the comment out
-        return remainedRerolls > 0;
+//        return remainedRerolls > 0;
+        return true;
     }
 
     private void makeRoll(){
