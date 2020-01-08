@@ -64,8 +64,13 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     View loadingView;
 
     private Calendar calendar = Calendar.getInstance();
-    private int today = calendar.get(calendar.DAY_OF_MONTH);
+
+    private int day = calendar.get(calendar.DATE);
+    private int month = calendar.get(calendar.MONTH);
+    private int year = calendar.get(calendar.YEAR);
+    private String date = "" + month + day + year;
     boolean isOutOfRolls = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -369,6 +374,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         loadingView = findViewById(R.id.restcard_loading);
         loadingView.setVisibility(View.VISIBLE);
     }
+  
+  
 
     /**
      * send search request with nextPageToken
@@ -452,19 +459,26 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     private void resetValues() {
-        Log.d(TAG, "resetValues: " + today);
         int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
-        Log.d(TAG, "resetValues: " + lastDay);
-        if (today != lastDay) {
+        int lastMonth = sharedPreferences.getInt(getString(R.string.sp_month), 0);
+        int lastYear = sharedPreferences.getInt(getString(R.string.sp_year), 0);
+        String lastDate = "" + lastMonth + lastDay + lastYear;
+
+        if(!lastDate.equals(date)){
             editor.remove(getString(R.string.sp_previously_accessed));
             editor.commit();
             editor.remove(getString(R.string.sp_remained_rerolls));
             editor.commit();
             Log.d(TAG, "resetValues: " + "removed");
         }
-        editor.putInt(getString(R.string.sp_date), today);
+        editor.putInt(getString(R.string.sp_date), day);
+        editor.commit();
+        editor.putInt(getString(R.string.sp_month), month);
+        editor.commit();
+        editor.putInt(getString(R.string.sp_year), year);
         editor.commit();
     }
+  
 
     private void turnOffBothCards() {
         restCard1.setVisibility(View.GONE);
