@@ -327,4 +327,16 @@ public class RestaurantCard extends ScrollView {
     public void setOnCloseContents(OnCloseContents onCloseContents){
         this.onCloseContents = onCloseContents;
     }
+
+    public String getURL() {
+        return restaurantCardContents.getUrl();
+    }
+
+    public String getPhoneNumber(){
+        return restaurantCardContents.getPhoneNumber();
+    }
+
+    public String getAddress() {
+        return restaurantCardContents.getAddress();
+    }
 }
