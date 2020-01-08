@@ -80,11 +80,13 @@
             app:layout_constraintStart_toStartOf="@+id/txtvw_rating"
             app:layout_constraintTop_toBottomOf="@+id/txtvw_rating" />
 
-        <TextView
-            android:id="@+id/txtvw_address"
+        <Button
+            android:id="@+id/btn_address"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:onClick="openMap"
             android:text="@string/restcard_txtvw_addr_placeholder"
             android:textAlignment="center"
             android:textSize="@dimen/font_size_restaurant_text"
@@ -92,31 +94,36 @@
             app:layout_constraintStart_toStartOf="@+id/txtvw_price_level"
             app:layout_constraintTop_toBottomOf="@+id/txtvw_price_level" />
 
-        <TextView
-            android:id="@+id/txtvw_phone_number"
+        <Button
+            android:id="@+id/btn_phone_number"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:onClick="callNumber"
             android:text="@string/restcard_default_phone_number"
             android:textAlignment="center"
             android:textSize="@dimen/font_size_restaurant_text"
-            app:layout_constraintEnd_toEndOf="@+id/txtvw_address"
-            app:layout_constraintStart_toStartOf="@+id/txtvw_address"
-            app:layout_constraintTop_toBottomOf="@+id/txtvw_address" />
+            app:layout_constraintEnd_toEndOf="@+id/btn_address"
+            app:layout_constraintStart_toStartOf="@+id/btn_address"
+            app:layout_constraintTop_toBottomOf="@+id/btn_address" />
 
-        <TextView
-            android:id="@+id/txtvw_website"
+        <Button
+            android:id="@+id/btn_website"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="@dimen/restcard_contents_padding_top_hours"
+            android:onClick="goToWebsite"
+            android:longClickable="true"
             android:text="@string/restcard_default_website"
             android:textAlignment="center"
             android:textSize="@dimen/font_size_restaurant_text"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/txtvw_phone_number"
-            app:layout_constraintStart_toStartOf="@+id/txtvw_phone_number"
-            app:layout_constraintTop_toBottomOf="@+id/txtvw_phone_number" />
+            app:layout_constraintEnd_toEndOf="@+id/btn_phone_number"
+            app:layout_constraintStart_toStartOf="@+id/btn_phone_number"
+            app:layout_constraintTop_toBottomOf="@+id/btn_phone_number" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
