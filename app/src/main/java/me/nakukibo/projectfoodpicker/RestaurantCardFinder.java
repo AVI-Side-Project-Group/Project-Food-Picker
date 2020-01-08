@@ -199,6 +199,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     private void showRestaurantError(int errorTxt){
+        deactiveFloatingButtons();
         loadingView.setVisibility(View.GONE);
         TextView txtvwNoRestaurants = findViewById(R.id.txtvw_no_restaurants);
         txtvwNoRestaurants.setText(getResources().getString(errorTxt));
@@ -258,6 +259,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private void makeRoll(){
         int remainedRerolls = sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10);
         remainedRerolls --;
+        remainedRerolls = 10; //TODO: remove this line of code
         Log.d(TAG, "getNextRestaurantDetails: " + remainedRerolls);
         editor.putInt(getString(R.string.sp_remained_rerolls), remainedRerolls);
         editor.commit();
@@ -284,6 +286,14 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         }
 
         return tempList;
+    }
+
+    private void deactiveFloatingButtons(){
+        FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
+        FloatingActionButton btnToggleContents = findViewById(R.id.btn_open_contents);
+
+        btnSwipe.hide();
+        btnToggleContents.hide();
     }
 
     /**
