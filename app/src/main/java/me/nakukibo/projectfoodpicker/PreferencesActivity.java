@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ public class PreferencesActivity extends AppCompatActivity {
     private Spinner spinRating;
     private Spinner spinPricing;
     private SeekBar sbrDistance;
+    private Button btnHistory;
 
     // values for views
     private String[] foodTypes = {PREF_ANY_STR_REP, "American", "Asian",
@@ -71,6 +73,9 @@ public class PreferencesActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         requestLocationPermission();
         initPrefViews();
+
+        FoodPicker.getEditor().remove(getString(R.string.sp_previously_accessed));
+        FoodPicker.getEditor().commit();
     }
 
     /**
@@ -91,6 +96,7 @@ public class PreferencesActivity extends AppCompatActivity {
         super.onResume();
         // reactivate the button (was deactivate during onSubmit)
         findViewById(R.id.btn_search).setClickable(true);
+        initHistoryButton();
     }
 
     /**
@@ -196,6 +202,7 @@ public class PreferencesActivity extends AppCompatActivity {
         initRatingsView();
         initDistancesView();
         initPriceRangesView();
+        initHistoryButton();
     }
 
     private void initFoodTypesView() {
@@ -258,6 +265,10 @@ public class PreferencesActivity extends AppCompatActivity {
         });
     }
 
+    private void initHistoryButton() {
+        btnHistory = findViewById(R.id.btn_get_history);
+    }
+
     /**
      * converts miles to meters
      * @param miles miles value
@@ -283,5 +294,17 @@ public class PreferencesActivity extends AppCompatActivity {
     public void changeSettings(View view) {
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
         startActivity(intent);
+    }
+
+    public void getHistory(View view){
+        Set tempSet = FoodPicker.getSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed), null);
+        if (tempSet == null) {
+            Toast toast = Toast.makeText(FoodPicker.getApp(), "History is blank.",
+                    Toast.LENGTH_LONG);
+            toast.show();
+        } else {
+            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+            startActivity(intent);
+        }
     }
 }

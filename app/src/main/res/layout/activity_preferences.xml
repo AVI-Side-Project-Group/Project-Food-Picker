@@ -159,4 +159,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_search" />
 
+    <Button
+        android:id="@+id/btn_get_history"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:onClick="getHistory"
+        android:text="@string/prefs_btn_gethistory"
+        app:layout_constraintEnd_toEndOf="@+id/btn_search"
+        app:layout_constraintStart_toStartOf="@+id/btn_search"
+        app:layout_constraintTop_toBottomOf="@+id/btn_search" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
