@@ -19,6 +19,8 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -63,7 +65,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-//    private List<String>
 
     private Set tempSet;
     View loadingView;
@@ -77,26 +78,28 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     boolean isOutOfRolls = false;
 
 
+    private PlacesClient placesClient;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = sharedPreferences.edit();
-
         setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String test = sharedPreferences.getString("hi", "bye");
-        Log.d(TAG, "onCreate: testing stuff=" + test);
-
         setContentView(R.layout.activity_restaurant_card_finder);
         needNextCard = true;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
+        placesClient = Places.createClient(this);
+
         initViews();
         retrievePassedValues();
-        fetchLocation(null);
         resetValues();
+        fetchLocation(null);
     }
 
     /**

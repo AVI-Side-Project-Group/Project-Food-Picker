@@ -18,7 +18,6 @@ import java.util.List;
 
 class DataParser {
     // used for storing and loading values into HashMap
-    static final String DATA_KEY_DISTANCE = "distance";
     static final String DATA_KEY_NAME = "restaurant_name";
     static final String DATA_KEY_ADDRESS = "formatted_address";
     static final String DATA_KEY_HOURS = "opening_hours";
@@ -29,6 +28,7 @@ class DataParser {
     static final String DATA_KEY_PRICE_LEVEL = "price_level";
     static final String DATA_KEY_PHONE_NUMBER = "phone_number";
     static final String DATA_KEY_WEBSITE = "website";
+    static final String DATA_KEY_DISTANCE = "distance";
     static final String DATA_KEY_PLACE_ID = "restaurant_place_id";
 
     private static final String TAG = DataParser.class.getSimpleName();
