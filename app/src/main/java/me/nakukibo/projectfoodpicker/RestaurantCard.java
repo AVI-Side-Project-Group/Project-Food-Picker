@@ -2,6 +2,8 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -14,7 +16,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
+
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 public class RestaurantCard extends ScrollView {
@@ -75,7 +86,7 @@ public class RestaurantCard extends ScrollView {
                 values.get(DataParser.DATA_KEY_NAME),
                 openNow != null && openNow.equals("true"),
                 distMiles,
-                R.drawable.ic_launcher_background,
+                DataParser.parsePhotos(values.get(DataParser.DATA_KEY_PHOTO)),
                 String.format(Locale.US, "%s stars (%s)",
                         values.get(DataParser.DATA_KEY_RATING), values.get(DataParser.DATA_KEY_TOT_RATING)),
                 String.format(Locale.US, "Pricing Level: %s",
@@ -91,23 +102,23 @@ public class RestaurantCard extends ScrollView {
      * set restaurant card to default values
      */
     void setDefaultValues(){
-        setValues(
-                getResources().getString(R.string.restcard_default_name),
-                true,
-                12.20,
-                R.drawable.ic_launcher_background,
-                getResources().getString(R.string.restcard_default_rating),
-                getResources().getString(R.string.restcard_default_pricing),
-                getResources().getString(R.string.restcard_default_address),
-                getResources().getString(R.string.restcard_default_phone_number),
-                getResources().getString(R.string.restcard_default_website),
-                getResources().getString(R.string.restcard_default_hours));
+//        setValues(
+//                getResources().getString(R.string.restcard_default_name),
+//                true,
+//                12.20,
+//                DataParser.parsePhotos(),
+//                getResources().getString(R.string.restcard_default_rating),
+//                getResources().getString(R.string.restcard_default_pricing),
+//                getResources().getString(R.string.restcard_default_address),
+//                getResources().getString(R.string.restcard_default_phone_number),
+//                getResources().getString(R.string.restcard_default_website),
+//                getResources().getString(R.string.restcard_default_hours));
     }
 
     /**
      * set restaurant card to values passed
      */
-    private void setValues(String name, Boolean openNow, Double distanceMiles, int photoSource, String rating, String pricing, String address,
+    private void setValues(String name, Boolean openNow, Double distanceMiles, List<Photo> photoSource, String rating, String pricing, String address,
                            String phoneNumber, String website, String hours){
         txtvwName.setText(name);
 
@@ -120,8 +131,49 @@ public class RestaurantCard extends ScrollView {
         txtvwOpenNow.setText(openNowText);
 
         txtvwDistance.setText(distanceMiles == null? "Unknown Distance" : String.format(Locale.US, "%.2f miles", distanceMiles));
-        restPhoto.setImageResource(photoSource);
+
+        Photo photo = photoSource.get(0);
+        PhotoMetadata.Builder builder = PhotoMetadata.builder(photo.getReference());
+        builder.setWidth(photo.getWidth());
+        builder.setHeight(photo.getHeight());
+
+        PhotoMetadata  photoMetadata = builder.build();
+        FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                .build();
+
+        PlacesClient placesClient = FoodPicker.getPlacesClient();
+        placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
+            Bitmap bitmap = fetchPhotoResponse.getBitmap();
+            restPhoto.setImageBitmap(bitmap);
+        }).addOnFailureListener((exception) -> {
+            if (exception instanceof ApiException) {
+                ApiException apiException = (ApiException) exception;
+                int statusCode = apiException.getStatusCode();
+                // Handle error with given status code.
+                Log.e(TAG, "Place not found: " + exception.getMessage());
+            }
+        });
+
         restaurantCardContents.setValues(rating, pricing, address, phoneNumber, website, hours);
+    }
+
+    public static Drawable LoadImageFromWebOperations(String url) {
+        try {
+            InputStream is = (InputStream) new URL(url).getContent();
+            Drawable d = Drawable.createFromStream(is, "src name");
+            return d;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String getPhotoUrl(Photo photo) {
+        String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/photo?";
+        googlePlaceUrl += "maxwidth=" + photo.getWidth();
+        googlePlaceUrl += "&photoreference=" + photo.getReference();
+        googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
+
+        return googlePlaceUrl;
     }
 
     private void initSwipeVariables() {
@@ -149,18 +201,18 @@ public class RestaurantCard extends ScrollView {
 
         // set view values to attribute values
         TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.RestaurantCard);
-        setValues(
-                attributes.getString(R.styleable.RestaurantCard_name),
-                true,
-                12.20,
-                R.styleable.RestaurantCard_android_src,
-                String.format(Locale.US, "%1.1f stars", attributes.getFloat(R.styleable.RestaurantCard_rating, 1f)),
-                String.format(Locale.US, "Price Level: %d", attributes.getInteger(R.styleable.RestaurantCard_price_level, 1)),
-                attributes.getString(R.styleable.RestaurantCard_address),
-                attributes.getString(R.styleable.RestaurantCard_phone_number),
-                attributes.getString(R.styleable.RestaurantCard_website),
-                attributes.getString(R.styleable.RestaurantCard_hours)
-        );
+//        setValues(
+//                attributes.getString(R.styleable.RestaurantCard_name),
+//                true,
+//                12.20,
+//                R.styleable.RestaurantCard_android_src,
+//                String.format(Locale.US, "%1.1f stars", attributes.getFloat(R.styleable.RestaurantCard_rating, 1f)),
+//                String.format(Locale.US, "Price Level: %d", attributes.getInteger(R.styleable.RestaurantCard_price_level, 1)),
+//                attributes.getString(R.styleable.RestaurantCard_address),
+//                attributes.getString(R.styleable.RestaurantCard_phone_number),
+//                attributes.getString(R.styleable.RestaurantCard_website),
+//                attributes.getString(R.styleable.RestaurantCard_hours)
+//        );
 
         attributes.recycle();
     }
