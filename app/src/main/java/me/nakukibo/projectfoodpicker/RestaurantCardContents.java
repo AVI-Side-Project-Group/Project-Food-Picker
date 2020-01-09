@@ -5,7 +5,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -20,7 +19,7 @@ public class RestaurantCardContents extends ScrollView {
     private String url = "";
     private String phoneNumber = "";
     private String address = "";
-    private ClipboardManager clipboardManager = (ClipboardManager)FoodPicker.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
+//    private ClipboardManager clipboardManager = (ClipboardManager) App.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
 
 
     public RestaurantCardContents(@NonNull Context context) {
@@ -62,7 +61,7 @@ public class RestaurantCardContents extends ScrollView {
         txtvwPricing.setText(pricing);
 
         Button btnAddress = findViewById(R.id.btn_address);
-        if(address == DataParser.DATA_DEFAULT){
+        if(address.equals(DataParser.DATA_DEFAULT)){
             btnAddress.setClickable(false);
         } else {
             btnAddress.setClickable(true);
@@ -70,14 +69,14 @@ public class RestaurantCardContents extends ScrollView {
         btnAddress.setText(address);
         this.address = address;
         btnAddress.setPaintFlags(btnAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnAddress.setOnLongClickListener(v -> {
-            ClipData clipData = ClipData.newPlainText("Address", address);
-            clipboardManager.setPrimaryClip(clipData);
-            Toast toast = Toast.makeText(FoodPicker.getApp(), "Address copied to clipboard",
-                    Toast.LENGTH_LONG);
-            toast.show();
-            return true;
-        });
+//        btnAddress.setOnLongClickListener(v -> {
+//            ClipData clipData = ClipData.newPlainText("Address", address);
+//            clipboardManager.setPrimaryClip(clipData);
+//            Toast toast = Toast.makeText(App.getApp(), "Address copied to clipboard",
+//                    Toast.LENGTH_LONG);
+//            toast.show();
+//            return true;
+//        });
 
 
         Button btnPhoneNumber = findViewById(R.id.btn_phone_number);
@@ -91,10 +90,10 @@ public class RestaurantCardContents extends ScrollView {
         btnPhoneNumber.setPaintFlags(btnPhoneNumber.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         btnPhoneNumber.setOnLongClickListener(v -> {
             ClipData clipData = ClipData.newPlainText("Phone Number", phoneNumber);
-            clipboardManager.setPrimaryClip(clipData);
-            Toast toast = Toast.makeText(FoodPicker.getApp(), "Phone number copied to clipboard",
-                    Toast.LENGTH_LONG);
-            toast.show();
+//            clipboardManager.setPrimaryClip(clipData);
+//            Toast toast = Toast.makeText(App.getApp(), "Phone number copied to clipboard",
+//                    Toast.LENGTH_LONG);
+//            toast.show();
             return true;
         });
 
@@ -111,10 +110,10 @@ public class RestaurantCardContents extends ScrollView {
         btnWebsite.setPaintFlags(btnWebsite.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         btnWebsite.setOnLongClickListener(v -> {
             ClipData clipData = ClipData.newPlainText("Website URL", url);
-            clipboardManager.setPrimaryClip(clipData);
-            Toast toast = Toast.makeText(FoodPicker.getApp(), "Website URL copied to clipboard",
-                    Toast.LENGTH_LONG);
-            toast.show();
+//            clipboardManager.setPrimaryClip(clipData);
+//            Toast toast = Toast.makeText(App.getApp(), "Website URL copied to clipboard",
+//                    Toast.LENGTH_LONG);
+//            toast.show();
             return true;
         });
 

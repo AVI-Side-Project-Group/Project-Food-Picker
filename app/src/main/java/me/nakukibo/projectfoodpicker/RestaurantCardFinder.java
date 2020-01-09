@@ -15,11 +15,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -62,8 +61,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     // previous pageToken for multiple calls
     private String previousPageToken;
 
-    private SharedPreferences sharedPreferences = FoodPicker.getSharedPreferences();
-    private SharedPreferences.Editor editor = FoodPicker.getEditor();
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 //    private List<String>
 
     private Set tempSet;
@@ -80,9 +79,17 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(FoodPicker.getSharedPreferences().getInt(getString(R.string.sp_theme), R.style.Light));
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = sharedPreferences.edit();
+
+        setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String test = sharedPreferences.getString("hi", "bye");
+        Log.d(TAG, "onCreate: testing stuff=" + test);
+
         setContentView(R.layout.activity_restaurant_card_finder);
         needNextCard = true;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);

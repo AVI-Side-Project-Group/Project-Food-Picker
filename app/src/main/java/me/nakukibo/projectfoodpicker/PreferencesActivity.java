@@ -2,6 +2,7 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -21,9 +22,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import java.util.Locale;
-import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -58,12 +59,19 @@ public class PreferencesActivity extends AppCompatActivity {
     private int[] priceRanges = {0, 1, 2, 3, 4};
     private float[] distances = {.5f, 1f, 5f, 10f, 20f};
 
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = sharedPreferences.edit();
+        editor.putString("hi", "hello");
+        editor.apply();
 
-        Log.d(TAG, "onCreate: " + FoodPicker.getSharedPreferences().getInt(getString(R.string.sp_theme), R.style.Light));
+        Log.d(TAG, "onCreate: " + sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
-        setTheme(FoodPicker.getSharedPreferences().getInt(getString(R.string.sp_theme), R.style.Light));
+        setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);

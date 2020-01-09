@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -141,18 +140,18 @@ public class RestaurantCard extends ScrollView {
         FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
                 .build();
 
-        PlacesClient placesClient = FoodPicker.getPlacesClient();
-        placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
-            Bitmap bitmap = fetchPhotoResponse.getBitmap();
-            restPhoto.setImageBitmap(bitmap);
-        }).addOnFailureListener((exception) -> {
-            if (exception instanceof ApiException) {
-                ApiException apiException = (ApiException) exception;
-                int statusCode = apiException.getStatusCode();
-                // Handle error with given status code.
-                Log.e(TAG, "Place not found: " + exception.getMessage());
-            }
-        });
+//        PlacesClient placesClient = App.getPlacesClient();
+//        placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
+//            Bitmap bitmap = fetchPhotoResponse.getBitmap();
+//            restPhoto.setImageBitmap(bitmap);
+//        }).addOnFailureListener((exception) -> {
+//            if (exception instanceof ApiException) {
+//                ApiException apiException = (ApiException) exception;
+//                int statusCode = apiException.getStatusCode();
+//                // Handle error with given status code.
+//                Log.e(TAG, "Place not found: " + exception.getMessage());
+//            }
+//        });
 
         restaurantCardContents.setValues(rating, pricing, address, phoneNumber, website, hours);
     }
