@@ -1,6 +1,8 @@
 package me.nakukibo.projectfoodpicker;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -14,6 +16,7 @@ import android.widget.TextView;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import java.util.List;
 import java.util.Locale;
 
 public class Restaurant {
@@ -29,6 +32,7 @@ public class Restaurant {
     private String website;
     private float distanceMiles; //distance_meters return straight line distance from origin to place
     private String id;
+    private List<Bitmap> photoBitmaps;
 
     public Restaurant(String name, String address, String hours, boolean isOpen, String photosJson,
                       float rating, int totRating, int priceLevel, String phoneNumber, String website,
@@ -45,6 +49,7 @@ public class Restaurant {
         this.website = website;
         this.distanceMiles = distanceMiles;
         this.id = id;
+        this.photoBitmaps = null;
     }
 
     public String getName() {
@@ -141,5 +146,13 @@ public class Restaurant {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public List<Bitmap> getPhotoBitmaps() {
+        return photoBitmaps;
+    }
+
+    public void setPhotoBitmaps(List<Bitmap> photoBitmaps) {
+        this.photoBitmaps = photoBitmaps;
     }
 }

@@ -488,7 +488,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private void defaultSwipeEvent(RestaurantCard thisCard, RestaurantCard otherCard) {
         thisCard.setVisibility(View.INVISIBLE);
         thisCard.setDefaultValues();
-        otherCard.setVisibility(View.VISIBLE);
         activeCard = otherCard;
 
         fetchNextRestaurant(R.string.restcard_finder_no_more_restaurants, true);
@@ -517,8 +516,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
   
 
     private void turnOffBothCards() {
-        restCard1.setVisibility(View.GONE);
-        restCard2.setVisibility(View.GONE);
+        restCard1.setVisibility(View.INVISIBLE);
+        restCard2.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -560,8 +559,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         return inFromRight;
     }
 
-    boolean receivedLastPhoto = false;
-
     /**
      * set values of views to values in HashMap<String, String>
      */
@@ -572,12 +569,16 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         if (photoSource != null) {
              photoBitmaps = new ArrayList<>();
             for(int i=0; i<photoSource.size(); i++){
-                receivedLastPhoto = i == photoSource.size() - 1;
-
+                final boolean receivedLastPhoto = i == photoSource.size() - 1;
                 Photo photo = photoSource.get(i);
                 PhotoMetadata.Builder builder = PhotoMetadata.builder(photo.getReference());
-                builder.setWidth(photo.getWidth());
-                builder.setHeight(photo.getHeight());
+                int width = Math.min(photo.getWidth(), 800);
+                int height = Math.min(photo.getHeight(), 800);
+
+                builder.setWidth(width);
+                builder.setHeight(height);
+
+                Log.d(TAG, "setViewValues: photo width x height=" + width + "x" + height);
 
                 PhotoMetadata  photoMetadata = builder.build();
                 FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
@@ -591,6 +592,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
                     if(receivedLastPhoto){
                         card.setValues(selectedRestaurant, photoBitmaps);
                         activeCard.setAnimation(inFromRightAnimation());
+                        activeCard.setVisibility(View.VISIBLE);
                     }
 
                 }).addOnFailureListener((exception) -> {
@@ -604,7 +606,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
             }
         }else {
             photoBitmaps = null;
-
+            activeCard.setVisibility(View.VISIBLE);
             card.setValues(selectedRestaurant, photoBitmaps);
             activeCard.setAnimation(inFromRightAnimation());
         }

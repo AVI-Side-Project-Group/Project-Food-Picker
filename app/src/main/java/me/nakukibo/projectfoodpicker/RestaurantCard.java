@@ -24,6 +24,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -120,8 +121,6 @@ public class RestaurantCard extends ScrollView {
 //                getResources().getString(R.string.restcard_default_website),
 //                getResources().getString(R.string.restcard_default_hours));
     }
-
-
 
     /**
      * set restaurant card to values passed
@@ -366,5 +365,13 @@ public class RestaurantCard extends ScrollView {
 
     public String getAddress() {
         return restaurantCardContents.getAddress();
+    }
+
+    public int getImageWidth(){
+        return restPhoto.getWidth();
+    }
+
+    public int getImageHeight(){
+        return restPhoto.getHeight();
     }
 }
