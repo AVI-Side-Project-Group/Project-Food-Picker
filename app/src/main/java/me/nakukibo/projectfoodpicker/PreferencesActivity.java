@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.Locale;
+import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -60,10 +61,10 @@ public class PreferencesActivity extends AppCompatActivity {
     private int[] minRatings = {0, 1, 2, 3, 4};
     private int[] priceRanges = {0, 1, 2, 3, 4};
     private float[] distances = {.5f, 1f, 5f, 10f, 20f};
-
+    SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Log.d(TAG, "onCreate: " + sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
         setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
@@ -74,8 +75,9 @@ public class PreferencesActivity extends AppCompatActivity {
         requestLocationPermission();
         initPrefViews();
 
-        FoodPicker.getEditor().remove(getString(R.string.sp_previously_accessed));
-        FoodPicker.getEditor().commit();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(getString(R.string.sp_previously_accessed));
+        editor.apply();
     }
 
     /**
@@ -297,9 +299,9 @@ public class PreferencesActivity extends AppCompatActivity {
     }
 
     public void getHistory(View view){
-        Set tempSet = FoodPicker.getSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed), null);
+        Set tempSet = sharedPreferences.getStringSet(getString(R.string.sp_previously_accessed), null);
         if (tempSet == null) {
-            Toast toast = Toast.makeText(FoodPicker.getApp(), "History is blank.",
+            Toast toast = Toast.makeText(this, "History is blank.",
                     Toast.LENGTH_LONG);
             toast.show();
         } else {

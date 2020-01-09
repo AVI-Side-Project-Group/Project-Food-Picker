@@ -2,6 +2,7 @@ package me.nakukibo.projectfoodpicker;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,7 +20,7 @@ import java.util.Set;
 
 public class HistoryActivity extends AppCompatActivity {
 
-    private SharedPreferences sharedPreferences = FoodPicker.getSharedPreferences();
+    private SharedPreferences sharedPreferences;
     private List<HashMap<String, String>> previouslyAccessed;
 
     private RecyclerView recyclerView;
@@ -30,6 +31,7 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         previouslyAccessed = getHistory();
         initRecycler();
