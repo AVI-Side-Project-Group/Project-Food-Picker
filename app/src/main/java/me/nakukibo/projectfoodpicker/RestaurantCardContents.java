@@ -15,12 +15,12 @@ import androidx.annotation.Nullable;
 
 public class RestaurantCardContents extends ScrollView {
 
-    // TODO: add distance and open now
+    private Context context;
+    private ClipboardManager clipboardManager;
+
     private String url = "";
     private String phoneNumber = "";
     private String address = "";
-//    private ClipboardManager clipboardManager = (ClipboardManager) App.getApp().getSystemService(Context.CLIPBOARD_SERVICE);
-
 
     public RestaurantCardContents(@NonNull Context context) {
         this(context, null);
@@ -32,7 +32,8 @@ public class RestaurantCardContents extends ScrollView {
 
     public RestaurantCardContents(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initCardContents(context);
+        initInternalFields(context);
+        initCardContents();
     }
 
     /**
@@ -60,72 +61,63 @@ public class RestaurantCardContents extends ScrollView {
         TextView txtvwPricing = findViewById(R.id.txtvw_price_level);
         txtvwPricing.setText(pricing);
 
-        Button btnAddress = findViewById(R.id.btn_address);
-        if(address.equals(DataParser.DATA_DEFAULT)){
-            btnAddress.setClickable(false);
-        } else {
-            btnAddress.setClickable(true);
-        }
-        btnAddress.setText(address);
-        this.address = address;
-        btnAddress.setPaintFlags(btnAddress.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-//        btnAddress.setOnLongClickListener(v -> {
-//            ClipData clipData = ClipData.newPlainText("Address", address);
-//            clipboardManager.setPrimaryClip(clipData);
-//            Toast toast = Toast.makeText(App.getApp(), "Address copied to clipboard",
-//                    Toast.LENGTH_LONG);
-//            toast.show();
-//            return true;
-//        });
-
-
-        Button btnPhoneNumber = findViewById(R.id.btn_phone_number);
-        if(phoneNumber == DataParser.DATA_DEFAULT){
-            btnPhoneNumber.setClickable(false);
-        } else {
-            btnPhoneNumber.setClickable(true);
-        }
-        btnPhoneNumber.setText(phoneNumber);
-        this.phoneNumber = phoneNumber;
-        btnPhoneNumber.setPaintFlags(btnPhoneNumber.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnPhoneNumber.setOnLongClickListener(v -> {
-            ClipData clipData = ClipData.newPlainText("Phone Number", phoneNumber);
-//            clipboardManager.setPrimaryClip(clipData);
-//            Toast toast = Toast.makeText(App.getApp(), "Phone number copied to clipboard",
-//                    Toast.LENGTH_LONG);
-//            toast.show();
-            return true;
-        });
-
-
-        Button btnWebsite = findViewById(R.id.btn_website);
-        if(websiteURL == DataParser.DATA_DEFAULT){
-            btnWebsite.setClickable(false);
-        } else {
-            btnWebsite.setClickable(true);
-        }
-        //btnWebsite.setText(getResources().getString(R.string.restcard_default_website));
-        btnWebsite.setText(websiteURL);
-        this.url = websiteURL;
-        btnWebsite.setPaintFlags(btnWebsite.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        btnWebsite.setOnLongClickListener(v -> {
-            ClipData clipData = ClipData.newPlainText("Website URL", url);
-//            clipboardManager.setPrimaryClip(clipData);
-//            Toast toast = Toast.makeText(App.getApp(), "Website URL copied to clipboard",
-//                    Toast.LENGTH_LONG);
-//            toast.show();
-            return true;
-        });
-
-
         TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
         txtvwHours.setText(hours);
+
+        this.address = address;
+        this.phoneNumber = phoneNumber;
+        this.url = websiteURL;
+
+        Button btnAddress = findViewById(R.id.btn_address);
+        setClickEvents(btnAddress, address, "Address");
+
+        Button btnPhoneNumber = findViewById(R.id.btn_phone_number);
+        setClickEvents(btnPhoneNumber, phoneNumber, "Phone number");
+
+        Button btnWebsite = findViewById(R.id.btn_website);
+        setClickEvents(btnWebsite, url, "Website URL");
+    }
+
+    private void setClickEvents(Button btn, String btnText, String clipLabel){
+        if(btnText.equals(DataParser.DATA_DEFAULT)) {
+            activateClickEvents(btn);
+        } else {
+            deactivateClickEvents(btn);
+        }
+
+        btn.setText(btnText);
+        btn.setPaintFlags(btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        btn.setOnLongClickListener(v -> {
+            defaultLongClickEvent(clipLabel, btnText);
+            return true;
+        });
+    }
+
+    private void activateClickEvents(Button btn){
+        btn.setClickable(true);
+        btn.setLongClickable(true);
+    }
+
+    private void deactivateClickEvents(Button btn){
+        btn.setClickable(false);
+        btn.setLongClickable(false);
+    }
+
+    private void defaultLongClickEvent(String label, String clipText){
+        ClipData clipData = ClipData.newPlainText(label, clipText);
+        clipboardManager.setPrimaryClip(clipData);
+        Toast.makeText(context, label + " copied to clipboard.", Toast.LENGTH_LONG).show();
+    }
+
+    private void initInternalFields(@NonNull Context context) {
+        this.context = context;
+        clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
     }
 
     /**
      * initialize the views in the card to specific values
      */
-    private void initCardContents(@NonNull Context context) {
+    private void initCardContents() {
         inflate(context, R.layout.restaurant_card_contents, this);
 
         // set values to default

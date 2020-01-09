@@ -59,18 +59,10 @@ public class PreferencesActivity extends AppCompatActivity {
     private int[] priceRanges = {0, 1, 2, 3, 4};
     private float[] distances = {.5f, 1f, 5f, 10f, 20f};
 
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        editor = sharedPreferences.edit();
-        editor.putString("hi", "hello");
-        editor.apply();
-
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Log.d(TAG, "onCreate: " + sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
-
         setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);

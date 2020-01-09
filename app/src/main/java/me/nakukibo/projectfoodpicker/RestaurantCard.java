@@ -156,25 +156,6 @@ public class RestaurantCard extends ScrollView {
         restaurantCardContents.setValues(rating, pricing, address, phoneNumber, website, hours);
     }
 
-    public static Drawable LoadImageFromWebOperations(String url) {
-        try {
-            InputStream is = (InputStream) new URL(url).getContent();
-            Drawable d = Drawable.createFromStream(is, "src name");
-            return d;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String getPhotoUrl(Photo photo) {
-        String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/photo?";
-        googlePlaceUrl += "maxwidth=" + photo.getWidth();
-        googlePlaceUrl += "&photoreference=" + photo.getReference();
-        googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
-
-        return googlePlaceUrl;
-    }
-
     private void initSwipeVariables() {
         restCardStartX = this.getX();
         restCardStartY = this.getY();
