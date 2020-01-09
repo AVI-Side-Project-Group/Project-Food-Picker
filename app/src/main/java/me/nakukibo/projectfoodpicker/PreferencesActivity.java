@@ -280,7 +280,8 @@ public class PreferencesActivity extends AppCompatActivity {
         return (int) Math.ceil(miles*1609.34);
     }
 
-    public static double metersToMiles(float meters){
+    public static Double metersToMiles(Float meters){
+        if(meters == null) return null;
         return meters * 0.000621371;
     }
 

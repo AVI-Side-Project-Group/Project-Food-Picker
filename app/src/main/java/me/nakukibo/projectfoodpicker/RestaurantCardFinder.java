@@ -6,7 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -14,7 +14,6 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
@@ -24,8 +23,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -46,11 +43,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
     private static final int ERROR_PASSED_VALUE = -1;
     private static final String DEFAULT_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
-    private static final int DEFAULT_WAIT_MS = 500;
+    private static final int DEFAULT_WAIT_MS = 2000;
 
-    private static List<HashMap<String, String>> nearbyPlaceListCombined; // accumulates the list over several calls
-    private static List<HashMap<String, String>> previouslyAccessed; // stores the restaurants that have been accessed
-    private static LinkedList<HashMap<String, String>> placesProcessed;
+    private static List<Restaurant> nearbyRestaurantsCombined; // accumulates the list over several calls
+    private static List<Restaurant> previouslyAccessed = new ArrayList<>(); // stores the restaurants that have been accessed
+    private static LinkedList<Restaurant> placesProcessed;
 
     // data passed from PreferencesActivity.java
     private String foodType;
@@ -78,9 +75,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
     private Calendar calendar = Calendar.getInstance();
 
-    private int day = calendar.get(calendar.DATE);
-    private int month = calendar.get(calendar.MONTH);
-    private int year = calendar.get(calendar.YEAR);
+    private int day = calendar.get(Calendar.DATE);
+    private int month = calendar.get(Calendar.MONTH);
+    private int year = calendar.get(Calendar.YEAR);
     private String date = "" + month + day + year;
     boolean isOutOfRolls = false;
 
@@ -89,7 +86,6 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        editor = sharedPreferences.edit();
         setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
@@ -112,8 +108,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      * nearby
      */
     @Override
-    public void sendData(List<HashMap<String, String>> nearbyPlaceList, String nextPageToken) {
-        if (nearbyPlaceList == null) {
+    public void sendData(List<Restaurant> restaurants, String nextPageToken){
+        if (restaurants == null) {
             // if null then that means the nextPageToken request failed so search again
             requestNextPageSearch(previousPageToken);
             return;
@@ -121,8 +117,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
             previousPageToken = nextPageToken;
         }
 
-        nearbyPlaceListCombined.addAll(nearbyPlaceList);
-        Log.d(TAG, "sendData: combined list has new size of " + nearbyPlaceListCombined.size());
+        nearbyRestaurantsCombined.addAll(restaurants);
+        Log.d(TAG, "sendData: combined list has new size of " + nearbyRestaurantsCombined.size());
 
         if (nextPageToken != null) {
             requestNextPageSearch(nextPageToken);
@@ -130,10 +126,10 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         }
 
         Log.d(TAG, "sendData: logging the combined list");
-        logAllPlacesList(nearbyPlaceListCombined);
+        logAllPlacesList(nearbyRestaurantsCombined);
 
         // randomize list
-        Collections.shuffle(nearbyPlaceListCombined);
+        Collections.shuffle(nearbyRestaurantsCombined);
 
         // fetch first restaurant
         fetchNextRestaurant(R.string.restcard_finder_no_restaurants, false);
@@ -144,9 +140,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      * called when GetDetailData AsyncTask has finished fetching the detailed information
      */
     @Override
-    public void sendDetailData(HashMap<String, String> selectedRestaurant) {
+    public void sendDetailData(Restaurant selectedRestaurant) {
         previouslyAccessed.add(selectedRestaurant); // selectedRestaurant has been accessed
-        savePreviouslyAccessedData(previouslyAccessed);
+//        savePreviouslyAccessedData(previouslyAccessed); TODO: put this in after fix
 
         if (firstCard) {
             // make loading screen invisible
@@ -169,7 +165,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
             logAllPlacesList(placesProcessed);
         }
 
-        Set<HashMap<String, String>> potentials = removeVisited(nearbyPlaceListCombined);
+        Set<Restaurant> potentials = removeVisited(nearbyRestaurantsCombined);
         removeProcessed(potentials);
         // if zero then all of the potentials are already processed
         if(potentials.size() == 0) return;
@@ -257,7 +253,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      *                 - false otherwise (eg 0 possible restaurants)
      */
     private boolean getNextRestaurantDetails() {
-        Set<HashMap<String, String>> potentials = removeVisited(nearbyPlaceListCombined);
+        Set<Restaurant> potentials = removeVisited(nearbyRestaurantsCombined);
         // if zero then user has went through all restaurants
         if (potentials.size() == 0) return false;
 
@@ -276,15 +272,15 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         return true;
     }
 
-    private void rollNextRestaurant(Set<HashMap<String, String>> potentials){
-        List<HashMap<String, String>> potentialsList = new ArrayList<>(potentials);
-        HashMap<String, String> selectedRestaurant = potentialsList.get(0);
+    private void rollNextRestaurant(Set<Restaurant> potentials){
+        List<Restaurant> potentialsList = new ArrayList<>(potentials);
+        Restaurant selectedRestaurant = potentialsList.get(0);
 
         Object[] dataTransfer = new Object[5];
 
         // find restaurants
         GetDetailData getDetailData = new GetDetailData(selectedRestaurant, this);
-        String url = getDetailsUrl(selectedRestaurant.get(DataParser.DATA_KEY_PLACE_ID));
+        String url = getDetailsUrl(selectedRestaurant.getId());
         dataTransfer[0] = url;
         getDetailData.execute(dataTransfer);
 
@@ -309,17 +305,18 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         editor.commit();
     }
 
-    private Set<HashMap<String, String>> removeVisited(List<HashMap<String, String>> list){
-        Set<HashMap<String, String>> potentials = new HashSet<>(list);
-        previouslyAccessed = getPreviouslyAccessed();
+    private Set<Restaurant> removeVisited(List<Restaurant> list){
+        Set<Restaurant> potentials = new HashSet<>(list);
+//        previouslyAccessed = getPreviouslyAccessed(); TODO: put back in when interface with restaurant
         potentials.removeAll(previouslyAccessed);
         return potentials;
     }
 
-    private void removeProcessed(Set<HashMap<String, String>> set){
+    private void removeProcessed(Set<Restaurant> set){
         set.removeAll(placesProcessed);
     }
 
+    // TODO: put back in when interface with restaurant
     private List<HashMap<String, String>> getPreviouslyAccessed() {
         tempSet = sharedPreferences.getStringSet(getString(R.string.sp_previously_accessed), null);
         List<HashMap<String, String>> tempList;
@@ -377,9 +374,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         buttonSet = findViewById(R.id.restcard_finder_btn_set);
         buttonSet.setVisibility(View.GONE);
 
-        nearbyPlaceListCombined = new ArrayList<>();
+        nearbyRestaurantsCombined = new ArrayList<>();
         placesProcessed = new LinkedList<>();
-        previouslyAccessed = getPreviouslyAccessed();
+//        previouslyAccessed = getPreviouslyAccessed(); TODO: put back in when interface with restaurant
 
         firstCard = true;
 
@@ -417,10 +414,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      * send search request with nextPageToken
      */
     private void requestNextPageSearch(String nextPageToken) {
-        SystemClock.sleep(DEFAULT_WAIT_MS);
-        String nextPage = getUrlNextPage(nextPageToken);
-        Log.d(TAG, "sendData: search with url=" + nextPage);
-        fetchLocation(nextPage);
+        new Handler().postDelayed(() -> {
+            String nextPage = getUrlNextPage(nextPageToken);
+            Log.d(TAG, "sendData: search with url=" + nextPage);
+            fetchLocation(nextPage);
+        }, DEFAULT_WAIT_MS);
     }
 
     /**
@@ -479,6 +477,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
     }
 
+    // TODO: rewrite using Restaurant classes
     private void savePreviouslyAccessedData(List<HashMap<String, String>> previouslyAccessed) {
         tempSet = new HashSet(previouslyAccessed);
         editor.putStringSet(getString(R.string.sp_previously_accessed), tempSet);
@@ -499,11 +498,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         int lastYear = sharedPreferences.getInt(getString(R.string.sp_year), 0);
         String lastDate = "" + lastMonth + lastDay + lastYear;
 
+        editor = sharedPreferences.edit();
         if(!lastDate.equals(date)){
             editor.remove(getString(R.string.sp_previously_accessed));
-            editor.commit();
+            editor.apply();
             editor.remove(getString(R.string.sp_remained_rerolls));
-            editor.commit();
+            editor.apply();
             Log.d(TAG, "resetValues: " + "removed");
         }
         editor.putInt(getString(R.string.sp_date), day);
@@ -523,10 +523,10 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     /**
      * logs all of the nearbyPlacesList's HashMaps' name fields for debugging purposes
      */
-    private void logAllPlacesList(List<HashMap<String, String>> nearbyPlaceList) {
+    private void logAllPlacesList(List<Restaurant> restaurants) {
         Log.d(TAG, "logAllPlacesList: printing nearbyPlacesList---------------------");
-        for (HashMap<String, String> placesInfo : nearbyPlaceList) {
-            Log.d(TAG, "logAllPlacesList: restaurant name=" + placesInfo.get(DataParser.DATA_KEY_NAME));
+        for (Restaurant restaurant: restaurants) {
+            Log.d(TAG, "logAllPlacesList: restaurant name=" + restaurant.getName());
         }
         Log.d(TAG, "logAllPlacesList: -----------------------------------------------");
     }
@@ -562,8 +562,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     /**
      * set values of views to values in HashMap<String, String>
      */
-    private void setViewValues(HashMap<String, String> selectedRestaurant, RestaurantCard card) {
-        List<Photo> photoSource = DataParser.parsePhotos(selectedRestaurant.get(DataParser.DATA_KEY_PHOTO));
+    private void setViewValues(Restaurant selectedRestaurant, RestaurantCard card) {
+        List<Photo> photoSource = DataParser.parsePhotos(selectedRestaurant.getPhotosJson());
         List<Bitmap> photoBitmaps;
 
         if (photoSource != null) {

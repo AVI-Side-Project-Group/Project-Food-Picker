@@ -6,5 +6,5 @@ public interface ReceiveDetailData {
     /**
      * method used to transmit data
      */
-    void sendDetailData(HashMap<String, String> selectedRestaurant);
+    void sendDetailData(Restaurant selectedRestaurant);
 }

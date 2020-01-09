@@ -42,7 +42,7 @@ public class RestaurantCardContents extends ScrollView {
     void setDefaultValues(){
         setValues(
                 getResources().getString(R.string.restcard_default_rating),
-                getResources().getString(R.string.restcard_default_pricing),
+                null,
                 getResources().getString(R.string.restcard_default_address),
                 getResources().getString(R.string.restcard_default_phone_number),
                 getResources().getString(R.string.restcard_default_website),
@@ -53,13 +53,13 @@ public class RestaurantCardContents extends ScrollView {
     /**
      * set restaurant card to values passed
      */
-    void setValues(String rating, String pricing, String address,
+    void setValues(String rating, Integer pricing, String address,
                    String phoneNumber, String websiteURL, String hours){
         TextView txtvwRating = findViewById(R.id.txtvw_rating);
         txtvwRating.setText(rating);
 
         TextView txtvwPricing = findViewById(R.id.txtvw_price_level);
-        txtvwPricing.setText(pricing);
+        txtvwPricing.setText(pricing == null ? getResources().getString(R.string.restcard_default_pricing) : "Price level: " + pricing);
 
         TextView txtvwHours = findViewById(R.id.txtvw_hours_values);
         txtvwHours.setText(hours);
@@ -123,7 +123,7 @@ public class RestaurantCardContents extends ScrollView {
         // set values to default
         setValues(
                 getResources().getString(R.string.restcard_default_rating),
-                getResources().getString(R.string.restcard_default_pricing),
+                null,
                 getResources().getString(R.string.restcard_default_address),
                 getResources().getString(R.string.restcard_default_phone_number),
                 getResources().getString(R.string.restcard_default_website),

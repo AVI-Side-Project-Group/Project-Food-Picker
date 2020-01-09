@@ -83,25 +83,18 @@ public class RestaurantCard extends ScrollView {
     /**
      * set restaurant card to values passed as HashMap<String, String> with keys used by DataParser class
      */
-    void setValues(HashMap<String, String> values, List<Bitmap> photoBitmaps){
-        String distMetersStr = values.get(DataParser.DATA_KEY_DISTANCE);
-        Double distMiles = distMetersStr == null ? null : PreferencesActivity.metersToMiles(Float.parseFloat(distMetersStr));
-        Log.d(TAG, "setValues: restaurant distance=" + distMetersStr + ", " + distMiles);
-        String openNow = values.get(DataParser.DATA_KEY_CURRENTLY_OPEN);
-
+    void setValues(Restaurant selectedRestaurant, List<Bitmap> photoBitmaps){
         setValues(
-                values.get(DataParser.DATA_KEY_NAME),
-                openNow != null && openNow.equals("true"),
-                distMiles,
+                selectedRestaurant.getName(),
+                selectedRestaurant.getOpen(),
+                selectedRestaurant.getDistanceMiles(),
                 photoBitmaps,
-                String.format(Locale.US, "%s stars (%s)",
-                        values.get(DataParser.DATA_KEY_RATING), values.get(DataParser.DATA_KEY_TOT_RATING)),
-                String.format(Locale.US, "Pricing Level: %s",
-                        values.get(DataParser.DATA_KEY_PRICE_LEVEL)),
-                values.get(DataParser.DATA_KEY_ADDRESS),
-                values.get(DataParser.DATA_KEY_PHONE_NUMBER),
-                values.get(DataParser.DATA_KEY_WEBSITE),
-                values.get(DataParser.DATA_KEY_HOURS)
+                String.format(Locale.US, "%.2f stars (%d)", selectedRestaurant.getRating(), selectedRestaurant.getTotRating()),
+                selectedRestaurant.getPriceLevel(),
+                selectedRestaurant.getAddress(),
+                selectedRestaurant.getPhoneNumber(),
+                selectedRestaurant.getWebsite(),
+                selectedRestaurant.getHours()
         );
     }
 
@@ -125,18 +118,21 @@ public class RestaurantCard extends ScrollView {
     /**
      * set restaurant card to values passed
      */
-    private void setValues(String name, Boolean openNow, Double distanceMiles, List<Bitmap> photoBitmaps, String rating, String pricing, String address,
-                           String phoneNumber, String website, String hours){
+    private void setValues(String name, Boolean openNow, Double distanceMiles, List<Bitmap> photoBitmaps,
+                           String rating, Integer pricing, String address, String phoneNumber,
+                           String website, String hours){
         txtvwName.setText(name);
 
         String openNowText;
-        if(openNow){
+        if(openNow == null){
+            openNowText = "Unsure if open";
+        } else if(openNow){
             openNowText = "Open Now!";
-        }else {
+        } else {
             openNowText = "Closed";
         }
-        txtvwOpenNow.setText(openNowText);
 
+        txtvwOpenNow.setText(openNowText);
         txtvwDistance.setText(distanceMiles == null? "Unknown Distance" : String.format(Locale.US, "%.2f miles", distanceMiles));
 
         this.photoBitmaps = photoBitmaps;

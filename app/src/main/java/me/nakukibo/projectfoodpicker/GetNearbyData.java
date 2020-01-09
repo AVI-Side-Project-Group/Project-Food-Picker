@@ -51,7 +51,7 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
 
     @Override
     protected void onPostExecute(String s){
-        List<HashMap<String, String>> nearbyPlaceList;
+        List<Restaurant> nearbyPlaceList;
         DataParser parser = new DataParser();
         String nextPageToken;
         try {

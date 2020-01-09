@@ -11,7 +11,7 @@ public class GetPhotoData extends AsyncTask<Object, String, String> {
 
     private static final String TAG = GetNearbyData.class.getSimpleName();
 
-    private HashMap<String, String> selectedRestaurant;
+    private Restaurant selectedRestaurant;
     private ReceiveDetailData receiveDetailData;
     private String googlePlacesData;
     private List<Photo> photos;
@@ -19,7 +19,7 @@ public class GetPhotoData extends AsyncTask<Object, String, String> {
 
     private Integer cIndex = null;
 
-    GetPhotoData(HashMap<String, String> selectedRestaurant, ReceiveDetailData receiveDetailData) {
+    GetPhotoData(Restaurant selectedRestaurant, ReceiveDetailData receiveDetailData) {
         this.selectedRestaurant = selectedRestaurant;
         this.receiveDetailData = receiveDetailData;
     }
@@ -44,7 +44,7 @@ public class GetPhotoData extends AsyncTask<Object, String, String> {
         DataParser parser = new DataParser();
         parser.parseDetails(s, selectedRestaurant);
 
-        photos = DataParser.parsePhotos(selectedRestaurant.get(DataParser.DATA_KEY_PHOTO));
+        photos = DataParser.parsePhotos(selectedRestaurant.getPhotosJson());
         receiveDetailData.sendDetailData(selectedRestaurant);
     }
 }

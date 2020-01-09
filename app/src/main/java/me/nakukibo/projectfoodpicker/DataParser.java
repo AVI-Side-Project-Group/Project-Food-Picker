@@ -18,18 +18,18 @@ import java.util.List;
 
 class DataParser {
     // used for storing and loading values into HashMap
-    static final String DATA_KEY_NAME = "restaurant_name";
-    static final String DATA_KEY_ADDRESS = "formatted_address";
-    static final String DATA_KEY_HOURS = "opening_hours";
-    static final String DATA_KEY_CURRENTLY_OPEN = "currently_open";
-    static final String DATA_KEY_PHOTO = "restaurant_photo";
-    static final String DATA_KEY_RATING = "restaurant_rating";
-    static final String DATA_KEY_TOT_RATING = "restaurant_total_rating";
-    static final String DATA_KEY_PRICE_LEVEL = "price_level";
-    static final String DATA_KEY_PHONE_NUMBER = "phone_number";
-    static final String DATA_KEY_WEBSITE = "website";
-    static final String DATA_KEY_DISTANCE = "distance";
-    static final String DATA_KEY_PLACE_ID = "restaurant_place_id";
+//    static final String DATA_KEY_NAME = "restaurant_name";
+//    static final String DATA_KEY_ADDRESS = "formatted_address";
+//    static final String DATA_KEY_HOURS = "opening_hours";
+//    static final String DATA_KEY_CURRENTLY_OPEN = "currently_open";
+//    static final String DATA_KEY_PHOTO = "restaurant_photo";
+//    static final String DATA_KEY_RATING = "restaurant_rating";
+//    static final String DATA_KEY_TOT_RATING = "restaurant_total_rating";
+//    static final String DATA_KEY_PRICE_LEVEL = "price_level";
+//    static final String DATA_KEY_PHONE_NUMBER = "phone_number";
+//    static final String DATA_KEY_WEBSITE = "website";
+//    static final String DATA_KEY_DISTANCE = "distance";
+//    static final String DATA_KEY_PLACE_ID = "restaurant_place_id";
 
     private static final String TAG = DataParser.class.getSimpleName();
     static final String DATA_DEFAULT = "--NA--"; // HashMap value if null or by default
@@ -42,12 +42,12 @@ class DataParser {
      * the details will be entered into the selectedRestaurant reference
      * the detail will be set to default if is not available
      */
-    void parseDetails(String jsonData, HashMap<String, String> selectedRestaurant) {
+    void parseDetails(String jsonData, Restaurant selectedRestaurant) {
         Log.d(TAG, "parseDetails: jsonData=" + getPrettyJson(jsonData));
 
-        String hours = DATA_DEFAULT;
-        String phoneNumber = DATA_DEFAULT;
-        String website = DATA_DEFAULT;
+        String hours = null;
+        String phoneNumber = null;
+        String website = null;
         String photos = null;
 
         JSONObject jsonObject;
@@ -63,7 +63,7 @@ class DataParser {
         } catch (JSONException e) {
             // if no result for search
             Log.d(TAG, "parseDetails: no details found for restaurant location: " +
-                    selectedRestaurant.get(DATA_KEY_NAME) + " with id=" + selectedRestaurant.get(DATA_KEY_PLACE_ID));
+                    selectedRestaurant.getName() + " with id=" + selectedRestaurant.getId());
             e.printStackTrace();
             return;
         }
@@ -103,10 +103,10 @@ class DataParser {
         }
 
         // pass into map
-        selectedRestaurant.put(DATA_KEY_HOURS, hours);
-        selectedRestaurant.put(DATA_KEY_PHONE_NUMBER, phoneNumber);
-        selectedRestaurant.put(DATA_KEY_WEBSITE, website);
-        if (photos != null) selectedRestaurant.put(DATA_KEY_PHOTO, photos);
+        selectedRestaurant.setHours(hours);
+        selectedRestaurant.setPhoneNumber(phoneNumber);
+        selectedRestaurant.setWebsite(website);
+        if (photos != null) selectedRestaurant.setPhotosJson(photos);
     }
 
     /**
@@ -116,11 +116,11 @@ class DataParser {
      * @param jsonData JSON data to be parsed
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
-    List<HashMap<String, String>> parse(String jsonData, Location userLocation, int maxDistance,
+    List<Restaurant> parse(String jsonData, Location userLocation, int maxDistance,
                                         int pricingRange, int minRating) throws RuntimeException {
         Log.d(TAG, "parse: jsonData=" + getPrettyJson(jsonData));
 
-        JSONArray jsonArray = null;
+        JSONArray jsonArray;
         JSONObject jsonObject;
         nextPageToken = null;
 
@@ -281,16 +281,16 @@ class DataParser {
      * @param jsonArray all of the JSON to be parsed
      * @return List<HashMap < String, String>>  list of all HashMaps returned for each location
      */
-    private List<HashMap<String, String>> getAllPlacesData(JSONArray jsonArray, Location userLocation,
+    private List<Restaurant> getAllPlacesData(JSONArray jsonArray, Location userLocation,
                                                            int maxDistance, int pricingRange, int minRating) {
-        List<HashMap<String, String>> placelist = new ArrayList<>();
-        HashMap<String, String> placeMap;
+        List<Restaurant> restaurants = new ArrayList<>();
+        Restaurant restaurantObj;
 
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                placeMap = getPlaceData((JSONObject) jsonArray.get(i), userLocation, maxDistance, pricingRange, minRating);
-                if (placeMap != null) {
-                    placelist.add(placeMap);
+                restaurantObj = getRestaurantData((JSONObject) jsonArray.get(i), userLocation, maxDistance, pricingRange, minRating);
+                if (restaurantObj != null) {
+                    restaurants.add(restaurantObj);
                     Log.d(TAG, "getAllPlacesData: place added");
                 } else {
                     Log.d(TAG, "getAllPlacesData: place not added");
@@ -299,7 +299,7 @@ class DataParser {
                 e.printStackTrace();
             }
         }
-        return placelist;
+        return restaurants;
     }
 
     /**
@@ -308,20 +308,18 @@ class DataParser {
      * @param googlePlaceJson the JSON to be converted
      * @return HashMap<String, String> key values are declared as constants for easy access
      */
-    private HashMap<String, String> getPlaceData(JSONObject googlePlaceJson, Location userLocation,
-                                                 int maxDistance, int pricingRange, int minRating) {
-        HashMap<String, String> googlePlaceMap = new HashMap<>();
-
+    private Restaurant getRestaurantData(JSONObject googlePlaceJson, Location userLocation,
+                                         int maxDistance, int pricingRange, int minRating) {
         // initialize all values to default
         Float distFromUser = null;
-        String name = DATA_DEFAULT;
-        String address = DATA_DEFAULT;
-        String isCurrentlyOpen = DATA_DEFAULT;
-        String photo = DATA_DEFAULT;
-        String rating = DATA_DEFAULT;
-        String totRating = DATA_DEFAULT;
-        String priceLevel = DATA_DEFAULT;
-        String placeId = DATA_DEFAULT;
+        String name = null;
+        String address = null;
+        Boolean isCurrentlyOpen = null;
+        String photo = null;
+        Double rating = null;
+        Integer totRating = null;
+        Integer priceLevel = null;
+        String placeId = null;
 
         Log.d("DataParser", "jsonobject =" + googlePlaceJson.toString());
 
@@ -344,7 +342,7 @@ class DataParser {
             if (!googlePlaceJson.isNull("opening_hours")) {
                 JSONObject openHoursObject = googlePlaceJson.getJSONObject("opening_hours");
                 if (!openHoursObject.isNull("open_now")) {
-                    isCurrentlyOpen = openHoursObject.getString("open_now");
+                    isCurrentlyOpen = openHoursObject.getBoolean("open_now");
                 }
             }
 
@@ -355,25 +353,25 @@ class DataParser {
 
             // rating
             if (!googlePlaceJson.isNull("rating")) {
-                rating = googlePlaceJson.getString("rating");
+                rating = googlePlaceJson.getDouble("rating");
                 // if rating too low, then return null
-                if (Double.parseDouble(rating) < minRating) {
-                    Log.d(TAG, "getPlaceData: " + name + "'s rating is too low. Returning null");
+                if (rating < minRating) {
+                    Log.d(TAG, "getRestaurantData: " + name + "'s rating is too low. Returning null");
                     return null;
                 }
             }
 
             // total rating count
             if (!googlePlaceJson.isNull("user_ratings_total")) {
-                totRating = googlePlaceJson.getString("user_ratings_total");
+                totRating = googlePlaceJson.getInt("user_ratings_total");
             }
 
             // price level
             if (!googlePlaceJson.isNull("price_level")) {
-                priceLevel = googlePlaceJson.getString("price_level");
+                priceLevel = googlePlaceJson.getInt("price_level");
                 // if price level not correct, return null
-                if (Double.parseDouble(priceLevel) != pricingRange && pricingRange != PreferencesActivity.PREF_ANY_INT_REP) {
-                    Log.d(TAG, "getPlaceData: " + name + " has incorrect price level.");
+                if (priceLevel > pricingRange && pricingRange != PreferencesActivity.PREF_ANY_INT_REP) {
+                    Log.d(TAG, "getRestaurantData: " + name + " has incorrect price level.");
                     return null;
                 }
             }
@@ -386,22 +384,14 @@ class DataParser {
             e.printStackTrace();
         }
 
-        // pass into map
-        googlePlaceMap.put(DATA_KEY_DISTANCE, String.valueOf(distFromUser));
-        googlePlaceMap.put(DATA_KEY_NAME, name);
-        googlePlaceMap.put(DATA_KEY_ADDRESS, address);
-        googlePlaceMap.put(DATA_KEY_HOURS, DATA_DEFAULT);
-        googlePlaceMap.put(DATA_KEY_CURRENTLY_OPEN, isCurrentlyOpen);
-        googlePlaceMap.put(DATA_KEY_PHOTO, photo);
-        googlePlaceMap.put(DATA_KEY_RATING, rating);
-        googlePlaceMap.put(DATA_KEY_TOT_RATING, totRating);
-        googlePlaceMap.put(DATA_KEY_PRICE_LEVEL, priceLevel);
-        googlePlaceMap.put(DATA_KEY_PHONE_NUMBER, DATA_DEFAULT);
-        googlePlaceMap.put(DATA_KEY_WEBSITE, DATA_DEFAULT);
-        googlePlaceMap.put(DATA_KEY_PLACE_ID, placeId);
+        Log.d(TAG, "getRestaurantData: ---------------------------------------------------------");
 
-        Log.d(TAG, "getPlaceData: ---------------------------------------------------------");
-        return googlePlaceMap;
+        Restaurant restaurant = new Restaurant(
+                name, address, isCurrentlyOpen, photo, rating, totRating, priceLevel,
+                PreferencesActivity.metersToMiles(distFromUser), placeId
+        );
+
+        return restaurant;
     }
 
     /**
@@ -423,7 +413,7 @@ class DataParser {
                     googlePlaceJson.getJSONObject("geometry").getJSONObject("location").getString("lng")
             );
         } catch (JSONException e) {
-            Log.d(TAG, "getPlaceData: " + name + " cannot determine location. Returning false.");
+            Log.d(TAG, "getRestaurantData: " + name + " cannot determine location. Returning false.");
             return null;
         }
 
