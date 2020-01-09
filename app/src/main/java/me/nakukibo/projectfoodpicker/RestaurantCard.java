@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -51,6 +52,11 @@ public class RestaurantCard extends ScrollView {
     private float restCardDy = 0;
     private boolean isBeingSwiped = false;
 
+    private Context context;
+
+    private List<Bitmap> photoBitmaps;
+    private int cImage;
+
 //    private static final String TAG = RestaurantCard.class.getSimpleName();
 
     public RestaurantCard(@NonNull Context context) {
@@ -63,6 +69,7 @@ public class RestaurantCard extends ScrollView {
 
     public RestaurantCard(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        this.context = context;
 
         onOpenContents = null;
         onCloseContents = null;
@@ -75,7 +82,7 @@ public class RestaurantCard extends ScrollView {
     /**
      * set restaurant card to values passed as HashMap<String, String> with keys used by DataParser class
      */
-    void setValues(HashMap<String, String> values){
+    void setValues(HashMap<String, String> values, List<Bitmap> photoBitmaps){
         String distMetersStr = values.get(DataParser.DATA_KEY_DISTANCE);
         Double distMiles = distMetersStr == null ? null : PreferencesActivity.metersToMiles(Float.parseFloat(distMetersStr));
         Log.d(TAG, "setValues: restaurant distance=" + distMetersStr + ", " + distMiles);
@@ -85,7 +92,7 @@ public class RestaurantCard extends ScrollView {
                 values.get(DataParser.DATA_KEY_NAME),
                 openNow != null && openNow.equals("true"),
                 distMiles,
-                DataParser.parsePhotos(values.get(DataParser.DATA_KEY_PHOTO)),
+                photoBitmaps,
                 String.format(Locale.US, "%s stars (%s)",
                         values.get(DataParser.DATA_KEY_RATING), values.get(DataParser.DATA_KEY_TOT_RATING)),
                 String.format(Locale.US, "Pricing Level: %s",
@@ -114,10 +121,12 @@ public class RestaurantCard extends ScrollView {
 //                getResources().getString(R.string.restcard_default_hours));
     }
 
+
+
     /**
      * set restaurant card to values passed
      */
-    private void setValues(String name, Boolean openNow, Double distanceMiles, List<Photo> photoSource, String rating, String pricing, String address,
+    private void setValues(String name, Boolean openNow, Double distanceMiles, List<Bitmap> photoBitmaps, String rating, String pricing, String address,
                            String phoneNumber, String website, String hours){
         txtvwName.setText(name);
 
@@ -131,27 +140,10 @@ public class RestaurantCard extends ScrollView {
 
         txtvwDistance.setText(distanceMiles == null? "Unknown Distance" : String.format(Locale.US, "%.2f miles", distanceMiles));
 
-        Photo photo = photoSource.get(0);
-        PhotoMetadata.Builder builder = PhotoMetadata.builder(photo.getReference());
-        builder.setWidth(photo.getWidth());
-        builder.setHeight(photo.getHeight());
+        this.photoBitmaps = photoBitmaps;
+        cImage = 0;
+        restPhoto.setImageBitmap(photoBitmaps.get(cImage));
 
-        PhotoMetadata  photoMetadata = builder.build();
-        FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                .build();
-
-//        PlacesClient placesClient = App.getPlacesClient();
-//        placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
-//            Bitmap bitmap = fetchPhotoResponse.getBitmap();
-//            restPhoto.setImageBitmap(bitmap);
-//        }).addOnFailureListener((exception) -> {
-//            if (exception instanceof ApiException) {
-//                ApiException apiException = (ApiException) exception;
-//                int statusCode = apiException.getStatusCode();
-//                // Handle error with given status code.
-//                Log.e(TAG, "Place not found: " + exception.getMessage());
-//            }
-//        });
 
         restaurantCardContents.setValues(rating, pricing, address, phoneNumber, website, hours);
     }
@@ -206,6 +198,8 @@ public class RestaurantCard extends ScrollView {
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
                 Log.d(TAG, "initEvents: viewing last image");
+                if(cImage > 0) cImage --;
+                restPhoto.setImageBitmap(photoBitmaps.get(cImage));
             }
 
             return true;
@@ -219,6 +213,8 @@ public class RestaurantCard extends ScrollView {
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
                 Log.d(TAG, "initEvents: viewing next image");
+                if(cImage < photoBitmaps.size() - 1) cImage ++;
+                restPhoto.setImageBitmap(photoBitmaps.get(cImage));
             }
 
             return true;

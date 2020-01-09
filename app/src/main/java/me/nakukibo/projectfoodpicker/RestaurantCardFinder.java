@@ -3,6 +3,7 @@ package me.nakukibo.projectfoodpicker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -13,13 +14,19 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -77,9 +84,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private String date = "" + month + day + year;
     boolean isOutOfRolls = false;
 
-
     private PlacesClient placesClient;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +99,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
-        placesClient = Places.createClient(this);
+
 
         initViews();
         retrievePassedValues();
@@ -555,11 +560,53 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         return inFromRight;
     }
 
+    boolean receivedLastPhoto = false;
+
     /**
      * set values of views to values in HashMap<String, String>
      */
     private void setViewValues(HashMap<String, String> selectedRestaurant, RestaurantCard card) {
-        card.setValues(selectedRestaurant);
-        activeCard.setAnimation(inFromRightAnimation());
+        List<Photo> photoSource = DataParser.parsePhotos(selectedRestaurant.get(DataParser.DATA_KEY_PHOTO));
+        List<Bitmap> photoBitmaps;
+
+        if (photoSource != null) {
+             photoBitmaps = new ArrayList<>();
+            for(int i=0; i<photoSource.size(); i++){
+                receivedLastPhoto = i == photoSource.size() - 1;
+
+                Photo photo = photoSource.get(i);
+                PhotoMetadata.Builder builder = PhotoMetadata.builder(photo.getReference());
+                builder.setWidth(photo.getWidth());
+                builder.setHeight(photo.getHeight());
+
+                PhotoMetadata  photoMetadata = builder.build();
+                FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                        .build();
+
+                PlacesClient placesClient = Places.createClient(this);
+                placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
+                    Bitmap bitmap = fetchPhotoResponse.getBitmap();
+                    photoBitmaps.add(bitmap);
+
+                    if(receivedLastPhoto){
+                        card.setValues(selectedRestaurant, photoBitmaps);
+                        activeCard.setAnimation(inFromRightAnimation());
+                    }
+
+                }).addOnFailureListener((exception) -> {
+                    if (exception instanceof ApiException) {
+                        ApiException apiException = (ApiException) exception;
+                        int statusCode = apiException.getStatusCode();
+                        // Handle error with given status code.
+                        Log.e(TAG, "Place not found: " + exception.getMessage());
+                    }
+                });
+            }
+        }else {
+            photoBitmaps = null;
+
+            card.setValues(selectedRestaurant, photoBitmaps);
+            activeCard.setAnimation(inFromRightAnimation());
+        }
     }
 }
