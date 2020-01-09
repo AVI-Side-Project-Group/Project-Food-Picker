@@ -5,22 +5,21 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
-public class DetailData extends AsyncTask<Object, String, String> {
+public class GetPhotoData extends AsyncTask<Object, String, String> {
 
-    /**
-     * takes in the HashMap<String, String> selectedRestaurant and fills it with the detailed info
-     * the reference will be sent back to the ReceiveDetailData instance that was passed as argument
-     */
-
-    private static final String TAG = NearbyData.class.getSimpleName();
+    private static final String TAG = GetNearbyData.class.getSimpleName();
 
     private HashMap<String, String> selectedRestaurant;
     private ReceiveDetailData receiveDetailData;
-
     private String googlePlacesData;
+    private List<Photo> photos;
+    private List<String> photoRetrieved;
 
-    DetailData(HashMap<String, String> selectedRestaurant, ReceiveDetailData receiveDetailData) {
+    private Integer cIndex = null;
+
+    GetPhotoData(HashMap<String, String> selectedRestaurant, ReceiveDetailData receiveDetailData) {
         this.selectedRestaurant = selectedRestaurant;
         this.receiveDetailData = receiveDetailData;
     }
@@ -44,6 +43,8 @@ public class DetailData extends AsyncTask<Object, String, String> {
     protected void onPostExecute(String s) {
         DataParser parser = new DataParser();
         parser.parseDetails(s, selectedRestaurant);
+
+        photos = DataParser.parsePhotos(selectedRestaurant.get(DataParser.DATA_KEY_PHOTO));
         receiveDetailData.sendDetailData(selectedRestaurant);
     }
 }
