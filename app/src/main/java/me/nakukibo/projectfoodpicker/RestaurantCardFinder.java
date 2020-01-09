@@ -15,9 +15,12 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -27,10 +30,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData {
+
+    public static final int MAX_PHOTOS = 5;
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
     private static final int ERROR_PASSED_VALUE = -1;
@@ -59,8 +63,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     // previous pageToken for multiple calls
     private String previousPageToken;
 
-    private SharedPreferences sharedPreferences = FoodPicker.getSharedPreferences();
-    private SharedPreferences.Editor editor = FoodPicker.getEditor();
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
 
     private Set tempSet;
     View loadingView;
@@ -74,23 +78,32 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     boolean isOutOfRolls = false;
 
 
+    private PlacesClient placesClient;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(FoodPicker.getSharedPreferences().getInt(getString(R.string.sp_theme), R.style.Light));
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = sharedPreferences.edit();
+        setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_restaurant_card_finder);
 
+        setContentView(R.layout.activity_restaurant_card_finder);
         needNextCard = true;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
+        placesClient = Places.createClient(this);
+
         initViews();
         retrievePassedValues();
-        fetchLocation(null);
         resetValues();
+        fetchLocation(null);
     }
 
     /**
-     * called when the NearbyData AsyncTask has finished retrieving the information for the restaurants
+     * called when the GetNearbyData AsyncTask has finished retrieving the information for the restaurants
      * nearby
      */
     @Override
@@ -123,7 +136,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
 
     /**
-     * called when DetailData AsyncTask has finished fetching the detailed information
+     * called when GetDetailData AsyncTask has finished fetching the detailed information
      */
     @Override
     public void sendDetailData(HashMap<String, String> selectedRestaurant) {
@@ -265,7 +278,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         Object[] dataTransfer = new Object[5];
 
         // find restaurants
-        DetailData getDetailData = new DetailData(selectedRestaurant, this);
+        GetDetailData getDetailData = new GetDetailData(selectedRestaurant, this);
         String url = getDetailsUrl(selectedRestaurant.get(DataParser.DATA_KEY_PLACE_ID));
         dataTransfer[0] = url;
         getDetailData.execute(dataTransfer);
@@ -337,7 +350,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
                         Object[] dataTransfer = new Object[5];
 
                         // find restaurants
-                        NearbyData getNearbyPlacesData = new NearbyData(RestaurantCardFinder.this);
+                        GetNearbyData getNearbyPlacesData = new GetNearbyData(RestaurantCardFinder.this);
                         String url = getUrl(latitude, longitude);
                         dataTransfer[0] = customUrl == null ? url : customUrl;
                         dataTransfer[1] = location;
@@ -445,7 +458,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private String getDetailsUrl(String placeId) {
         String googlePlaceUrl = "https://maps.googleapis.com/maps/api/place/details/json?";
         googlePlaceUrl += "place_id=" + placeId;
-        googlePlaceUrl += "&fields=formatted_phone_number,opening_hours,website";
+        googlePlaceUrl += "&fields=formatted_phone_number,opening_hours,website,photos";
         googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
 
         return googlePlaceUrl;

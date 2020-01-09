@@ -5,19 +5,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.EditTextPreference;
-import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 public class SettingsActivity extends AppCompatActivity {
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
@@ -27,10 +21,14 @@ public class SettingsActivity extends AppCompatActivity {
     private int currentTheme;
     private int selectedTheme;
 
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = FoodPicker.getSharedPreferences();
-        editor = FoodPicker.getEditor();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor = sharedPreferences.edit();
+
         currentTheme = sharedPreferences.getInt(getString(R.string.sp_theme), themeIDs[0]);
 
         setTheme(currentTheme);

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-public class NearbyData extends AsyncTask<Object, String, String> {
+public class GetNearbyData extends AsyncTask<Object, String, String> {
 
     /**
      * fetches the restaurants from Google Places and then parses the data and sends it back
@@ -22,11 +22,11 @@ public class NearbyData extends AsyncTask<Object, String, String> {
     private int pricingRange;
     private int minRating;
 
-    NearbyData(ReceiveNearbyData receiveNearbyData) {
+    GetNearbyData(ReceiveNearbyData receiveNearbyData) {
         this.receiveNearbyData = receiveNearbyData;
     }
 
-    private static final String TAG = NearbyData.class.getSimpleName();
+    private static final String TAG = GetNearbyData.class.getSimpleName();
 
     @Override
     protected String doInBackground(Object... objects){
