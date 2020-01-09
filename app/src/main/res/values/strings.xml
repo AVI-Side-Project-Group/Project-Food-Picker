@@ -13,6 +13,7 @@
     <string name="prefs_rdbtn_pricinglv3">$$$</string>
     <string name="prefs_btn_search">Search</string>
     <string name="prefs_btn_setting">Settings</string>
+    <string name="prefs_btn_gethistory">History</string>
 
     <!--    restaurant_card.xml text-->
     <string name="restcard_txtvw_hours">Opening Hours</string>
@@ -65,4 +66,7 @@
     <string name="restcard_finder_no_rolls">
         You are out of rolls.
     </string>
+
+    <!-- history_info.xml text -->
+    <string name="historycard_btn_get_info">Get More Info</string>
 </resources>
