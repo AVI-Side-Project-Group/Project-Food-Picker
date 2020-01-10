@@ -1,27 +1,12 @@
 package me.nakukibo.projectfoodpicker;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.graphics.Bitmap;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
-import android.widget.Spinner;
-import android.widget.TextView;
-
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.List;
-import java.util.Locale;
 
 import static me.nakukibo.projectfoodpicker.DataParser.DATA_DEFAULT;
 
-public class Restaurant {
+class Restaurant {
     private String name;
     private String address;
     private Boolean isOpen;
@@ -37,7 +22,7 @@ public class Restaurant {
     private String website;
     private List<Bitmap> photoBitmaps;
 
-    public Restaurant(String name, String address, Boolean isOpen, String photosJson, Double rating,
+    Restaurant(String name, String address, Boolean isOpen, String photosJson, Double rating,
                       Integer totRating, Integer priceLevel, Double distanceMiles, String id) {
         this.name = name;
         this.address = address;
@@ -55,107 +40,107 @@ public class Restaurant {
         this.photoBitmaps = null;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
 
-    public String getAddress() {
+    String getAddress() {
         return address == null ? DATA_DEFAULT : address;
     }
 
-    public void setAddress(String address) {
+    void setAddress(String address) {
         this.address = address;
     }
 
-    public Boolean getOpen() {
+    Boolean getOpen() {
         return isOpen;
     }
 
-    public void setOpen(Boolean open) {
+    void setOpen(Boolean open) {
         isOpen = open;
     }
 
-    public String getPhotosJson() {
+    String getPhotosJson() {
         return photosJson == null ? DATA_DEFAULT : photosJson;
     }
 
-    public void setPhotosJson(String photosJson) {
+    void setPhotosJson(String photosJson) {
         this.photosJson = photosJson;
     }
 
-    public Double getRating() {
+    Double getRating() {
         return rating;
     }
 
-    public void setRating(Double rating) {
+    void setRating(Double rating) {
         this.rating = rating;
     }
 
-    public Integer getTotRating() {
+    Integer getTotRating() {
         return totRating;
     }
 
-    public void setTotRating(Integer totRating) {
+    void setTotRating(Integer totRating) {
         this.totRating = totRating;
     }
 
-    public Integer getPriceLevel() {
+    Integer getPriceLevel() {
         return priceLevel;
     }
 
-    public void setPriceLevel(Integer priceLevel) {
+    void setPriceLevel(Integer priceLevel) {
         this.priceLevel = priceLevel;
     }
 
-    public Double getDistanceMiles() {
+    Double getDistanceMiles() {
         return distanceMiles;
     }
 
-    public void setDistanceMiles(Double distanceMiles) {
+    void setDistanceMiles(Double distanceMiles) {
         this.distanceMiles = distanceMiles;
     }
 
-    public String getId() {
+    String getId() {
         return id == null ? DATA_DEFAULT : id;
     }
 
-    public void setId(String id) {
+    void setId(String id) {
         this.id = id;
     }
 
-    public String getHours() {
+    String getHours() {
         return hours == null ? DATA_DEFAULT : hours;
     }
 
-    public void setHours(String hours) {
+    void setHours(String hours) {
         this.hours = hours;
     }
 
-    public String getPhoneNumber() {
+    String getPhoneNumber() {
         return phoneNumber == null ? DATA_DEFAULT : phoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
+    void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getWebsite() {
+    String getWebsite() {
         return website == null ? DATA_DEFAULT : website;
     }
 
-    public void setWebsite(String website) {
+    void setWebsite(String website) {
         this.website = website;
     }
 
-    public List<Bitmap> getPhotoBitmaps() {
+    List<Bitmap> getPhotoBitmaps() {
         return photoBitmaps;
     }
 
-    public void setPhotoBitmaps(List<Bitmap> photoBitmaps) {
+    void setPhotoBitmaps(List<Bitmap> photoBitmaps) {
         this.photoBitmaps = photoBitmaps;
     }
 }

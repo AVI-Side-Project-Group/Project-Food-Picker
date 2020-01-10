@@ -41,11 +41,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     public static final int MAX_PHOTOS = 5;
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
+
+    private static final int DEFAULT_WAIT_MS = 2000;
     private static final int ERROR_PASSED_VALUE = -1;
     private static final String DEFAULT_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
-    private static final int DEFAULT_WAIT_MS = 2000;
 
-    private static List<Restaurant> nearbyRestaurantsCombined; // accumulates the list over several calls
+    private List<Restaurant> nearbyRestaurants; // accumulates the list over several calls
     private static List<Restaurant> previouslyAccessed = new ArrayList<>(); // stores the restaurants that have been accessed
     private static LinkedList<Restaurant> placesProcessed;
 
@@ -109,27 +110,28 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      */
     @Override
     public void sendData(List<Restaurant> restaurants, String nextPageToken){
-        if (restaurants == null) {
-            // if null then that means the nextPageToken request failed so search again
-            requestNextPageSearch(previousPageToken);
-            return;
-        } else {
-            previousPageToken = nextPageToken;
-        }
-
-        nearbyRestaurantsCombined.addAll(restaurants);
-        Log.d(TAG, "sendData: combined list has new size of " + nearbyRestaurantsCombined.size());
-
-        if (nextPageToken != null) {
-            requestNextPageSearch(nextPageToken);
-            return;
-        }
-
-        Log.d(TAG, "sendData: logging the combined list");
-        logAllPlacesList(nearbyRestaurantsCombined);
+//        if (restaurants == null) {
+//            // if null then that means the nextPageToken request failed so search again
+//            requestNextPageSearch(previousPageToken);
+//            return;
+//        } else {
+//            previousPageToken = nextPageToken;
+//        }
+//
+//        nearbyRestaurants.addAll(restaurants);
+//        Log.d(TAG, "sendData: combined list has new size of " + nearbyRestaurants.size());
+//
+////        if (nextPageToken != null) {
+////            requestNextPageSearch(nextPageToken);
+////            return;
+////        }
+//
+//        Log.d(TAG, "sendData: logging the combined list");
+        Log.d(TAG, "sendData: combined list has new size of " + nearbyRestaurants.size());
+        logAllPlacesList(nearbyRestaurants);
 
         // randomize list
-        Collections.shuffle(nearbyRestaurantsCombined);
+        Collections.shuffle(nearbyRestaurants);
 
         // fetch first restaurant
         fetchNextRestaurant(R.string.restcard_finder_no_restaurants, false);
@@ -165,7 +167,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
             logAllPlacesList(placesProcessed);
         }
 
-        Set<Restaurant> potentials = removeVisited(nearbyRestaurantsCombined);
+        Set<Restaurant> potentials = removeVisited(nearbyRestaurants);
         removeProcessed(potentials);
         // if zero then all of the potentials are already processed
         if(potentials.size() == 0) return;
@@ -253,7 +255,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      *                 - false otherwise (eg 0 possible restaurants)
      */
     private boolean getNextRestaurantDetails() {
-        Set<Restaurant> potentials = removeVisited(nearbyRestaurantsCombined);
+        Set<Restaurant> potentials = removeVisited(nearbyRestaurants);
         // if zero then user has went through all restaurants
         if (potentials.size() == 0) return false;
 
@@ -284,8 +286,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         dataTransfer[0] = url;
         getDetailData.execute(dataTransfer);
 
-        makeRoll();
-        Log.d(TAG, "getNextRestaurantDetails: " + sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10));
+        // TODO: figure out whether makeRoll() is needed here
+//        makeRoll();
+//        Log.d(TAG, "getNextRestaurantDetails: " + sharedPreferences.getInt(getString(R.string.sp_remained_rerolls), 10));
     }
 
     private boolean haveRolls(){
@@ -350,9 +353,10 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
                         Object[] dataTransfer = new Object[5];
-
+                        Log.d(TAG, "fetchLocation: calling getnearbydata");
                         // find restaurants
-                        GetNearbyData getNearbyPlacesData = new GetNearbyData(RestaurantCardFinder.this);
+                        GetNearbyData getNearbyPlacesData = new GetNearbyData(getResources().getString(R.string.google_maps_key),
+                                this, nearbyRestaurants);
                         String url = getUrl(latitude, longitude);
                         dataTransfer[0] = customUrl == null ? url : customUrl;
                         dataTransfer[1] = location;
@@ -374,7 +378,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         buttonSet = findViewById(R.id.restcard_finder_btn_set);
         buttonSet.setVisibility(View.GONE);
 
-        nearbyRestaurantsCombined = new ArrayList<>();
+        nearbyRestaurants = new ArrayList<>();
         placesProcessed = new LinkedList<>();
 //        previouslyAccessed = getPreviouslyAccessed(); TODO: put back in when interface with restaurant
 
@@ -424,7 +428,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     /**
      * get the google place url based on nextPageToken only
      */
-    private String getUrlNextPage(String nextPageToken) {
+    public String getUrlNextPage(String nextPageToken) {
         String googlePlaceUrl = DEFAULT_PLACES_SEARCH_URL;
         googlePlaceUrl += "pagetoken=" + nextPageToken;
         googlePlaceUrl += "&key=" + getResources().getString(R.string.google_maps_key);
