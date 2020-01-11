@@ -14,8 +14,12 @@ import java.util.List;
 
 class FetchDetails {
 
-    private Restaurant.OnFinishRetrievingImages onFinishRetrievingImages;
+    /**
+     * Fetches Google Place details for a specific location using PlacesClient instance
+     * */
+
     private static final String TAG = GetNearbyData.class.getSimpleName();
+    private Restaurant.OnFinishRetrievingImages onFinishRetrievingImages;
 
     FetchDetails(Restaurant.OnFinishRetrievingImages onFinishRetrievingImages) {
         this.onFinishRetrievingImages = onFinishRetrievingImages;
@@ -36,14 +40,14 @@ class FetchDetails {
             Uri website = place.getWebsiteUri();
 
             selectedRestaurant.setPhoneNumber(place.getPhoneNumber());
-            selectedRestaurant.setHours(openingHours == null ? null : openingHours.toString());
+            selectedRestaurant.setWeekdayTextConcatenated(openingHours == null ? null : openingHours.getWeekdayText());
             selectedRestaurant.setWebsite(website == null ? null : website.toString());
             selectedRestaurant.fetchImages(placesClient, place.getPhotoMetadatas());
 
         }).addOnFailureListener((exception) -> {
             if (exception instanceof ApiException) {
-                Log.e(TAG, "Place not found " + selectedRestaurant.getName() + ": " +
-                        exception.getMessage());
+                Log.e(TAG, "Place not found " + selectedRestaurant.getName());
+                exception.printStackTrace();
             }
         });
     }

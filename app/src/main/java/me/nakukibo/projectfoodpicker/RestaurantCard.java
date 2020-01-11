@@ -83,7 +83,7 @@ public class RestaurantCard extends ScrollView {
                 selectedRestaurant.getAddress(),
                 selectedRestaurant.getPhoneNumber(),
                 selectedRestaurant.getWebsite(),
-                selectedRestaurant.getHours()
+                selectedRestaurant.getWeekdayTextConcatenated()
         );
     }
 

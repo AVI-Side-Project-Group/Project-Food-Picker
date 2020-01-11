@@ -8,6 +8,6 @@
         <attr name="price_level" format="integer"/>
         <attr name="phone_number" format="string"/>
         <attr name="website" format="string"/>
-        <attr name="hours" format="string"/>
+        <attr name="weekdayTextConcatenated" format="string"/>
     </declare-styleable>
 </resources>

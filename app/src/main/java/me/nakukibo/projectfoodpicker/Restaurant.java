@@ -8,7 +8,6 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import java.util.ArrayList;
 import java.util.List;
 
-
 class Restaurant {
 
     /**
@@ -29,7 +28,7 @@ class Restaurant {
     private String id;
 
     private List<Photo> photos;
-    private String hours;
+    private String weekdayTextConcatenated;
     private String phoneNumber;
     private String website;
 
@@ -48,9 +47,10 @@ class Restaurant {
         this.id = id;
 
         this.photos = new ArrayList<>();
-        this.phoneNumber = null;
-        this.website = null;
-        this.hours = null;
+        this.phoneNumber = DATA_DEFAULT;
+        this.website = DATA_DEFAULT;
+        this.weekdayTextConcatenated = DATA_DEFAULT;
+
         this.onFinishRetrievingImages = null;
     }
 
@@ -84,6 +84,10 @@ class Restaurant {
         }
     }
 
+    /**
+     * checks if the photoMetaData being processed is the last to be processed
+     * and if so then runs the onFinishRetrievingImages.onFinishRetrieve() if not null
+     * */
     private void defaultLastPhotoEvent(List<PhotoMetadata> processed, PhotoMetadata photoMetadata,
                                        int numPhotos){
         if(isLastPhoto(processed, photoMetadata, numPhotos)){
@@ -91,6 +95,11 @@ class Restaurant {
         }
     }
 
+    /**
+     * checks if the photoMetadata is the last to be processed
+     * @return true     - is the last
+     *         false    - there is more to come
+     * */
     private boolean isLastPhoto(List<PhotoMetadata> processed, PhotoMetadata photoMetadata,
                                 int numPhotos){
         processed.add(photoMetadata);
@@ -102,7 +111,7 @@ class Restaurant {
     }
 
     String getAddress() {
-        return address == null ? DATA_DEFAULT : address;
+        return address;
     }
 
     Boolean getOpen() {
@@ -126,19 +135,7 @@ class Restaurant {
     }
 
     String getId() {
-        return id == null ? DATA_DEFAULT : id;
-    }
-
-    void setId(String id) {
-        this.id = id;
-    }
-
-    String getHours() {
-        return hours == null ? DATA_DEFAULT : hours;
-    }
-
-    void setHours(String hours) {
-        this.hours = hours;
+        return id;
     }
 
     String getPhoneNumber() {
@@ -155,6 +152,25 @@ class Restaurant {
 
     void setWebsite(String website) {
         this.website = website;
+    }
+
+    String getWeekdayTextConcatenated() {
+        return weekdayTextConcatenated == null ? DATA_DEFAULT : weekdayTextConcatenated;
+    }
+
+    void setWeekdayTextConcatenated(List<String> weekdayText) {
+        if(weekdayText != null) {
+            StringBuilder weekdayTextBuilder = new StringBuilder();
+
+            for(String dayText : weekdayText){
+                weekdayTextBuilder.append(dayText).append("\n");
+            }
+
+            weekdayTextConcatenated = weekdayTextBuilder.toString();
+        }else {
+            weekdayTextConcatenated = DATA_DEFAULT;
+        }
+
     }
 
     List<Photo> getPhotos(){

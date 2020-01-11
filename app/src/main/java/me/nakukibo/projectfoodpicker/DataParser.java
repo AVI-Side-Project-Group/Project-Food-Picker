@@ -12,6 +12,10 @@ import java.util.List;
 
 class DataParser {
 
+    /**
+     * DataParser is used to parse JSON data returned from Google Places
+     * */
+
     private static final String TAG = DataParser.class.getSimpleName();
     private String nextPageToken; // for storing and later accessing the nextPageToken since the process runs in background
 
