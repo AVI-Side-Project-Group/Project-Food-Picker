@@ -2,8 +2,6 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,16 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
-import com.google.android.libraries.places.api.net.FetchPhotoRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
-
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,7 +43,7 @@ public class RestaurantCard extends ScrollView {
 
     private Context context;
 
-    private List<Bitmap> photoBitmaps;
+    private List<Photo> photos;
     private int cImage;
 
 //    private static final String TAG = RestaurantCard.class.getSimpleName();
@@ -83,12 +71,13 @@ public class RestaurantCard extends ScrollView {
     /**
      * set restaurant card to values passed as HashMap<String, String> with keys used by DataParser class
      */
-    void setValues(Restaurant selectedRestaurant, List<Bitmap> photoBitmaps){
+    void setValues(Restaurant selectedRestaurant){
+        Log.d(TAG, "setValues: setting values for restaurant " + selectedRestaurant.getName());
         setValues(
                 selectedRestaurant.getName(),
                 selectedRestaurant.getOpen(),
                 selectedRestaurant.getDistanceMiles(),
-                photoBitmaps,
+                selectedRestaurant.getPhotos(),
                 String.format(Locale.US, "%.2f stars (%d)", selectedRestaurant.getRating(), selectedRestaurant.getTotRating()),
                 selectedRestaurant.getPriceLevel(),
                 selectedRestaurant.getAddress(),
@@ -118,7 +107,7 @@ public class RestaurantCard extends ScrollView {
     /**
      * set restaurant card to values passed
      */
-    private void setValues(String name, Boolean openNow, Double distanceMiles, List<Bitmap> photoBitmaps,
+    private void setValues(String name, Boolean openNow, Double distanceMiles, List<Photo> photos,
                            String rating, Integer pricing, String address, String phoneNumber,
                            String website, String hours){
         txtvwName.setText(name);
@@ -135,11 +124,9 @@ public class RestaurantCard extends ScrollView {
         txtvwOpenNow.setText(openNowText);
         txtvwDistance.setText(distanceMiles == null? "Unknown Distance" : String.format(Locale.US, "%.2f miles", distanceMiles));
 
-        this.photoBitmaps = photoBitmaps;
+        this.photos = photos;
         cImage = 0;
-        restPhoto.setImageBitmap(photoBitmaps.get(cImage));
-
-
+        restPhoto.setImageBitmap(photos.get(cImage).getBitmap());
         restaurantCardContents.setValues(rating, pricing, address, phoneNumber, website, hours);
     }
 
@@ -194,7 +181,7 @@ public class RestaurantCard extends ScrollView {
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
                 Log.d(TAG, "initEvents: viewing last image");
                 if(cImage > 0) cImage --;
-                restPhoto.setImageBitmap(photoBitmaps.get(cImage));
+                restPhoto.setImageBitmap(photos.get(cImage).getBitmap());
             }
 
             return true;
@@ -208,8 +195,8 @@ public class RestaurantCard extends ScrollView {
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
                 Log.d(TAG, "initEvents: viewing next image");
-                if(cImage < photoBitmaps.size() - 1) cImage ++;
-                restPhoto.setImageBitmap(photoBitmaps.get(cImage));
+                if(cImage < photos.size() - 1) cImage ++;
+                restPhoto.setImageBitmap(photos.get(cImage).getBitmap());
             }
 
             return true;
@@ -369,5 +356,17 @@ public class RestaurantCard extends ScrollView {
 
     public int getImageHeight(){
         return restPhoto.getHeight();
+    }
+
+    public static interface OnCloseContents {
+        void onClose();
+    }
+
+    public static interface OnOpenContents {
+        void onOpen();
+    }
+
+    public static interface OnSwipe {
+        void onSwipe();
     }
 }

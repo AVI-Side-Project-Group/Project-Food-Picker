@@ -79,7 +79,7 @@ public class RestaurantCardContents extends ScrollView {
     }
 
     private void setClickEvents(Button btn, String btnText, String clipLabel){
-        if(btnText.equals(DataParser.DATA_DEFAULT)) {
+        if(btnText.equals(Restaurant.DATA_DEFAULT)) {
             activateClickEvents(btn);
         } else {
             deactivateClickEvents(btn);

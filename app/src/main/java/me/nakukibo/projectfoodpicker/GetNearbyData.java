@@ -1,14 +1,11 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.content.Context;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class GetNearbyData extends AsyncTask<Object, String, String> {
@@ -16,7 +13,9 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
     /**
      * fetches the restaurants from Google Places and then parses the data and sends it back
      * to the ReceiveNearbyData instance that was passed as argument
-     */
+     **/
+
+
     private static final String DEFAULT_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
     private String apiKey;
     private String googlePlacesData;
@@ -78,7 +77,7 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
                 new GetNearbyData(apiKey, receiveNearbyData, restaurants).execute(url, userLocation, maxDistance, pricingRange, minRating);
             }, 2000);
         } else {
-            receiveNearbyData.sendData(restaurants, nextPageToken);
+            receiveNearbyData.onFinishNearbyFetch();
         }
     }
 
@@ -87,5 +86,10 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
         googlePlaceUrl += "pagetoken=" + nextPageToken;
         googlePlaceUrl += "&key=" + apiKey;
         return googlePlaceUrl;
+    }
+
+    public static interface ReceiveNearbyData {
+
+        void onFinishNearbyFetch();
     }
 }

@@ -3,7 +3,6 @@ package me.nakukibo.projectfoodpicker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,12 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
-import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -36,7 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNearbyData, ReceiveDetailData {
+public class RestaurantCardFinder extends AppCompatActivity implements GetNearbyData.ReceiveNearbyData {
 
     public static final int MAX_PHOTOS = 5;
 
@@ -46,9 +42,9 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private static final int ERROR_PASSED_VALUE = -1;
     private static final String DEFAULT_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
 
-    private List<Restaurant> nearbyRestaurants; // accumulates the list over several calls
-    private static List<Restaurant> previouslyAccessed = new ArrayList<>(); // stores the restaurants that have been accessed
-    private static LinkedList<Restaurant> placesProcessed;
+    private List<Restaurant> nearbyRestaurants;
+    private List<Restaurant> previouslyAccessed;
+    private LinkedList<Restaurant> placesProcessed;
 
     // data passed from PreferencesActivity.java
     private String foodType;
@@ -69,17 +65,13 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private String previousPageToken;
 
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
 
     private Set tempSet;
     View loadingView;
 
     private Calendar calendar = Calendar.getInstance();
 
-    private int day = calendar.get(Calendar.DATE);
-    private int month = calendar.get(Calendar.MONTH);
-    private int year = calendar.get(Calendar.YEAR);
-    private String date = "" + month + day + year;
+
     boolean isOutOfRolls = false;
 
     private PlacesClient placesClient;
@@ -90,13 +82,13 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
-
+        previouslyAccessed = new ArrayList<>();
         setContentView(R.layout.activity_restaurant_card_finder);
         needNextCard = true;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
-
+        placesClient = Places.createClient(this);
 
         initViews();
         retrievePassedValues();
@@ -105,29 +97,12 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     /**
-     * called when the GetNearbyData AsyncTask has finished retrieving the information for the restaurants
+     * called when the GetNearbyData AsyncTask has finished retrieving the information for all of the restaurants
      * nearby
      */
     @Override
-    public void sendData(List<Restaurant> restaurants, String nextPageToken){
-//        if (restaurants == null) {
-//            // if null then that means the nextPageToken request failed so search again
-//            requestNextPageSearch(previousPageToken);
-//            return;
-//        } else {
-//            previousPageToken = nextPageToken;
-//        }
-//
-//        nearbyRestaurants.addAll(restaurants);
-//        Log.d(TAG, "sendData: combined list has new size of " + nearbyRestaurants.size());
-//
-////        if (nextPageToken != null) {
-////            requestNextPageSearch(nextPageToken);
-////            return;
-////        }
-//
-//        Log.d(TAG, "sendData: logging the combined list");
-        Log.d(TAG, "sendData: combined list has new size of " + nearbyRestaurants.size());
+    public void onFinishNearbyFetch(){
+        Log.d(TAG, "onFinishNearbyFetch: combined list has a size of " + nearbyRestaurants.size());
         logAllPlacesList(nearbyRestaurants);
 
         // randomize list
@@ -137,17 +112,14 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         fetchNextRestaurant(R.string.restcard_finder_no_restaurants, false);
     }
 
-
-    /**
-     * called when GetDetailData AsyncTask has finished fetching the detailed information
-     */
-    @Override
-    public void sendDetailData(Restaurant selectedRestaurant) {
+    private void onFinishDetailsFetch(Restaurant selectedRestaurant){
+        Log.d(TAG, "onFinishDetailsFetch: finished fetching details for " + selectedRestaurant.getName());
         previouslyAccessed.add(selectedRestaurant); // selectedRestaurant has been accessed
 //        savePreviouslyAccessedData(previouslyAccessed); TODO: put this in after fix
 
         if (firstCard) {
             // make loading screen invisible
+            Log.d(TAG, "onFinishDetailsFetch: reached first card");
             View loadingView = findViewById(R.id.restcard_loading);
             loadingView.setAnimation(outToLeftAnimation());
             activeCard = restCard1;
@@ -278,13 +250,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         List<Restaurant> potentialsList = new ArrayList<>(potentials);
         Restaurant selectedRestaurant = potentialsList.get(0);
 
-        Object[] dataTransfer = new Object[5];
+//        Object[] dataTransfer = new Object[5];
 
         // find restaurants
-        GetDetailData getDetailData = new GetDetailData(selectedRestaurant, this);
-        String url = getDetailsUrl(selectedRestaurant.getId());
-        dataTransfer[0] = url;
-        getDetailData.execute(dataTransfer);
+        FetchDetails fetchDetails = new FetchDetails(() -> onFinishDetailsFetch(selectedRestaurant));
+        fetchDetails.fetch(selectedRestaurant, placesClient);
 
         // TODO: figure out whether makeRoll() is needed here
 //        makeRoll();
@@ -304,6 +274,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         remainedRerolls --;
         remainedRerolls = 10; //TODO: remove this line of code
         Log.d(TAG, "getNextRestaurantDetails: " + remainedRerolls);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(getString(R.string.sp_remained_rerolls), remainedRerolls);
         editor.commit();
     }
@@ -396,11 +368,11 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
 
         FloatingActionButton btnSwipe = findViewById(R.id.btn_roll_again);
         FloatingActionButton btnToggleContents = findViewById(R.id.btn_open_contents);
-        OnOpenContents onOpenContents = () -> {
+        RestaurantCard.OnOpenContents onOpenContents = () -> {
             btnSwipe.hide();
             btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
         };
-        OnCloseContents onCloseContents = () -> {
+        RestaurantCard.OnCloseContents onCloseContents = () -> {
             btnSwipe.show();
             btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
         };
@@ -420,7 +392,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     private void requestNextPageSearch(String nextPageToken) {
         new Handler().postDelayed(() -> {
             String nextPage = getUrlNextPage(nextPageToken);
-            Log.d(TAG, "sendData: search with url=" + nextPage);
+            Log.d(TAG, "onFinishNearbyFetch: search with url=" + nextPage);
             fetchLocation(nextPage);
         }, DEFAULT_WAIT_MS);
     }
@@ -447,7 +419,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
         if (!foodType.equals("any")) googlePlaceUrl.append("&query=").append(foodType);
         googlePlaceUrl.append("&type=restaurant");
 
-        googlePlaceUrl.append("&field=formatted_address,name,permanently_closed,photos,place_id," +
+        googlePlaceUrl.append("&field=formatted_address,name,permanently_closed,place_id," +
                 "price_level,rating,user_ratings_total");
 
         googlePlaceUrl.append("&key=").append(getResources().getString(R.string.google_maps_key));
@@ -484,6 +456,7 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     // TODO: rewrite using Restaurant classes
     private void savePreviouslyAccessedData(List<HashMap<String, String>> previouslyAccessed) {
         tempSet = new HashSet(previouslyAccessed);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putStringSet(getString(R.string.sp_previously_accessed), tempSet);
         editor.commit();
     }
@@ -497,12 +470,18 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
     }
 
     private void resetValues() {
+        int day = calendar.get(Calendar.DATE);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+        String date = "" + month + day + year;
+
         int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
         int lastMonth = sharedPreferences.getInt(getString(R.string.sp_month), 0);
         int lastYear = sharedPreferences.getInt(getString(R.string.sp_year), 0);
         String lastDate = "" + lastMonth + lastDay + lastYear;
 
-        editor = sharedPreferences.edit();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
         if(!lastDate.equals(date)){
             editor.remove(getString(R.string.sp_previously_accessed));
             editor.apply();
@@ -567,52 +546,8 @@ public class RestaurantCardFinder extends AppCompatActivity implements ReceiveNe
      * set values of views to values in HashMap<String, String>
      */
     private void setViewValues(Restaurant selectedRestaurant, RestaurantCard card) {
-        List<Photo> photoSource = DataParser.parsePhotos(selectedRestaurant.getPhotosJson());
-        List<Bitmap> photoBitmaps;
-
-        if (photoSource != null) {
-             photoBitmaps = new ArrayList<>();
-            for(int i=0; i<photoSource.size(); i++){
-                final boolean receivedLastPhoto = i == photoSource.size() - 1;
-                Photo photo = photoSource.get(i);
-                PhotoMetadata.Builder builder = PhotoMetadata.builder(photo.getReference());
-                int width = Math.min(photo.getWidth(), 800);
-                int height = Math.min(photo.getHeight(), 800);
-
-                builder.setWidth(width);
-                builder.setHeight(height);
-
-                Log.d(TAG, "setViewValues: photo width x height=" + width + "x" + height);
-
-                PhotoMetadata  photoMetadata = builder.build();
-                FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
-                        .build();
-
-                PlacesClient placesClient = Places.createClient(this);
-                placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {
-                    Bitmap bitmap = fetchPhotoResponse.getBitmap();
-                    photoBitmaps.add(bitmap);
-
-                    if(receivedLastPhoto){
-                        card.setValues(selectedRestaurant, photoBitmaps);
-                        activeCard.setAnimation(inFromRightAnimation());
-                        activeCard.setVisibility(View.VISIBLE);
-                    }
-
-                }).addOnFailureListener((exception) -> {
-                    if (exception instanceof ApiException) {
-                        ApiException apiException = (ApiException) exception;
-                        int statusCode = apiException.getStatusCode();
-                        // Handle error with given status code.
-                        Log.e(TAG, "Place not found: " + exception.getMessage());
-                    }
-                });
-            }
-        }else {
-            photoBitmaps = null;
-            activeCard.setVisibility(View.VISIBLE);
-            card.setValues(selectedRestaurant, photoBitmaps);
-            activeCard.setAnimation(inFromRightAnimation());
-        }
+        activeCard.setVisibility(View.VISIBLE);
+        card.setValues(selectedRestaurant);
+        activeCard.setAnimation(inFromRightAnimation());
     }
 }

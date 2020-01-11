@@ -1,107 +1,128 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.graphics.Bitmap;
+import android.util.Log;
 
+import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.android.libraries.places.api.net.PlacesClient;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import static me.nakukibo.projectfoodpicker.DataParser.DATA_DEFAULT;
 
 class Restaurant {
+
+    /**
+     * Restaurant class represents each individual restaurant
+     * */
+
+    static final String DATA_DEFAULT = "--NA--";
+
+    private static final int MAX_NUM_PHOTOS = 5;    // max photos allowed for a restaurant
+
     private String name;
     private String address;
     private Boolean isOpen;
-    private String photosJson;
     private Double rating;
     private Integer totRating;
     private Integer priceLevel;
-    private Double distanceMiles; //distance_meters return straight line distance from origin to place
+    private Double distanceMiles;
     private String id;
 
+    private List<Photo> photos;
     private String hours;
     private String phoneNumber;
     private String website;
-    private List<Bitmap> photoBitmaps;
 
-    Restaurant(String name, String address, Boolean isOpen, String photosJson, Double rating,
+    private OnFinishRetrievingImages onFinishRetrievingImages;
+    private static final String TAG = Restaurant.class.getSimpleName();
+
+    Restaurant(String name, String address, Boolean isOpen, Double rating,
                       Integer totRating, Integer priceLevel, Double distanceMiles, String id) {
         this.name = name;
         this.address = address;
         this.isOpen = isOpen;
-        this.photosJson = photosJson;
         this.rating = rating;
         this.totRating = totRating;
         this.priceLevel = priceLevel;
         this.distanceMiles = distanceMiles;
         this.id = id;
 
+        this.photos = new ArrayList<>();
         this.phoneNumber = null;
         this.website = null;
         this.hours = null;
-        this.photoBitmaps = null;
+        this.onFinishRetrievingImages = null;
+    }
+
+    /**
+     * populates the photos array by fetching them from Google Places and instantiating the Photo obj
+     *
+     * @param placesClient      PlacesClient to be used to fetch data from Google Places
+     * @param photosMetadata    list of PhotoMetadata instances representing individual images
+     * */
+    void fetchImages(PlacesClient placesClient, List<PhotoMetadata> photosMetadata){
+        Log.d(TAG, "fetchImages: fetching photos");
+        if(photosMetadata == null) return;
+
+        final int numPhotos = Math.min(photosMetadata.size(), MAX_NUM_PHOTOS);
+        List<PhotoMetadata> processedMetadata = new ArrayList<>();
+        Log.d(TAG, "fetchImages: will be fetching " + numPhotos + " photos.");
+
+        for(int i=0; i<numPhotos; i++){
+            PhotoMetadata photoMetadata = photosMetadata.get(i);
+            Photo photo = new Photo(placesClient, photoMetadata);
+
+            photo.setOnFinishFetch(() -> {
+                Log.d(TAG, "fetchImages: successfully added photo");
+                photos.add(photo);
+                defaultLastPhotoEvent(processedMetadata, photoMetadata, numPhotos);
+            });
+            photo.setOnFailFetch(() -> {
+                Log.d(TAG, "fetchImages: failed to photo");
+                defaultLastPhotoEvent(processedMetadata, photoMetadata, numPhotos);
+            });
+        }
+    }
+
+    private void defaultLastPhotoEvent(List<PhotoMetadata> processed, PhotoMetadata photoMetadata,
+                                       int numPhotos){
+        if(isLastPhoto(processed, photoMetadata, numPhotos)){
+            if(onFinishRetrievingImages != null) onFinishRetrievingImages.onFinishRetrieve();
+        }
+    }
+
+    private boolean isLastPhoto(List<PhotoMetadata> processed, PhotoMetadata photoMetadata,
+                                int numPhotos){
+        processed.add(photoMetadata);
+        return processed.size() == numPhotos;
     }
 
     String getName() {
         return name;
     }
 
-    void setName(String name) {
-        this.name = name;
-    }
-
     String getAddress() {
         return address == null ? DATA_DEFAULT : address;
-    }
-
-    void setAddress(String address) {
-        this.address = address;
     }
 
     Boolean getOpen() {
         return isOpen;
     }
 
-    void setOpen(Boolean open) {
-        isOpen = open;
-    }
-
-    String getPhotosJson() {
-        return photosJson == null ? DATA_DEFAULT : photosJson;
-    }
-
-    void setPhotosJson(String photosJson) {
-        this.photosJson = photosJson;
-    }
-
     Double getRating() {
         return rating;
-    }
-
-    void setRating(Double rating) {
-        this.rating = rating;
     }
 
     Integer getTotRating() {
         return totRating;
     }
 
-    void setTotRating(Integer totRating) {
-        this.totRating = totRating;
-    }
-
     Integer getPriceLevel() {
         return priceLevel;
     }
 
-    void setPriceLevel(Integer priceLevel) {
-        this.priceLevel = priceLevel;
-    }
-
     Double getDistanceMiles() {
         return distanceMiles;
-    }
-
-    void setDistanceMiles(Double distanceMiles) {
-        this.distanceMiles = distanceMiles;
     }
 
     String getId() {
@@ -136,11 +157,15 @@ class Restaurant {
         this.website = website;
     }
 
-    List<Bitmap> getPhotoBitmaps() {
-        return photoBitmaps;
+    List<Photo> getPhotos(){
+        return photos;
     }
 
-    void setPhotoBitmaps(List<Bitmap> photoBitmaps) {
-        this.photoBitmaps = photoBitmaps;
+    void setOnFinishRetrievingImages(OnFinishRetrievingImages onFinishRetrievingImages) {
+        this.onFinishRetrievingImages = onFinishRetrievingImages;
+    }
+
+    interface OnFinishRetrievingImages{
+        void onFinishRetrieve();
     }
 }
