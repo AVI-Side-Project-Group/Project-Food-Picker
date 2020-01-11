@@ -15,7 +15,6 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
      * to the ReceiveNearbyData instance that was passed as argument
      **/
 
-
     private static final String DEFAULT_PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/textsearch/json?";
     private String apiKey;
     private String googlePlacesData;

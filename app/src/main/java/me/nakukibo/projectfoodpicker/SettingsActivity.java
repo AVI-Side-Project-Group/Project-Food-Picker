@@ -8,36 +8,18 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.PreferenceManager;
-
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends ThemedAppCompatActivity {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
-
     private Spinner spinTheme;
-    private String[] themes = {"Light", "Dark", "Purple"};
-    private int[] themeIDs = {R.style.Light, R.style.Dark, R.style.Purple};
-    private int currentTheme;
-    private int selectedTheme;
-
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        editor = sharedPreferences.edit();
+        super.onCreate(savedInstanceState);
 
-        currentTheme = sharedPreferences.getInt(getString(R.string.sp_theme), themeIDs[0]);
-
-        setTheme(currentTheme);
         setContentView(R.layout.settings_activity);
-
         initTheme();
         checkSharedPreference();
-
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -48,38 +30,45 @@ public class SettingsActivity extends AppCompatActivity {
     private void initTheme() {
         spinTheme = findViewById(R.id.spin_theme);
         ArrayAdapter<String> adapterTheme = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item, themes);
+                android.R.layout.simple_spinner_dropdown_item, getThemes());
         spinTheme.setAdapter(adapterTheme);
-        spinTheme.setSelection(getThemeIDPosition(currentTheme));
+        spinTheme.setSelection(getThemeIDPosition(getCurrentTheme()));
     }
 
     private void checkSharedPreference() {
-        int pos = getThemeIDPosition(currentTheme);
+        int pos = getThemeIDPosition(getCurrentTheme());
         spinTheme.setSelection(pos);
 
-        Log.d(TAG, "checkSharedPreference: " + currentTheme);
+        Log.d(TAG, "checkSharedPreference: " + getCurrentTheme());
     }
 
     private int findThemeIDByName(String theme){
+        String[] themes = getThemes();
         for(int i = 0; i < themes.length; i++){
-            if(theme.equals(themes[i])) return themeIDs[i];
+            if (theme.equals(themes[i])) return getThemeIDs()[i];
         }
         return -1;
     }
 
     private int getThemeIDPosition(int id){
+        String[] themes = getThemes();
         for(int i = 0; i < themes.length; i++){
-            if(id == themeIDs[i]) return i;
+            if (id == getThemeIDs()[i]) return i;
         }
         return -1;
     }
 
     public void applySettings(View view){
+        int selectedTheme;
+        SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
+
         selectedTheme = findThemeIDByName(spinTheme.getSelectedItem().toString());
-        Log.d(TAG, "applySettings: " + selectedTheme);
+        Log.d(TAG, "applySettings: selectedTheme=" + selectedTheme);
         setTheme(selectedTheme);
+
         editor.putInt(getString(R.string.sp_theme), selectedTheme);
-        editor.commit();
+        editor.apply();
+
         Intent intent = getIntent();
         finish();
         startActivity(intent);

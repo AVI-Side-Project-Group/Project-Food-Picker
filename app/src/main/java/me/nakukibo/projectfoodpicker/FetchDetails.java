@@ -25,11 +25,15 @@ class FetchDetails {
         this.onFinishRetrievingImages = onFinishRetrievingImages;
     }
 
+    /**
+     * populates the passed selectedRestaurant instance with the detailed information
+     */
     void fetch(Restaurant selectedRestaurant, PlacesClient placesClient) {
         Log.d(TAG, "fetch: fetching details for " + selectedRestaurant.getName());
 
         selectedRestaurant.setOnFinishRetrievingImages(onFinishRetrievingImages);
 
+        // fetches the details
         List<Place.Field> placeFields = Arrays.asList(Place.Field.PHONE_NUMBER, Place.Field.OPENING_HOURS,
                 Place.Field.WEBSITE_URI, Place.Field.PHOTO_METADATAS);
         FetchPlaceRequest request = FetchPlaceRequest.newInstance(selectedRestaurant.getId(), placeFields);
@@ -39,6 +43,7 @@ class FetchDetails {
             OpeningHours openingHours = place.getOpeningHours();
             Uri website = place.getWebsiteUri();
 
+            // populates the instance
             selectedRestaurant.setPhoneNumber(place.getPhoneNumber());
             selectedRestaurant.setWeekdayTextConcatenated(openingHours == null ? null : openingHours.getWeekdayText());
             selectedRestaurant.setWebsite(website == null ? null : website.toString());

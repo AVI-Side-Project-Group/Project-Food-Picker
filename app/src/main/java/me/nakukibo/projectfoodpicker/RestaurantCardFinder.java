@@ -13,7 +13,6 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
@@ -32,9 +31,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class RestaurantCardFinder extends AppCompatActivity implements GetNearbyData.ReceiveNearbyData {
-
-    public static final int MAX_PHOTOS = 5;
+public class RestaurantCardFinder extends ThemedAppCompatActivity implements GetNearbyData.ReceiveNearbyData {
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
 
