@@ -2,6 +2,7 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,7 +28,7 @@ public class RestaurantCard extends ScrollView {
     private ImageView restPhoto;
     private RestaurantCardContents restaurantCardContents;
 
-    private OnSwipe onSwipeEvent;
+    private OnSwipeEnd onSwipeEndEvent;
     private OnOpenContents onOpenContents;
     private OnCloseContents onCloseContents;
 
@@ -45,6 +47,7 @@ public class RestaurantCard extends ScrollView {
 
     private List<Photo> photos;
     private int cImage;
+    private OnSwipeStart onSwipeStartEvent;
 
 //    private static final String TAG = RestaurantCard.class.getSimpleName();
 
@@ -62,7 +65,8 @@ public class RestaurantCard extends ScrollView {
 
         onOpenContents = null;
         onCloseContents = null;
-        onSwipeEvent = null;
+        onSwipeEndEvent = null;
+        onSwipeStartEvent = null;
         initCard(context, attrs);
         initSwipeVariables();
         initEvents();
@@ -91,17 +95,17 @@ public class RestaurantCard extends ScrollView {
      * set restaurant card to default values
      */
     void setDefaultValues(){
-//        setValues(
-//                getResources().getString(R.string.restcard_default_name),
-//                true,
-//                12.20,
-//                DataParser.parsePhotos(),
-//                getResources().getString(R.string.restcard_default_rating),
-//                getResources().getString(R.string.restcard_default_pricing),
-//                getResources().getString(R.string.restcard_default_address),
-//                getResources().getString(R.string.restcard_default_phone_number),
-//                getResources().getString(R.string.restcard_default_website),
-//                getResources().getString(R.string.restcard_default_hours));
+        setValues(
+                getResources().getString(R.string.restcard_default_name),
+                true,
+                12.20,
+                null,
+                getResources().getString(R.string.restcard_default_rating),
+                1,
+                getResources().getString(R.string.restcard_default_address),
+                getResources().getString(R.string.restcard_default_phone_number),
+                getResources().getString(R.string.restcard_default_website),
+                getResources().getString(R.string.restcard_default_hours));
     }
 
     /**
@@ -126,8 +130,16 @@ public class RestaurantCard extends ScrollView {
 
         this.photos = photos;
         cImage = 0;
-        restPhoto.setImageBitmap(photos.get(cImage).getBitmap());
+        setPhoto();
         restaurantCardContents.setValues(rating, pricing, address, phoneNumber, website, hours);
+    }
+
+    private void setPhoto(){
+        if(photos == null) {
+            restPhoto.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher_background));
+        }else {
+            restPhoto.setImageBitmap(photos.get(cImage).getBitmap());
+        }
     }
 
     private void initSwipeVariables() {
@@ -180,8 +192,10 @@ public class RestaurantCard extends ScrollView {
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
                 Log.d(TAG, "initEvents: viewing last image");
-                if(cImage > 0) cImage --;
-                restPhoto.setImageBitmap(photos.get(cImage).getBitmap());
+                if(cImage > 0) {
+                    cImage --;
+                    setPhoto();
+                }
             }
 
             return true;
@@ -195,8 +209,10 @@ public class RestaurantCard extends ScrollView {
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
                 Log.d(TAG, "initEvents: viewing next image");
-                if(cImage < photos.size() - 1) cImage ++;
-                restPhoto.setImageBitmap(photos.get(cImage).getBitmap());
+                if(cImage < photos.size() - 1) {
+                    cImage ++;
+                    setPhoto();
+                }
             }
 
             return true;
@@ -269,9 +285,6 @@ public class RestaurantCard extends ScrollView {
 
                 if(dx*dx + dy*dy >= minDistance*minDistance) {
                     isBeingSwiped = true;
-                    Log.d(TAG, "checkForSwipe: restaurantCard set to being swiped:" + dx + "," + dy);
-                }else {
-                    Log.d(TAG, "checkForSwipe: not being swiped");
                 }
 
                 if(isBeingSwiped){
@@ -300,23 +313,21 @@ public class RestaurantCard extends ScrollView {
 
     public void swipeCard(){
         Log.d(TAG, "initViews: card is swiped left");
+
+        if(onSwipeStartEvent != null) onSwipeStartEvent.onSwipeStart();
         Animation exitAnimation = RestaurantCardFinder.outToLeftAnimation();
         exitAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
+            public void onAnimationStart(Animation animation) { }
 
             @Override
             public void onAnimationEnd(Animation animation) {
                 Log.d(TAG, "onAnimationEnd: animation finished");
-                if(onSwipeEvent != null) onSwipeEvent.onSwipe();
+                if(onSwipeEndEvent != null) onSwipeEndEvent.onSwipeEnd();
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
+            public void onAnimationRepeat(Animation animation) { }
         });
 
         this.startAnimation(exitAnimation);
@@ -326,8 +337,12 @@ public class RestaurantCard extends ScrollView {
         return restaurantCardContents.getVisibility() == VISIBLE;
     }
 
-    public void setOnSwipeEvent(OnSwipe onSwipeEvent){
-        this.onSwipeEvent = onSwipeEvent;
+    public void setOnSwipeEndEvent(OnSwipeEnd onSwipeEndEvent){
+        this.onSwipeEndEvent = onSwipeEndEvent;
+    }
+
+    public void setOnSwipeStartEvent(OnSwipeStart onSwipeStartEvent){
+        this.onSwipeStartEvent = onSwipeStartEvent;
     }
 
     public void setOnOpenContents(OnOpenContents onOpenContents){
@@ -366,7 +381,11 @@ public class RestaurantCard extends ScrollView {
         void onOpen();
     }
 
-    public static interface OnSwipe {
-        void onSwipe();
+    public static interface OnSwipeEnd {
+        void onSwipeEnd();
+    }
+
+    public static interface OnSwipeStart {
+        void onSwipeStart();
     }
 }
