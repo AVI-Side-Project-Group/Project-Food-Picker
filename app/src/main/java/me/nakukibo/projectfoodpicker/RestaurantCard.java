@@ -253,11 +253,13 @@ public class RestaurantCard extends ScrollView {
     public void openContents(){
         restaurantCardContents.setVisibility(VISIBLE);
         if(onOpenContents != null) onOpenContents.onOpen();
+        else Log.d(TAG, "openContents: onOpenContents is null");
     }
 
     public void closeContents(){
         restaurantCardContents.setVisibility(GONE);
         if(onCloseContents != null) onCloseContents.onClose();
+        else Log.d(TAG, "closeContents: onCloseContents is null");
     }
 
     private boolean cannotPerformEvents(){
