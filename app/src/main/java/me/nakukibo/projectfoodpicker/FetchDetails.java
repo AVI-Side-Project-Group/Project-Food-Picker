@@ -10,6 +10,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 class FetchDetails {
@@ -20,15 +21,21 @@ class FetchDetails {
 
     private static final String TAG = GetNearbyData.class.getSimpleName();
     private Restaurant.OnFinishRetrievingImages onFinishRetrievingImages;
+    private LinkedList<Restaurant> restaurants;
 
-    FetchDetails(Restaurant.OnFinishRetrievingImages onFinishRetrievingImages) {
+    FetchDetails(LinkedList<Restaurant> restaurants, Restaurant.OnFinishRetrievingImages onFinishRetrievingImages) {
+        this.restaurants = restaurants;
         this.onFinishRetrievingImages = onFinishRetrievingImages;
+    }
+
+    void execute(PlacesClient placesClient){
+        fetch(restaurants.pop(), placesClient);
     }
 
     /**
      * populates the passed selectedRestaurant instance with the detailed information
      */
-    void fetch(Restaurant selectedRestaurant, PlacesClient placesClient) {
+    private void fetch(Restaurant selectedRestaurant, PlacesClient placesClient) {
         Log.d(TAG, "fetch: fetching details for " + selectedRestaurant.getName());
 
         selectedRestaurant.setOnFinishRetrievingImages(onFinishRetrievingImages);
@@ -49,11 +56,14 @@ class FetchDetails {
             selectedRestaurant.setWebsite(website == null ? null : website.toString());
             selectedRestaurant.fetchImages(placesClient, place.getPhotoMetadatas());
 
+            if(!restaurants.isEmpty()) fetch(restaurants.pop(), placesClient);
+
         }).addOnFailureListener((exception) -> {
             if (exception instanceof ApiException) {
                 Log.e(TAG, "Place not found " + selectedRestaurant.getName());
                 exception.printStackTrace();
             }
+            if(!restaurants.isEmpty()) fetch(restaurants.pop(), placesClient);
         });
     }
 }
