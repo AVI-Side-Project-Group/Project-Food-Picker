@@ -15,7 +15,7 @@
             android:id="@+id/txtvw_hours_label"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/restcard_contents_padding_top_hours"
+            android:layout_marginTop="16dp"
             android:text="@string/restcard_txtvw_hours"
             android:textAlignment="center"
             android:textSize="@dimen/font_size_restaurant_title"
@@ -23,50 +23,30 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/hours_layout"
+        <TextView
+            android:id="@+id/txtvw_hours_values"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/restcard_txtvw_hours_placeholder"
+            android:textSize="@dimen/font_size_restaurant_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/txtvw_hours_label">
-
-            <TextView
-                android:id="@+id/txtvw_hours"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="32dp"
-                android:text="@string/restcard_txtvw_hours_label"
-                android:textSize="@dimen/font_size_restaurant_text"
-                app:layout_constraintEnd_toStartOf="@+id/txtvw_hours_values"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/txtvw_hours_values"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/restcard_txtvw_hours_placeholder"
-                android:textSize="@dimen/font_size_restaurant_text"
-                app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_hours"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_hours_label" />
 
         <TextView
             android:id="@+id/txtvw_rating"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="16dp"
             android:text="@string/restcard_default_rating"
             android:textAlignment="center"
             android:textSize="@dimen/font_size_restaurant_text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/hours_layout" />
+            app:layout_constraintTop_toBottomOf="@+id/txtvw_hours_values" />
 
         <TextView
             android:id="@+id/txtvw_price_level"

@@ -53,8 +53,9 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
         HashMap<String, String> currentItem = data.get(position);
 
-        holder.txtvwName.setText(currentItem.get(DataParser.DATA_KEY_NAME));
-        holder.txtvwAddress.setText(currentItem.get(DataParser.DATA_KEY_ADDRESS));
+        // fix with restaurant class
+//        holder.txtvwName.setText(currentItem.get(DataParser.DATA_KEY_NAME));
+//        holder.txtvwAddress.setText(currentItem.get(DataParser.DATA_KEY_ADDRESS));
     }
 
     @Override

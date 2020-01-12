@@ -1,145 +1,187 @@
 package me.nakukibo.projectfoodpicker;
 
-import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.util.Log;
 
-import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Restaurant {
+class Restaurant {
+
+    /**
+     * Restaurant class represents each individual restaurant
+     * */
+
+    static final String DATA_DEFAULT = "--NA--";
+
+    private static final int MAX_NUM_PHOTOS = 5;    // max photos allowed for a restaurant
+
     private String name;
     private String address;
-    private String hours;
-    private boolean isOpen;
-    private String photosJson;
-    private float rating;
-    private int totRating;
-    private int priceLevel;
-    private String phoneNumber;
-    private String website;
-    private float distanceMiles; //distance_meters return straight line distance from origin to place
+    private Boolean isOpen;
+    private Double rating;
+    private Integer totRating;
+    private Integer priceLevel;
+    private Double distanceMiles;
     private String id;
 
-    public Restaurant(String name, String address, String hours, boolean isOpen, String photosJson,
-                      float rating, int totRating, int priceLevel, String phoneNumber, String website,
-                      float distanceMiles, String id) {
+    private List<Photo> photos;
+    private String weekdayTextConcatenated;
+    private String phoneNumber;
+    private String website;
+
+    private OnFinishRetrievingImages onFinishRetrievingImages;
+    private static final String TAG = Restaurant.class.getSimpleName();
+
+    Restaurant(String name, String address, Boolean isOpen, Double rating,
+                      Integer totRating, Integer priceLevel, Double distanceMiles, String id) {
         this.name = name;
         this.address = address;
-        this.hours = hours;
         this.isOpen = isOpen;
-        this.photosJson = photosJson;
         this.rating = rating;
         this.totRating = totRating;
         this.priceLevel = priceLevel;
-        this.phoneNumber = phoneNumber;
-        this.website = website;
         this.distanceMiles = distanceMiles;
         this.id = id;
+
+        this.photos = new ArrayList<>();
+        this.phoneNumber = DATA_DEFAULT;
+        this.website = DATA_DEFAULT;
+        this.weekdayTextConcatenated = DATA_DEFAULT;
+
+        this.onFinishRetrievingImages = null;
     }
 
-    public String getName() {
+    /**
+     * populates the photos array by fetching them from Google Places and instantiating the Photo obj
+     *
+     * @param placesClient      PlacesClient to be used to fetch data from Google Places
+     * @param photosMetadata    list of PhotoMetadata instances representing individual images
+     * */
+    void fetchImages(PlacesClient placesClient, List<PhotoMetadata> photosMetadata){
+        Log.d(TAG, "fetchImages: fetching photos");
+        if(photosMetadata == null) return;
+
+        final int numPhotos = Math.min(photosMetadata.size(), MAX_NUM_PHOTOS);
+        List<PhotoMetadata> processedMetadata = new ArrayList<>();
+        Log.d(TAG, "fetchImages: will be fetching " + numPhotos + " photos.");
+
+        for(int i=0; i<numPhotos; i++){
+            PhotoMetadata photoMetadata = photosMetadata.get(i);
+            Photo photo = new Photo(placesClient, photoMetadata);
+
+            photo.setOnFinishFetch(() -> {
+                Log.d(TAG, "fetchImages: successfully added photo");
+                photos.add(photo);
+                defaultLastPhotoEvent(processedMetadata, photoMetadata, numPhotos);
+            });
+            photo.setOnFailFetch(() -> {
+                Log.d(TAG, "fetchImages: failed to photo");
+                defaultLastPhotoEvent(processedMetadata, photoMetadata, numPhotos);
+            });
+        }
+    }
+
+    /**
+     * checks if the photoMetaData being processed is the last to be processed
+     * and if so then runs the onFinishRetrievingImages.onFinishRetrieve() if not null
+     * */
+    private void defaultLastPhotoEvent(List<PhotoMetadata> processed, PhotoMetadata photoMetadata,
+                                       int numPhotos){
+        if(isLastPhoto(processed, photoMetadata, numPhotos)){
+            if(onFinishRetrievingImages != null) onFinishRetrievingImages.onFinishRetrieve();
+        }
+    }
+
+    /**
+     * checks if the photoMetadata is the last to be processed
+     * @return true     - is the last
+     *         false    - there is more to come
+     * */
+    private boolean isLastPhoto(List<PhotoMetadata> processed, PhotoMetadata photoMetadata,
+                                int numPhotos){
+        processed.add(photoMetadata);
+        return processed.size() == numPhotos;
+    }
+
+    String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
+    String getAddress() {
         return address;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getHours() {
-        return hours;
-    }
-
-    public void setHours(String hours) {
-        this.hours = hours;
-    }
-
-    public boolean isOpen() {
+    Boolean getOpen() {
         return isOpen;
     }
 
-    public void setOpen(boolean open) {
-        isOpen = open;
-    }
-
-    public String getPhotosJson() {
-        return photosJson;
-    }
-
-    public void setPhotosJson(String photosJson) {
-        this.photosJson = photosJson;
-    }
-
-    public float getRating() {
+    Double getRating() {
         return rating;
     }
 
-    public void setRating(float rating) {
-        this.rating = rating;
-    }
-
-    public int getTotRating() {
+    Integer getTotRating() {
         return totRating;
     }
 
-    public void setTotRating(int totRating) {
-        this.totRating = totRating;
-    }
-
-    public int getPriceLevel() {
+    Integer getPriceLevel() {
         return priceLevel;
     }
 
-    public void setPriceLevel(int priceLevel) {
-        this.priceLevel = priceLevel;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getWebsite() {
-        return website;
-    }
-
-    public void setWebsite(String website) {
-        this.website = website;
-    }
-
-    public float getDistanceMiles() {
+    Double getDistanceMiles() {
         return distanceMiles;
     }
 
-    public void setDistanceMiles(float distanceMiles) {
-        this.distanceMiles = distanceMiles;
-    }
-
-    public String getId() {
+    String getId() {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    String getPhoneNumber() {
+        return phoneNumber == null ? DATA_DEFAULT : phoneNumber;
+    }
+
+    void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    String getWebsite() {
+        return website == null ? DATA_DEFAULT : website;
+    }
+
+    void setWebsite(String website) {
+        this.website = website;
+    }
+
+    String getWeekdayTextConcatenated() {
+        return weekdayTextConcatenated == null ? DATA_DEFAULT : weekdayTextConcatenated;
+    }
+
+    void setWeekdayTextConcatenated(List<String> weekdayText) {
+        if(weekdayText != null) {
+            StringBuilder weekdayTextBuilder = new StringBuilder();
+
+            for(String dayText : weekdayText){
+                weekdayTextBuilder.append(dayText).append("\n");
+            }
+
+            weekdayTextConcatenated = weekdayTextBuilder.toString();
+        }else {
+            weekdayTextConcatenated = DATA_DEFAULT;
+        }
+
+    }
+
+    List<Photo> getPhotos(){
+        return photos;
+    }
+
+    void setOnFinishRetrievingImages(OnFinishRetrievingImages onFinishRetrievingImages) {
+        this.onFinishRetrievingImages = onFinishRetrievingImages;
+    }
+
+    interface OnFinishRetrievingImages{
+        void onFinishRetrieve();
     }
 }
