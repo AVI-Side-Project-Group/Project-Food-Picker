@@ -18,6 +18,8 @@ class Photo {
         onFailFetch = null;
 
         FetchPhotoRequest photoRequest = FetchPhotoRequest.builder(photoMetadata)
+                .setMaxHeight(600)
+                .setMaxWidth(600)
                 .build();
 
         placesClient.fetchPhoto(photoRequest).addOnSuccessListener((fetchPhotoResponse) -> {

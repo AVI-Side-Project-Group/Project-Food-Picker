@@ -225,7 +225,6 @@ public class RestaurantCard extends ScrollView {
             boolean isSwiped = checkForSwipe(motionEvent);
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
-                Log.d(TAG, "initEvents: opening contents");
                 if(!isContentsVisible()) {
                     openContents();
                 } else {
@@ -253,11 +252,13 @@ public class RestaurantCard extends ScrollView {
     public void openContents(){
         restaurantCardContents.setVisibility(VISIBLE);
         if(onOpenContents != null) onOpenContents.onOpen();
+        else Log.d(TAG, "openContents: onOpenContents is null");
     }
 
     public void closeContents(){
         restaurantCardContents.setVisibility(GONE);
         if(onCloseContents != null) onCloseContents.onClose();
+        else Log.d(TAG, "closeContents: onCloseContents is null");
     }
 
     private boolean cannotPerformEvents(){
@@ -309,6 +310,10 @@ public class RestaurantCard extends ScrollView {
                 }
         }
         return false;
+    }
+
+    public void resetCard(){
+        closeContents();
     }
 
     public void swipeCard(){
