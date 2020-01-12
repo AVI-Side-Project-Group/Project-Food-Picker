@@ -3,6 +3,7 @@ package me.nakukibo.projectfoodpicker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -81,14 +83,16 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void initViewEvents() {
         RestaurantCard.OnOpenContents onOpenContents = () -> {
             Log.d(TAG, "initViewEvents: opening contents");
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.up));
+            btnSwipe.setClickable(false);
             btnSwipe.hide();
+            btnToggleContents.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.up));
         };
 
         RestaurantCard.OnCloseContents onCloseContents = () -> {
             Log.d(TAG, "initViewEvents: closing contents");
-            btnToggleContents.setImageDrawable(getDrawable(R.drawable.down));
+            btnSwipe.setClickable(true);
             btnSwipe.show();
+            btnToggleContents.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.down));
         };
 
         restCard1.setOnSwipeStartEvent(this::deactivateFloatingButtons);
@@ -228,20 +232,14 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         LinkedList<Restaurant> unvisitedRestaurants = new LinkedList<>(removeVisited(nearbyRestaurants));
         Collections.shuffle(unvisitedRestaurants);
 
-        Restaurant restaurant = unvisitedRestaurants.pop();
         Restaurant.OnFinishRetrievingImages onFinishRetrievingImages = new Restaurant.OnFinishRetrievingImages() {
             @Override
-            public void onFinishRetrieve() {
+            public void onFinishRetrieve(Restaurant restaurant) {
                 onFinishDetailsFetch(restaurant);
-                if(!unvisitedRestaurants.isEmpty()){
-                    Restaurant nextRestaurant = unvisitedRestaurants.pop();
-                    FetchDetails fetchDetails = new FetchDetails(this);
-                    fetchDetails.fetch(nextRestaurant, placesClient);
-                }
             }
         };
-        FetchDetails fetchDetails = new FetchDetails(onFinishRetrievingImages);
-        fetchDetails.fetch(restaurant, placesClient);
+        FetchDetails fetchDetails = new FetchDetails(unvisitedRestaurants, onFinishRetrievingImages);
+        fetchDetails.execute(placesClient);
     }
 
     private void onFinishDetailsFetch(Restaurant selectedRestaurant){
@@ -249,6 +247,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         //savePreviouslyAccessedData(previouslyAccessed); TODO: put this in after fix
 
         if (firstCard) {
+            firstCard = false;
             hideLoadingScreen();
             activateFloatingButtons();
 
@@ -324,10 +323,11 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
 
     private void defaultSwipeEndEvent(RestaurantCard thisCard, RestaurantCard otherCard) {
-        activeCard.setVisibility(View.INVISIBLE);
-        activeCard.setDefaultValues();
+        btnToggleContents.setClickable(false);
+        thisCard.setVisibility(View.GONE);
+        thisCard.setDefaultValues();
+        thisCard.resetCard();
         activeCard = otherCard;
-
         fetchNextRestaurant(R.string.restcard_finder_no_more_restaurants);
     }
 
@@ -350,14 +350,6 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             @Override
             public void onAnimationRepeat(Animation animation) {}
         });
-
-        if(restCard1.getVisibility() == View.VISIBLE){
-            Log.d(TAG, "setViewValues: card one setting to visible");
-        }
-
-        if(restCard2.getVisibility() == View.VISIBLE){
-            Log.d(TAG, "setViewValues: card two setting to visible");
-        }
 
         activeCard.setVisibility(View.VISIBLE);
         activeCard.setValues(selectedRestaurant);
@@ -433,19 +425,15 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     }
 
     public void swipeCard(View view) {
-        btnToggleContents.setClickable(false);
         activeCard.swipeCard();
-        btnToggleContents.setClickable(true);
     }
 
     public void toggleContents(View view) {
-        btnSwipe.setClickable(false);
         if (activeCard.isContentsVisible()) {
             activeCard.closeContents();
         } else {
             activeCard.openContents();
         }
-        btnSwipe.setClickable(true);
     }
 
     /**
@@ -460,7 +448,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     }
 
     private void hideLoadingScreen(){
-        loadingView.setVisibility(View.INVISIBLE);
+        loadingView.setVisibility(View.GONE);
     }
 
     private void deactivateFloatingButtons(){
@@ -480,8 +468,8 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     }
 
     private void hideCards() {
-        restCard1.setVisibility(View.INVISIBLE);
-        restCard2.setVisibility(View.INVISIBLE);
+        restCard1.setVisibility(View.GONE);
+        restCard2.setVisibility(View.GONE);
     }
 
     /**

@@ -71,6 +71,7 @@ class Restaurant {
         for(int i=0; i<numPhotos; i++){
             PhotoMetadata photoMetadata = photosMetadata.get(i);
             Photo photo = new Photo(placesClient, photoMetadata);
+            Log.d(TAG, "fetchImages: photometadata=" + photoMetadata.getAttributions());
 
             photo.setOnFinishFetch(() -> {
                 Log.d(TAG, "fetchImages: successfully added photo");
@@ -91,7 +92,7 @@ class Restaurant {
     private void defaultLastPhotoEvent(List<PhotoMetadata> processed, PhotoMetadata photoMetadata,
                                        int numPhotos){
         if(isLastPhoto(processed, photoMetadata, numPhotos)){
-            if(onFinishRetrievingImages != null) onFinishRetrievingImages.onFinishRetrieve();
+            if(onFinishRetrievingImages != null) onFinishRetrievingImages.onFinishRetrieve(this);
         }
     }
 
@@ -182,6 +183,6 @@ class Restaurant {
     }
 
     interface OnFinishRetrievingImages{
-        void onFinishRetrieve();
+        void onFinishRetrieve(Restaurant restaurant);
     }
 }

@@ -225,7 +225,6 @@ public class RestaurantCard extends ScrollView {
             boolean isSwiped = checkForSwipe(motionEvent);
 
             if(motionEvent.getAction() == MotionEvent.ACTION_UP && !isSwiped){
-                Log.d(TAG, "initEvents: opening contents");
                 if(!isContentsVisible()) {
                     openContents();
                 } else {
@@ -311,6 +310,10 @@ public class RestaurantCard extends ScrollView {
                 }
         }
         return false;
+    }
+
+    public void resetCard(){
+        closeContents();
     }
 
     public void swipeCard(){
