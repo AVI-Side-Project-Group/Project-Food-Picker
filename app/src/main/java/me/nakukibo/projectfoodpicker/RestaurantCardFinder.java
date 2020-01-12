@@ -44,6 +44,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private ConstraintLayout buttonSet;
 
     private FloatingActionButton btnSwipe;
+    private FloatingActionButton btnBlock;
     private FloatingActionButton btnOpenContents;
     private FloatingActionButton btnCloseContents;
 
@@ -148,6 +149,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         buttonSet = findViewById(R.id.restcard_finder_btn_set);
 
         btnSwipe = findViewById(R.id.btn_roll_again);
+        btnBlock = findViewById(R.id.btn_block_location);
         btnOpenContents = findViewById(R.id.btn_open_contents);
         btnCloseContents = findViewById(R.id.btn_close_contents);
 
@@ -491,10 +493,12 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void deactivateFloatingButtons(){
         Log.d(TAG, "deactivateFloatingButtons: deactivating buttons");
         btnSwipe.setClickable(false);
+        btnBlock.setClickable(false);
         btnOpenContents.setClickable(false);
         btnCloseContents.setClickable(false);
 
         btnSwipe.hide();
+        btnBlock.hide();
         btnOpenContents.hide();
         btnCloseContents.hide();
     }
@@ -503,6 +507,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         Log.d(TAG, "activateFloatingButtons: activating buttons");
         btnSwipe.setClickable(true);
         btnSwipe.show();
+
+        btnBlock.setClickable(true);
+        btnBlock.show();
 
         if(activeCard == null || !activeCard.isContentsVisible()){
             btnOpenContents.setClickable(true);

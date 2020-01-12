@@ -121,7 +121,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/restcard_finder_btn_set"
         android:layout_width="0dp"
-        android:layout_height="70dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -132,16 +132,26 @@
             android:id="@+id/btn_roll_again"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
+            android:layout_marginStart="32dp"
             android:clickable="true"
             android:focusable="true"
             android:onClick="swipeCard"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/vertical50"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/reload"
             tools:srcCompat="@drawable/reload" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_block_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btn_close_wrapper"
+            app:layout_constraintStart_toStartOf="@+id/vertical50"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/quantum_ic_clear_grey600_24" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/btn_close_wrapper"
@@ -157,13 +167,12 @@
                 android:id="@+id/btn_close_contents"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:onClick="toggleContents"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/up" />
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -182,13 +191,12 @@
                 android:id="@+id/btn_open_contents"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:onClick="toggleContents"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/down"
                 tools:srcCompat="@drawable/down" />
