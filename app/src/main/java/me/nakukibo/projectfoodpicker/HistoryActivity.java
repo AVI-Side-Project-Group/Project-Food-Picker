@@ -1,9 +1,12 @@
 package me.nakukibo.projectfoodpicker;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +15,8 @@ import java.util.Set;
 
 public class HistoryActivity extends ThemedAppCompatActivity {
 
-    private List<HashMap<String, String>> previouslyAccessed;
+    private static final String TAG = HistoryActivity.class.getSimpleName();
+    private List<Restaurant> previouslyAccessed;
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
@@ -36,16 +40,22 @@ public class HistoryActivity extends ThemedAppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-    private List<HashMap<String, String>> getHistory(){
-        Set tempSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed), null);
-        List<HashMap<String, String>> tempList;
-        if (tempSet == null) {
-            tempList = new ArrayList<>();
-        } else {
-            tempList = new ArrayList<>(tempSet);
+    private List<Restaurant> getHistory(){
+        List<Restaurant> restaurantList = new ArrayList<>();
+        Gson gson = new Gson();
+        Set jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
+
+        ArrayList<String> jsonList = new ArrayList<String>(jsonSet);
+
+        if(jsonSet != null){
+            for(int i = 0; i < jsonList.size(); i++) {
+                restaurantList.add(gson.fromJson(jsonList.get(i), Restaurant.class));
+            }
         }
 
-        return tempList;
+        Log.d(TAG, "getPreviouslyAccessed: " + restaurantList);
+
+        return restaurantList;
     }
 }
 
