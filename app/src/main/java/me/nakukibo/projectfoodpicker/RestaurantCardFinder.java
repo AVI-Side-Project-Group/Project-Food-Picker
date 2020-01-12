@@ -3,7 +3,6 @@ package me.nakukibo.projectfoodpicker;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +20,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,11 +37,15 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private static final int ERROR_PASSED_VALUE = -1;
 
     private View loadingView;
+    private View wrapperOpen;
+    private View wrapperClose;
+
     private ConstraintLayout noRestaurantsError;
     private ConstraintLayout buttonSet;
 
     private FloatingActionButton btnSwipe;
-    private FloatingActionButton btnToggleContents;
+    private FloatingActionButton btnOpenContents;
+    private FloatingActionButton btnCloseContents;
 
     private RestaurantCard restCard1;
     private RestaurantCard restCard2;
@@ -72,8 +76,8 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
         initViewVariables();
         initViewEvents();
-        resetGlobalVariables();
         initViewValues();
+        resetGlobalVariables();
 
         retrievePassedValues();
         resetRolls();
@@ -81,18 +85,35 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     }
 
     private void initViewEvents() {
+
         RestaurantCard.OnOpenContents onOpenContents = () -> {
             Log.d(TAG, "initViewEvents: opening contents");
+
+            btnOpenContents.setClickable(false);
+            wrapperOpen.setVisibility(View.INVISIBLE);
+            btnOpenContents.hide();
+
+            btnCloseContents.setClickable(true);
+            wrapperClose.setVisibility(View.VISIBLE);
+            btnCloseContents.show();
+
             btnSwipe.setClickable(false);
             btnSwipe.hide();
-            btnToggleContents.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.up));
         };
 
         RestaurantCard.OnCloseContents onCloseContents = () -> {
             Log.d(TAG, "initViewEvents: closing contents");
+
+            btnCloseContents.setClickable(false);
+            wrapperClose.setVisibility(View.INVISIBLE);
+            btnCloseContents.hide();
+
+            btnOpenContents.setClickable(true);
+            wrapperOpen.setVisibility(View.VISIBLE);
+            btnOpenContents.show();
+
             btnSwipe.setClickable(true);
             btnSwipe.show();
-            btnToggleContents.setImageDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.down));
         };
 
         restCard1.setOnSwipeStartEvent(this::deactivateFloatingButtons);
@@ -121,28 +142,33 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
     private void initViewVariables() {
         loadingView = findViewById(R.id.restcard_loading);
+        wrapperOpen = findViewById(R.id.btn_open_wrapper);
+        wrapperClose = findViewById(R.id.btn_close_wrapper);
         noRestaurantsError = findViewById(R.id.no_restaurants_layout);
         buttonSet = findViewById(R.id.restcard_finder_btn_set);
 
         btnSwipe = findViewById(R.id.btn_roll_again);
-        btnToggleContents = findViewById(R.id.btn_open_contents);
+        btnOpenContents = findViewById(R.id.btn_open_contents);
+        btnCloseContents = findViewById(R.id.btn_close_contents);
 
         restCard1 = findViewById(R.id.restcard);
         restCard2 = findViewById(R.id.restcard2);
+        restCard1.resetCard();
+        restCard2.resetCard();
         activeCard = null;
     }
 
     private void initViewValues() {
         loadingView.setVisibility(View.VISIBLE);
         noRestaurantsError.setVisibility(View.GONE);
-        buttonSet.setVisibility(View.GONE);
+        buttonSet.setVisibility(View.INVISIBLE);
 
         deactivateFloatingButtons();
 
         restCard1.setDefaultValues();
         restCard2.setDefaultValues();
-        restCard1.setVisibility(View.GONE);
-        restCard2.setVisibility(View.GONE);
+        restCard1.setVisibility(View.INVISIBLE);
+        restCard2.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -243,6 +269,13 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     }
 
     private void onFinishDetailsFetch(Restaurant selectedRestaurant){
+        if(buttonSet.getVisibility() == View.VISIBLE){
+            Log.d(TAG, "onFinishDetailsFetch: button set visible");
+        }else {
+            Log.d(TAG, "onFinishDetailsFetch: button set not visible");
+        }
+
+
         Log.d(TAG, "onFinishDetailsFetch: finished fetching details for " + selectedRestaurant.getName());
         //savePreviouslyAccessedData(previouslyAccessed); TODO: put this in after fix
 
@@ -250,6 +283,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             firstCard = false;
             hideLoadingScreen();
             activateFloatingButtons();
+            btnOpenContents.show();
+            btnCloseContents.hide();
+            wrapperOpen.setVisibility(View.VISIBLE);
 
             activeCard = restCard1;
             activeCard.setVisibility(View.VISIBLE);
@@ -323,7 +359,8 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
 
     private void defaultSwipeEndEvent(RestaurantCard thisCard, RestaurantCard otherCard) {
-        btnToggleContents.setClickable(false);
+        btnOpenContents.setClickable(false);
+        btnCloseContents.setClickable(false);
         thisCard.setVisibility(View.GONE);
         thisCard.setDefaultValues();
         thisCard.resetCard();
@@ -429,9 +466,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     }
 
     public void toggleContents(View view) {
-        if (activeCard.isContentsVisible()) {
+        if (view.getId() == R.id.btn_close_contents) {
             activeCard.closeContents();
-        } else {
+        } else if (view.getId() == R.id.btn_open_contents) {
             activeCard.openContents();
         }
     }
@@ -454,22 +491,31 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void deactivateFloatingButtons(){
         Log.d(TAG, "deactivateFloatingButtons: deactivating buttons");
         btnSwipe.setClickable(false);
-        btnToggleContents.setClickable(false);
+        btnOpenContents.setClickable(false);
+        btnCloseContents.setClickable(false);
+
         btnSwipe.hide();
-        btnToggleContents.hide();
+        btnOpenContents.hide();
+        btnCloseContents.hide();
     }
 
     private void activateFloatingButtons(){
         Log.d(TAG, "activateFloatingButtons: activating buttons");
         btnSwipe.setClickable(true);
-        btnToggleContents.setClickable(true);
         btnSwipe.show();
-        btnToggleContents.show();
+
+        if(activeCard == null || !activeCard.isContentsVisible()){
+            btnOpenContents.setClickable(true);
+            btnOpenContents.show();
+        }else {
+            btnCloseContents.setClickable(true);
+            btnCloseContents.show();
+        }
     }
 
     private void hideCards() {
-        restCard1.setVisibility(View.GONE);
-        restCard2.setVisibility(View.GONE);
+        restCard1.setVisibility(View.INVISIBLE);
+        restCard2.setVisibility(View.INVISIBLE);
     }
 
     /**
