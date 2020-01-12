@@ -20,27 +20,24 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.preference.PreferenceManager;
 
 import java.util.Locale;
+import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class PreferencesActivity extends AppCompatActivity {
+public class PreferencesActivity extends ThemedAppCompatActivity {
 
     // variables used to pass data between PreferencesActivity and RestaurantCardFinder
-    public static final String PREF_ANY_STR_REP = "Any";
     public static final int PREF_ANY_INT_REP = 0;
-
+    public static final String PREF_ANY_STR_REP = "Any";
     public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
     public static final String PREF_INTENT_PRICING = "pricing";
 
-    // tag for logging
     private static final String TAG = PreferencesActivity.class.getSimpleName();
 
     // flag for checking whether the user allowed for location data
@@ -63,9 +60,6 @@ public class PreferencesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Log.d(TAG, "onCreate: " + sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
-        setTheme(sharedPreferences.getInt(getString(R.string.sp_theme), R.style.Light));
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
@@ -74,9 +68,11 @@ public class PreferencesActivity extends AppCompatActivity {
         requestLocationPermission();
         initPrefViews();
 
-        FoodPicker.getEditor().remove(getString(R.string.sp_previously_accessed));
-        FoodPicker.getEditor().commit();
+        SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
+        editor.remove(getString(R.string.sp_previously_accessed));
+        editor.apply();
     }
+
 
     /**
      * logs all values for debugging purposes
@@ -278,7 +274,8 @@ public class PreferencesActivity extends AppCompatActivity {
         return (int) Math.ceil(miles*1609.34);
     }
 
-    public static double metersToMiles(float meters){
+    public static Double metersToMiles(Float meters){
+        if(meters == null) return null;
         return meters * 0.000621371;
     }
 
@@ -296,10 +293,10 @@ public class PreferencesActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void getHistory(View view){
-        Set tempSet = FoodPicker.getSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed), null);
+    public void openHistory(View view) {
+        Set tempSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed), null);
         if (tempSet == null) {
-            Toast toast = Toast.makeText(FoodPicker.getApp(), "History is blank.",
+            Toast toast = Toast.makeText(this, "History is blank.",
                     Toast.LENGTH_LONG);
             toast.show();
         } else {
