@@ -241,8 +241,6 @@ public class RestaurantCard extends ScrollView {
         if(isContentsVisible()){
             return super.onTouchEvent(ev);
         }  else {
-            Log.d(TAG, "initEvents: RestaurantCard touch event");
-
             if(cannotPerformEvents()) return true;
             checkForSwipe(ev);
             return true;
@@ -298,7 +296,7 @@ public class RestaurantCard extends ScrollView {
                 // if pass threshold, then new card, else place card back in center
                 if(isBeingSwiped){
 
-                    if (newX <= restCardStartX - width/2) {
+                    if (newX <= restCardStartX - width/4) {
                         swipeCard();
                     }
 
