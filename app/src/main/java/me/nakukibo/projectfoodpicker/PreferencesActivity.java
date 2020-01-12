@@ -68,9 +68,9 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         requestLocationPermission();
         initPrefViews();
 
-        SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
-        editor.remove(getString(R.string.sp_previously_accessed));
-        editor.apply();
+        /*SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
+        editor.remove(getString(R.string.sp_previously_accessed_json));
+        editor.apply();*/
     }
 
 
@@ -137,6 +137,23 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
             Toast toast = Toast.makeText(getApplicationContext(), "You cannot search with location off.",
                     Toast.LENGTH_LONG);
             toast.show();
+        }
+    }
+
+    public void changeSettings(View view) {
+        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    public void openHistory(View view) {
+        Set jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
+        if (jsonSet == null) {
+            Toast toast = Toast.makeText(this, "History is blank.",
+                    Toast.LENGTH_LONG);
+            toast.show();
+        } else {
+            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -286,22 +303,5 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
      * */
     private String getDistance(int index) {
         return String.format(Locale.US, "%2.1f miles", distances[index]);
-    }
-
-    public void changeSettings(View view) {
-        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        startActivity(intent);
-    }
-
-    public void openHistory(View view) {
-        Set tempSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed), null);
-        if (tempSet == null) {
-            Toast toast = Toast.makeText(this, "History is blank.",
-                    Toast.LENGTH_LONG);
-            toast.show();
-        } else {
-            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
-            startActivity(intent);
-        }
     }
 }

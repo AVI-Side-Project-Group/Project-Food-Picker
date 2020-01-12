@@ -17,7 +17,7 @@ import java.util.List;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.RestaurantViewHolder> {
     private static String TAG = RestaurantAdapter.class.getSimpleName();
-    private List<HashMap<String, String>> data;
+    private List<Restaurant> data;
 
     public static class RestaurantViewHolder extends RecyclerView.ViewHolder {
         public TextView txtvwName;
@@ -26,7 +26,6 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
         public RestaurantViewHolder(View itemView){
             super(itemView);
-            //historyCard = h;
             txtvwName = itemView.findViewById(R.id.his_txtvw_name);
             txtvwAddress = itemView.findViewById(R.id.his_txtvw_address);
             btnMoreInfo = itemView.findViewById(R.id.btn_getinfo);
@@ -36,7 +35,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
         }
     }
 
-    public RestaurantAdapter(List<HashMap<String, String>> data) {
+    public RestaurantAdapter(List<Restaurant> data) {
         this.data = data;
     }
 
@@ -51,11 +50,10 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
 
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
-        HashMap<String, String> currentItem = data.get(position);
+        Restaurant currentItem = data.get(position);
 
-        // fix with restaurant class
-//        holder.txtvwName.setText(currentItem.get(DataParser.DATA_KEY_NAME));
-//        holder.txtvwAddress.setText(currentItem.get(DataParser.DATA_KEY_ADDRESS));
+        holder.txtvwName.setText(currentItem.getName());
+        holder.txtvwAddress.setText(currentItem.getAddress());
     }
 
     @Override

@@ -1,9 +1,15 @@
 package me.nakukibo.projectfoodpicker;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.net.PlacesClient;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +34,7 @@ class Restaurant {
     private String id;
 
     private List<Photo> photos;
+    private int numPhotos;
     private String weekdayTextConcatenated;
     private String phoneNumber;
     private String website;
@@ -54,6 +61,31 @@ class Restaurant {
         this.onFinishRetrievingImages = null;
     }
 
+    Restaurant(String json){
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+
+            name = jsonObject.getString("Name");
+            address = jsonObject.getString("Address");
+            isOpen = jsonObject.getBoolean("isOpen");
+            rating = jsonObject.getDouble("rating");
+            totRating = jsonObject.getInt("totRating");
+            priceLevel = jsonObject.getInt("priceLevel");
+            distanceMiles = jsonObject.getDouble("distance");
+            id = jsonObject.getString("id");
+            phoneNumber = jsonObject.getString("phoneNumber");
+            website = jsonObject.getString("website");
+            weekdayTextConcatenated = jsonObject.getString("weekdayText");
+            for(int i = 0; i < jsonObject.getInt("numPhoto"); i++){
+                Bitmap bitmap = getBitmapFromString(jsonObject.getString("photo" + i));
+                Photo photo = new Photo(bitmap);
+                photos.add(photo);
+            }
+        } catch (JSONException err){
+            Log.d("Error", err.toString());
+        }
+    }
+
     /**
      * populates the photos array by fetching them from Google Places and instantiating the Photo obj
      *
@@ -64,7 +96,7 @@ class Restaurant {
         Log.d(TAG, "fetchImages: fetching photos");
         if(photosMetadata == null) return;
 
-        final int numPhotos = Math.min(photosMetadata.size(), MAX_NUM_PHOTOS);
+        numPhotos = Math.min(photosMetadata.size(), MAX_NUM_PHOTOS);
         List<PhotoMetadata> processedMetadata = new ArrayList<>();
         Log.d(TAG, "fetchImages: will be fetching " + numPhotos + " photos.");
 
@@ -183,5 +215,38 @@ class Restaurant {
 
     interface OnFinishRetrievingImages{
         void onFinishRetrieve();
+    }
+
+    String getJsonFromResturant(){
+        JSONObject jsonObject= new JSONObject();
+        try {
+            jsonObject.put("name", getName());
+            jsonObject.put("address", getAddress());
+            jsonObject.put("isOpen", getOpen());
+            jsonObject.put("rating", getRating());
+            jsonObject.put("totRating", getTotRating());
+            jsonObject.put("priceLevel", getPriceLevel());
+            jsonObject.put("distance", getDistanceMiles());
+            jsonObject.put("id", getId());
+            jsonObject.put("phoneNumber", getPhoneNumber());
+            jsonObject.put("website", getWebsite());
+            jsonObject.put("weekdayText", getWeekdayTextConcatenated());
+            jsonObject.put("numPhoto", numPhotos);
+            for(int i = 0; i < numPhotos; i++){
+                jsonObject.put("photo " + i, getPhotos().get(i).getStringFromBitmap(getPhotos().get(i).getBitmap()));
+            }
+
+            return jsonObject.toString();
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    Bitmap getBitmapFromString(String stringPicture) {
+        byte[] decodedString = Base64.decode(stringPicture, Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        return decodedByte;
     }
 }

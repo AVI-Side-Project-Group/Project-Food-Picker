@@ -1,9 +1,14 @@
 package me.nakukibo.projectfoodpicker;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
+
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
+
+import java.io.ByteArrayOutputStream;
 
 class Photo {
 
@@ -32,6 +37,12 @@ class Photo {
         });
     }
 
+    Photo(Bitmap bitmap){
+        this.bitmap = bitmap;
+        onFinishFetch = null;
+        onFailFetch = null;
+    }
+
     Bitmap getBitmap() {
         return bitmap;
     }
@@ -58,5 +69,16 @@ class Photo {
          * */
 
         void onFailFetch();
+    }
+
+    String getStringFromBitmap(Bitmap bitmapPicture) {
+        final int COMPRESSION_QUALITY = 100;
+        String encodedImage;
+        ByteArrayOutputStream byteArrayBitmapStream = new ByteArrayOutputStream();
+        bitmapPicture.compress(Bitmap.CompressFormat.PNG, COMPRESSION_QUALITY,
+                byteArrayBitmapStream);
+        byte[] b = byteArrayBitmapStream.toByteArray();
+        encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+        return encodedImage;
     }
 }
