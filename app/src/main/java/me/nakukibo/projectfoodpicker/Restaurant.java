@@ -65,8 +65,8 @@ class Restaurant {
         try {
             JSONObject jsonObject = new JSONObject(json);
 
-            name = jsonObject.getString("Name");
-            address = jsonObject.getString("Address");
+            name = jsonObject.getString("name");
+            address = jsonObject.getString("address");
             isOpen = jsonObject.getBoolean("isOpen");
             rating = jsonObject.getDouble("rating");
             totRating = jsonObject.getInt("totRating");

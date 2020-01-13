@@ -52,7 +52,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
 
     // values for views
     private String[] foodTypes = {PREF_ANY_STR_REP, "American", "Asian",
-            "Barbecue", "Dessert", "European", "Hamburger", "Mediterranean",
+            "Barbecue", "Boba", "Dessert", "European", "Hamburger", "Mediterranean",
             "Mexican", "Pizza", "Seafood", "Steak"};
     private int[] minRatings = {0, 1, 2, 3, 4};
     private int[] priceRanges = {0, 1, 2, 3, 4};

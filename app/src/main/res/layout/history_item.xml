@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/historyCard"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:onClick="getInfo"
+    app:cardBackgroundColor="#00FFFFFF">
 
     <TextView
         android:id="@+id/his_txtvw_address"
@@ -9,6 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="50dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:text="@string/restcard_default_address" />
 
@@ -18,14 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
         android:text="@string/restcard_default_name"
         android:textSize="24sp" />
-
-    <Button
-        android:id="@+id/btn_getinfo"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:onClick="getInfo"
-        android:visibility="invisible" />
 
 </androidx.cardview.widget.CardView>
