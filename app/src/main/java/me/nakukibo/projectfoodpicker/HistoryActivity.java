@@ -80,7 +80,7 @@ public class HistoryActivity extends ThemedAppCompatActivity {
         popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
     }
 
-    public void closePopUpWindown(View view){
+    public void closePopUpWindow(View view){
         popupWindow.dismiss();
     }
 }

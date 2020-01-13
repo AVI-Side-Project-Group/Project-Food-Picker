@@ -9,7 +9,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#00FFFFFF"
+        app:cardBackgroundColor="#4D000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -57,7 +57,7 @@
             android:id="@+id/hiscard_btn_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="closePopUpWindown"
+            android:onClick="closePopUpWindow"
             android:text="Button" />
     </androidx.cardview.widget.CardView>
 

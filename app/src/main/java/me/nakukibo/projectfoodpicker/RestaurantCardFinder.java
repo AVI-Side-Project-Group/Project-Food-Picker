@@ -349,8 +349,10 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void makeRoll(Restaurant selectedRestaurant){
         setViewValues(selectedRestaurant);
 
-        int remainingRolls = getApplicationSharedPreferences().getInt(getString(R.string.sp_remained_rerolls), 10);
+        //int remainingRolls = getApplicationSharedPreferences().getInt(getString(R.string.sp_remained_rerolls), 10);
+        int remainingRolls = 10;
         Log.d(TAG, "haveUnseenRestaurants: " + remainingRolls);
+        //remainingRolls--;
 
         SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
         editor.putInt(getString(R.string.sp_remained_rerolls), remainingRolls);
