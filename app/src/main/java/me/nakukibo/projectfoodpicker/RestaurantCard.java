@@ -315,10 +315,13 @@ public class RestaurantCard extends ScrollView {
     }
 
     public void swipeCard(){
-        Log.d(TAG, "initViews: card is swiped left");
+
+        float width = getWidth();
+        float height = getHeight();
+        Log.d(TAG, "swipeCard: card is swiped left: " + getX()/width + ", " + getY()/height);
 
         if(onSwipeStartEvent != null) onSwipeStartEvent.onSwipeStart();
-        Animation exitAnimation = RestaurantCardFinder.outToLeftAnimation();
+        Animation exitAnimation = RestaurantCardFinder.outToLeftAnimation(getX()/width, getY()/height);
         exitAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) { }
@@ -368,27 +371,19 @@ public class RestaurantCard extends ScrollView {
         return restaurantCardContents.getAddress();
     }
 
-    public int getImageWidth(){
-        return restPhoto.getWidth();
-    }
-
-    public int getImageHeight(){
-        return restPhoto.getHeight();
-    }
-
-    public static interface OnCloseContents {
+    public interface OnCloseContents {
         void onClose();
     }
 
-    public static interface OnOpenContents {
+    public interface OnOpenContents {
         void onOpen();
     }
 
-    public static interface OnSwipeEnd {
+    public interface OnSwipeEnd {
         void onSwipeEnd();
     }
 
-    public static interface OnSwipeStart {
+    public interface OnSwipeStart {
         void onSwipeStart();
     }
 }
