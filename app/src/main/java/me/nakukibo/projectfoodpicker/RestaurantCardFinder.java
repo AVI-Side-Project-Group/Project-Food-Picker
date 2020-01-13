@@ -537,7 +537,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         float yDist = dy * xDist;
 
         float distance = (float) Math.sqrt(xDist*xDist + yDist*yDist);
-        int duration = (int) (distance*140);
+        int duration = (int) (distance*160);
 
         Log.d(TAG, "outToLeftAnimation: dy=" + dy + " (xDist, yDist)=(" + xDist + ", " + yDist
                 + "), distance=" + distance + " duration=" + duration);
@@ -561,7 +561,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                 Animation.RELATIVE_TO_PARENT, 0.0f,
                 Animation.RELATIVE_TO_PARENT, 0.0f,
                 Animation.RELATIVE_TO_PARENT, 0.0f);
-        inFromRight.setDuration(200);
+        inFromRight.setDuration(240);
         inFromRight.setInterpolator(new AccelerateInterpolator());
         return inFromRight;
     }
