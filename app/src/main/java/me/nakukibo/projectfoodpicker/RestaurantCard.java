@@ -241,6 +241,8 @@ public class RestaurantCard extends ScrollView {
         if(isContentsVisible()){
             return super.onTouchEvent(ev);
         }  else {
+            Log.d(TAG, "initEvents: RestaurantCard touch event");
+
             if(cannotPerformEvents()) return true;
             checkForSwipe(ev);
             return true;
@@ -296,7 +298,7 @@ public class RestaurantCard extends ScrollView {
                 // if pass threshold, then new card, else place card back in center
                 if(isBeingSwiped){
 
-                    if (newX <= restCardStartX - width/4) {
+                    if (newX <= restCardStartX - width/2) {
                         swipeCard();
                     }
 
@@ -315,13 +317,10 @@ public class RestaurantCard extends ScrollView {
     }
 
     public void swipeCard(){
-
-        float width = getWidth();
-        float height = getHeight();
-        Log.d(TAG, "swipeCard: card is swiped left: " + getX()/width + ", " + getY()/height);
+        Log.d(TAG, "initViews: card is swiped left");
 
         if(onSwipeStartEvent != null) onSwipeStartEvent.onSwipeStart();
-        Animation exitAnimation = RestaurantCardFinder.outToLeftAnimation(getX()/width, getY()/height);
+        Animation exitAnimation = RestaurantCardFinder.outToLeftAnimation();
         exitAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) { }
@@ -371,19 +370,27 @@ public class RestaurantCard extends ScrollView {
         return restaurantCardContents.getAddress();
     }
 
-    public interface OnCloseContents {
+    public int getImageWidth(){
+        return restPhoto.getWidth();
+    }
+
+    public int getImageHeight(){
+        return restPhoto.getHeight();
+    }
+
+    public static interface OnCloseContents {
         void onClose();
     }
 
-    public interface OnOpenContents {
+    public static interface OnOpenContents {
         void onOpen();
     }
 
-    public interface OnSwipeEnd {
+    public static interface OnSwipeEnd {
         void onSwipeEnd();
     }
 
-    public interface OnSwipeStart {
+    public static interface OnSwipeStart {
         void onSwipeStart();
     }
 }
