@@ -22,13 +22,11 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantAdapter.Re
     public static class RestaurantViewHolder extends RecyclerView.ViewHolder {
         public TextView txtvwName;
         public TextView txtvwAddress;
-        public Button btnMoreInfo;
 
         public RestaurantViewHolder(View itemView){
             super(itemView);
             txtvwName = itemView.findViewById(R.id.his_txtvw_name);
             txtvwAddress = itemView.findViewById(R.id.his_txtvw_address);
-            btnMoreInfo = itemView.findViewById(R.id.btn_getinfo);
 
             Log.d(TAG, "RestaurantViewHolder: " + txtvwName);
 

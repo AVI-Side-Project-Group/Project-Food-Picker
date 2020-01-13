@@ -20,7 +20,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -284,10 +283,10 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             firstCard = false;
             hideLoadingScreen();
             activateFloatingButtons();
+
             btnOpenContents.show();
             btnCloseContents.hide();
             wrapperOpen.setVisibility(View.VISIBLE);
-
             activeCard = restCard1;
             activeCard.setVisibility(View.VISIBLE);
             buttonSet.setVisibility(View.VISIBLE);
@@ -375,6 +374,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void setViewValues(Restaurant selectedRestaurant) {
         previouslyAccessed = getPreviouslyAccessed();
         previouslyAccessed.add(selectedRestaurant);
+
+        Log.d(TAG, "setViewValues: " + previouslyAccessed);
+
         savePreviouslyAccessedData(previouslyAccessed);
 
         Animation inAnimation = inFromRightAnimation();
@@ -409,6 +411,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         for(int i = 0; i < previouslyAccessed.size(); i++){
             jsonSet.add(previouslyAccessed.get(i).getJsonFromResturant());
         }
+
+        Log.d(TAG, "savePreviouslyAccessedData: " + jsonSet);
+
         SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
         editor.putStringSet(getString(R.string.sp_previously_accessed_json), jsonSet);
         editor.apply();
