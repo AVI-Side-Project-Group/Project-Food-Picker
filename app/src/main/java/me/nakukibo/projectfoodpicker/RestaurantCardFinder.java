@@ -543,13 +543,26 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     /**
      * Animation for a card to move from in card to out of screen
      */
-    static Animation outToLeftAnimation() {
+    static Animation outToLeftAnimation(float fromX, float fromY) {
+        final float toX = -1.0f;
+        float dy = fromY/Math.abs(fromX);
+        dy = Float.isNaN(dy) ? 0 : dy;
+
+        float xDist = fromX - toX;
+        float yDist = dy * xDist;
+
+        float distance = (float) Math.sqrt(xDist*xDist + yDist*yDist);
+        int duration = (int) (distance*160);
+
+        Log.d(TAG, "outToLeftAnimation: dy=" + dy + " (xDist, yDist)=(" + xDist + ", " + yDist
+                + "), distance=" + distance + " duration=" + duration);
+
         Animation outToLeft = new TranslateAnimation(
-                Animation.RELATIVE_TO_PARENT, 0.0f,
-                Animation.RELATIVE_TO_PARENT, -1.0f,
-                Animation.RELATIVE_TO_PARENT, 0.0f,
-                Animation.RELATIVE_TO_PARENT, 0.0f);
-        outToLeft.setDuration(200);
+                Animation.RELATIVE_TO_PARENT, fromX,
+                Animation.RELATIVE_TO_PARENT, toX,
+                Animation.RELATIVE_TO_PARENT, fromY,
+                Animation.RELATIVE_TO_PARENT, fromY + yDist);
+        outToLeft.setDuration(duration);
         outToLeft.setInterpolator(new AccelerateInterpolator());
         return outToLeft;
     }
@@ -563,7 +576,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                 Animation.RELATIVE_TO_PARENT, 0.0f,
                 Animation.RELATIVE_TO_PARENT, 0.0f,
                 Animation.RELATIVE_TO_PARENT, 0.0f);
-        inFromRight.setDuration(400);
+        inFromRight.setDuration(240);
         inFromRight.setInterpolator(new AccelerateInterpolator());
         return inFromRight;
     }
