@@ -27,7 +27,8 @@ class DataParser {
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
     List<Restaurant> parse(String jsonData, Location userLocation, int maxDistance,
-                                        int pricingRange, int minRating) throws RuntimeException {
+                                        int pricingRange, int minRating, Boolean allowProminent)
+            throws RuntimeException {
         Log.d(TAG, "parse: jsonData=" + jsonData);
 
         JSONArray jsonArray;
@@ -53,7 +54,7 @@ class DataParser {
             return null;
         }
 
-        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating);
+        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating, allowProminent);
     }
 
     /**
@@ -63,13 +64,15 @@ class DataParser {
      * @return List<HashMap < String, String>>  list of all HashMaps returned for each location
      */
     private List<Restaurant> getAllPlacesData(JSONArray jsonArray, Location userLocation,
-                                                           int maxDistance, int pricingRange, int minRating) {
+                                                           int maxDistance, int pricingRange,
+                                              int minRating, Boolean allowProminent) {
         List<Restaurant> restaurants = new ArrayList<>();
         Restaurant restaurantObj;
 
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
-                restaurantObj = getRestaurantData((JSONObject) jsonArray.get(i), userLocation, maxDistance, pricingRange, minRating);
+                restaurantObj = getRestaurantData((JSONObject) jsonArray.get(i), userLocation,
+                        maxDistance, pricingRange, minRating, allowProminent);
                 if (restaurantObj != null) {
                     restaurants.add(restaurantObj);
                     Log.d(TAG, "getAllPlacesData: place added");
@@ -90,7 +93,7 @@ class DataParser {
      * @return HashMap<String, String> key values are declared as constants for easy access
      */
     private Restaurant getRestaurantData(JSONObject googlePlaceJson, Location userLocation,
-                                         int maxDistance, int pricingRange, int minRating) {
+                                         int maxDistance, int pricingRange, int minRating, Boolean allowProminent) {
         // initialize all values to default
         Float distFromUser = null;
         String name = null;
@@ -110,7 +113,7 @@ class DataParser {
             }
 
             // if too far, then return null
-            distFromUser = distFromUser(userLocation, googlePlaceJson, name, maxDistance);
+            distFromUser = distFromUser(userLocation, googlePlaceJson, name, maxDistance, allowProminent);
             if (distFromUser == null) return null;
 
             // address
@@ -173,9 +176,10 @@ class DataParser {
      * @param userLocation    Location object representing user's location with latitude and longitude
      * @param googlePlaceJson the JSONObject representing the data retrieved from Google Places
      * @param name            name of the restaurant
-     * @return Float - distance from user in meters, null if out of range
+     * @return Float - distance from user in meters, null if out of range and allowProminent == false
      */
-    private Float distFromUser(Location userLocation, JSONObject googlePlaceJson, String name, int maxDistance) {
+    private Float distFromUser(Location userLocation, JSONObject googlePlaceJson, String name,
+                               int maxDistance, Boolean allowProminent) {
         double latitude;
         double longitude;
         try {
@@ -195,8 +199,8 @@ class DataParser {
         restLocation.setLongitude(longitude);
 
         boolean closeEnough = userLocation.distanceTo(restLocation) <= maxDistance;
-        if (!closeEnough) Log.d(TAG, "distFromUser: " + name + " removed b/c too far.");
-        return closeEnough ? userLocation.distanceTo(restLocation) : null;
+        if (!closeEnough && !allowProminent) Log.d(TAG, "distFromUser: " + name + " removed b/c too far.");
+        return closeEnough || allowProminent ? userLocation.distanceTo(restLocation) : null;
     }
 
     String getNextPageToken() {

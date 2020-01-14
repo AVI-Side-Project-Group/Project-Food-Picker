@@ -15,7 +15,7 @@
         android:layout_marginEnd="16dp"
         android:text="@string/prefs_txtvw_food_type"
         android:textSize="@dimen/font_size_pref_main"
-        app:layout_constraintEnd_toStartOf="@+id/vertical45"
+        app:layout_constraintEnd_toStartOf="@+id/vertical36"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/horizontal5" />
 
@@ -28,7 +28,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/txtvw_foodtype"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/vertical45"
+        app:layout_constraintStart_toStartOf="@+id/vertical36"
         app:layout_constraintTop_toTopOf="@+id/txtvw_foodtype" />
 
 
@@ -52,7 +52,7 @@
         android:max="5"
         app:layout_constraintBottom_toBottomOf="@+id/txtvw_rating"
         app:layout_constraintEnd_toEndOf="@+id/spin_foodtype"
-        app:layout_constraintStart_toStartOf="@+id/vertical45"
+        app:layout_constraintStart_toStartOf="@+id/vertical36"
         app:layout_constraintTop_toTopOf="@+id/txtvw_rating" />
 
     <TextView
@@ -94,13 +94,13 @@
         android:textSize="@dimen/font_size_pref_main"
         app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_distance"
         app:layout_constraintEnd_toStartOf="@+id/vertical55"
-        app:layout_constraintStart_toStartOf="@+id/vertical45" />
+        app:layout_constraintStart_toStartOf="@+id/vertical36" />
 
     <SeekBar
         android:id="@+id/sbr_distance"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:max="4"
         app:layout_constraintBottom_toBottomOf="@+id/txtvw_distance_progress"
         app:layout_constraintEnd_toEndOf="@+id/spin_rating"
@@ -157,7 +157,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5523114" />
+        app:layout_constraintGuide_percent=".55" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/horizontal5"
@@ -167,10 +167,10 @@
         app:layout_constraintGuide_percent="0.10123119" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/vertical45"
+        android:id="@+id/vertical36"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.38199514" />
+        app:layout_constraintGuide_percent=".36" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

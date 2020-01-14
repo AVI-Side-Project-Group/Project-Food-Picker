@@ -67,6 +67,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private int distance;
     private int pricing;
     private int rating;
+    private Boolean allowProminent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +182,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         rating = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_RATING, ERROR_PASSED_VALUE);
         distance = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
         pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
+        allowProminent = getIntent().getBooleanExtra(PreferencesActivity.PREF_INTENT_ALLOW_PROMINENT, false);
     }
 
     private void resetRolls() {
@@ -204,11 +206,11 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             editor.apply();
 
             editor.putInt(getString(R.string.sp_date), day);
-            editor.commit();
+            editor.apply();
             editor.putInt(getString(R.string.sp_month), month);
-            editor.commit();
+            editor.apply();
             editor.putInt(getString(R.string.sp_year), year);
-            editor.commit();
+            editor.apply();
         }
     }
 
@@ -230,7 +232,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         // get locational information
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        Object[] dataTransfer = new Object[5];
+                        Object[] dataTransfer = new Object[6];
                         Log.d(TAG, "fetchLocation: calling getnearbydata");
 
                         // find restaurants
@@ -242,6 +244,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         dataTransfer[2] = distance;
                         dataTransfer[3] = pricing;
                         dataTransfer[4] = rating;
+                        dataTransfer[5] = allowProminent;
                         getNearbyPlacesData.execute(dataTransfer);
                     }
                 });
@@ -337,6 +340,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
     private boolean haveUnseenRestaurants() {
         Set<Restaurant> potentials = removeVisited(nearbyRestaurants);
+        Log.d(TAG, "haveUnseenRestaurants: unseen restaurants:" + potentials.size());
         return potentials.size() > 0;
     }
 
@@ -351,7 +355,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         setViewValues(selectedRestaurant);
 
         int remainingRolls = getApplicationSharedPreferences().getInt(getString(R.string.sp_remained_rerolls), 10);
-        Log.d(TAG, "haveUnseenRestaurants: " + remainingRolls);
+        Log.d(TAG, "makeRoll: remainingRolls=" + remainingRolls);
 
         SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
         editor.putInt(getString(R.string.sp_remained_rerolls), remainingRolls);
