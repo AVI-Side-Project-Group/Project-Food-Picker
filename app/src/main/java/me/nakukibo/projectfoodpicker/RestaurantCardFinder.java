@@ -409,16 +409,17 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
     // TODO: rewrite using Restaurant classes
     private void savePreviouslyAccessedData(List<Restaurant> previouslyAccessed) {
-        jsonSet = new HashSet<String>();
-        for(int i = 0; i < previouslyAccessed.size(); i++){
-            jsonSet.add(previouslyAccessed.get(i).getJsonFromResturant());
-        }
+        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), new HashSet<>());
+        jsonSet.add(previouslyAccessed.get(previouslyAccessed.size()-1).getJsonFromRestaurant());
 
         Log.d(TAG, "savePreviouslyAccessedData: " + jsonSet);
 
         SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
         editor.putStringSet(getString(R.string.sp_previously_accessed_json), jsonSet);
         editor.apply();
+
+        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
+        Log.d(TAG, "savePreviouslyAccessedData: " + jsonSet);
     }
 
     // TODO: put back in when interface with restaurant
