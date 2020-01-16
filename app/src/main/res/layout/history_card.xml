@@ -20,12 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <include
-            android:id="@+id/hiscard_restcard"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            layout="@layout/restaurant_card" />
-
         <!--<TextView
             android:id="@+id/txtvw_hiscard_open_now"
             android:layout_width="0dp"
@@ -75,6 +69,11 @@
             android:fontFamily="sans-serif"
             android:text="@string/restcard_distance_placeholder"
             android:textSize="@dimen/font_size_pref_main" /> -->
+
+        <me.nakukibo.projectfoodpicker.RestaurantCard
+            android:id="@+id/history_restcard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/hiscard_btn_close"

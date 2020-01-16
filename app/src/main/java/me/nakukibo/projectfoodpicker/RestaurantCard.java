@@ -2,7 +2,6 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -48,6 +46,7 @@ public class RestaurantCard extends ScrollView {
     private List<Photo> photos;
     private int cImage;
     private OnSwipeStart onSwipeStartEvent;
+    private boolean popupMode;
 
 //    private static final String TAG = RestaurantCard.class.getSimpleName();
 
@@ -67,6 +66,7 @@ public class RestaurantCard extends ScrollView {
         onCloseContents = null;
         onSwipeEndEvent = null;
         onSwipeStartEvent = null;
+        popupMode = false;
         initCard(context, attrs);
         initSwipeVariables();
         initEvents();
@@ -219,6 +219,8 @@ public class RestaurantCard extends ScrollView {
         });
 
         viewOpenContents.setOnTouchListener((view, motionEvent) -> {
+
+            if(popupMode) return true;
             Log.d(TAG, "initEvents: viewOpenContents touch event");
 
             if(cannotPerformEvents()) return true;
@@ -256,6 +258,7 @@ public class RestaurantCard extends ScrollView {
     }
 
     public void closeContents(){
+        if(popupMode) return;
         restaurantCardContents.setVisibility(GONE);
         if(onCloseContents != null) onCloseContents.onClose();
         else Log.d(TAG, "closeContents: onCloseContents is null");
@@ -266,6 +269,7 @@ public class RestaurantCard extends ScrollView {
     }
 
     private boolean checkForSwipe(MotionEvent motionEvent){
+        if(popupMode) return false;
         if(isContentsVisible()) return false;
 
         final float minDistance = 30f;
@@ -276,6 +280,7 @@ public class RestaurantCard extends ScrollView {
 
         switch(motionEvent.getAction()){
             case MotionEvent.ACTION_DOWN:
+
                 restCardDx = this.getX() - motionEvent.getRawX();
                 restCardDy = this.getY() - motionEvent.getRawY();
                 break;
@@ -376,6 +381,11 @@ public class RestaurantCard extends ScrollView {
 
     public int getImageHeight(){
         return restPhoto.getHeight();
+    }
+
+    public void setPopupMode(boolean popupMode){
+        this.popupMode = popupMode;
+        if(popupMode) openContents();
     }
 
     public static interface OnCloseContents {

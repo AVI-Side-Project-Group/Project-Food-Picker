@@ -83,6 +83,7 @@ public class HistoryActivity extends ThemedAppCompatActivity {
     public void getInfo(View view){
         LayoutInflater inflater = (LayoutInflater) view.getContext().getSystemService(view.getContext().LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.history_card,null);
+//        HistoryCard layout = findViewById(R)
         popupWindow = new PopupWindow(layout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true);
 
         if(Build.VERSION.SDK_INT >= 21){
@@ -91,7 +92,6 @@ public class HistoryActivity extends ThemedAppCompatActivity {
         popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
 
         setValues(view, layout);
-
         //hisCard.setCardBackgroundColor();
     }
 
@@ -102,10 +102,12 @@ public class HistoryActivity extends ThemedAppCompatActivity {
     private void setValues(View view, View card){
         Restaurant restaurant = previouslyAccessed.get(recyclerView.getChildLayoutPosition(view));
 
-        CardView hisCard = card.findViewById(R.id.his_cardView);
-        View restCard = hisCard.findViewById(R.id.hiscard_restcard);
-        TextView restName = restCard.findViewById(R.id.txtvw_title_name);
-        restName.setText(restaurant.getName());
+        RestaurantCard restaurantCard = card.findViewById(R.id.history_restcard);
+        restaurantCard.setValues(restaurant);
+        restaurantCard.setPopupMode(true);
+//        View restCard = hisCard.findViewById(R.id.hiscard_restcard);
+//        TextView restName = restCard.findViewById(R.id.txtvw_title_name);
+//        restName.setText(restaurant.getName());
 
         Log.d(TAG, "setValues: " + restaurant.getJsonFromRestaurant());
 
