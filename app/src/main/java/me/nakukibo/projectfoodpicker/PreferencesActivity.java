@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     public static final String PREF_INTENT_DISTANCE = "distance";
     public static final String PREF_INTENT_ALLOW_PROMINENT = "allow_prominent";
     public static final String PREF_INTENT_PRICING = "pricing";
+    public static final String PREF_INTENT_OPEN_NOW = "open_now";
 
     private static final String TAG = PreferencesActivity.class.getSimpleName();
 
@@ -49,6 +51,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     private Spinner spinRating;
     private Spinner spinPricing;
     private SeekBar sbrDistance;
+    private Switch toggleOpenNow;
     private Button btnHistory;
 
     // values for views
@@ -136,6 +139,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
                     getApplicationSharedPreferences()
                             .getBoolean(getResources()
                                     .getString(R.string.sp_allow_prominent), false));
+            switchIntent.putExtra(PREF_INTENT_OPEN_NOW, toggleOpenNow.isChecked());
             startActivity(switchIntent);
         } else {
             // notify user error message
@@ -220,7 +224,13 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         initRatingsView();
         initDistancesView();
         initPriceRangesView();
+        initIsOpenNowView();
         initHistoryButton();
+    }
+
+    private void initIsOpenNowView() {
+        toggleOpenNow = findViewById(R.id.toggle_open_now);
+        toggleOpenNow.setChecked(true);
     }
 
     private void initFoodTypesView() {

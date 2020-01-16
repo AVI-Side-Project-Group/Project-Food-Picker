@@ -71,9 +71,8 @@
         android:layout_height="0dp"
         android:text="@string/setting_txtvw_distance_margin_placeholder"
         android:textSize="@dimen/font_size_settings_text"
-        app:layout_constraintBottom_toBottomOf="@+id/txtvw_distance_margin"
-        app:layout_constraintStart_toStartOf="@+id/toggle_allow_prominent"
-        app:layout_constraintTop_toTopOf="@+id/txtvw_distance_margin" />
+        app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_distance_margin"
+        app:layout_constraintStart_toStartOf="@+id/toggle_allow_prominent" />
 
     <SeekBar
         android:id="@+id/sbr_distance_margin"

@@ -24,6 +24,7 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
     private int pricingRange;
     private int minRating;
     private Boolean allowProminent;
+    private Boolean openNow;
     private List<Restaurant> restaurants;
 
     GetNearbyData(String apiKey, ReceiveNearbyData receiveNearbyData, List<Restaurant> listToPopulate) {
@@ -46,6 +47,7 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
         pricingRange = (int) objects[3];
         minRating = (int) objects[4];
         allowProminent = (Boolean) objects[5];
+        openNow = (Boolean) objects[6];
 
         DownloadUrl downloadURL = new DownloadUrl();
         try {
@@ -63,11 +65,11 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
         DataParser parser = new DataParser();
         String nextPageToken;
         try {
-            nearbyPlaceList = parser.parse(s, userLocation, maxDistance, pricingRange, minRating, allowProminent);
+            nearbyPlaceList = parser.parse(s, userLocation, maxDistance, pricingRange, minRating, allowProminent, openNow);
             restaurants.addAll(nearbyPlaceList);
             nextPageToken = parser.getNextPageToken();
         }catch (RuntimeException e){
-            nearbyPlaceList = null;
+            e.printStackTrace();
             nextPageToken = null;
         }
 
@@ -76,7 +78,7 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
 
             new Handler().postDelayed(() -> {
                 new GetNearbyData(apiKey, receiveNearbyData, restaurants)
-                        .execute(url, userLocation, maxDistance, pricingRange, minRating, allowProminent);
+                        .execute(url, userLocation, maxDistance, pricingRange, minRating, allowProminent, openNow);
             }, 2000);
         } else {
             receiveNearbyData.onFinishNearbyFetch();

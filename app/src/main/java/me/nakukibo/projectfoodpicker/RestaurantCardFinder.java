@@ -68,6 +68,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private int pricing;
     private int rating;
     private Boolean allowProminent;
+    private Boolean openNow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,6 +184,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         distance = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
         pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
         allowProminent = getIntent().getBooleanExtra(PreferencesActivity.PREF_INTENT_ALLOW_PROMINENT, false);
+        openNow = getIntent().getBooleanExtra(PreferencesActivity.PREF_INTENT_OPEN_NOW, false);
     }
 
     private void resetRolls() {
@@ -232,7 +234,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         // get locational information
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        Object[] dataTransfer = new Object[6];
+                        Object[] dataTransfer = new Object[7];
                         Log.d(TAG, "fetchLocation: calling getnearbydata");
 
                         // find restaurants
@@ -245,6 +247,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         dataTransfer[3] = pricing;
                         dataTransfer[4] = rating;
                         dataTransfer[5] = allowProminent;
+                        dataTransfer[6] = openNow;
+
+                        Log.d(TAG, "fetchLocation: openNow=" + openNow);
                         getNearbyPlacesData.execute(dataTransfer);
                     }
                 });

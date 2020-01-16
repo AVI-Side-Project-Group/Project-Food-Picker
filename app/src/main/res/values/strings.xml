@@ -7,7 +7,8 @@
     <string name="prefs_edtxt_food_type_hint">\"Chinese\"</string>
     <string name="prefs_txtvw_rating">Rating (min)</string>
     <string name="prefs_txtvw_pricing">Price (max)</string>
-    <string name="prefs_txtvw_distance">Search radius (miles)</string>
+    <string name="prefs_txtvw_distance">Search radius</string>
+    <string name="prefs_txtvw_open_now">Is open now</string>
     <string name="prefs_txtvw_allow_prominent">Allow prominent</string>
     <string name="prefs_btn_search">Search</string>
     <string name="prefs_btn_setting">Settings</string>

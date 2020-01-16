@@ -27,7 +27,7 @@ class DataParser {
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
     List<Restaurant> parse(String jsonData, Location userLocation, int maxDistance,
-                                        int pricingRange, int minRating, Boolean allowProminent)
+                                        int pricingRange, int minRating, Boolean allowProminent, Boolean openNow)
             throws RuntimeException {
         Log.d(TAG, "parse: jsonData=" + jsonData);
 
@@ -38,6 +38,7 @@ class DataParser {
         try {
             jsonObject = new JSONObject(jsonData);
             if (!jsonObject.isNull("status") && jsonObject.getString("status").equals("INVALID_REQUEST")) {
+                Log.d(TAG, "parse: Invalid Request error");
                 throw new RuntimeException("Invalid Request");
             }
 
@@ -54,7 +55,7 @@ class DataParser {
             return null;
         }
 
-        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating, allowProminent);
+        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating, allowProminent, openNow);
     }
 
     /**
@@ -64,15 +65,17 @@ class DataParser {
      * @return List<HashMap < String, String>>  list of all HashMaps returned for each location
      */
     private List<Restaurant> getAllPlacesData(JSONArray jsonArray, Location userLocation,
-                                                           int maxDistance, int pricingRange,
-                                              int minRating, Boolean allowProminent) {
+                                              int maxDistance, int pricingRange,
+                                              int minRating, Boolean allowProminent, Boolean openNow) {
         List<Restaurant> restaurants = new ArrayList<>();
         Restaurant restaurantObj;
 
+        Log.d(TAG, "getAllPlacesData: number of restaurants=" + jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {
+            Log.d(TAG, "getAllPlacesData: restaurant " + (i+1) + " out of " + jsonArray.length());
             try {
                 restaurantObj = getRestaurantData((JSONObject) jsonArray.get(i), userLocation,
-                        maxDistance, pricingRange, minRating, allowProminent);
+                        maxDistance, pricingRange, minRating, allowProminent, openNow);
                 if (restaurantObj != null) {
                     restaurants.add(restaurantObj);
                     Log.d(TAG, "getAllPlacesData: place added");
@@ -93,7 +96,8 @@ class DataParser {
      * @return HashMap<String, String> key values are declared as constants for easy access
      */
     private Restaurant getRestaurantData(JSONObject googlePlaceJson, Location userLocation,
-                                         int maxDistance, int pricingRange, int minRating, Boolean allowProminent) {
+                                         int maxDistance, int pricingRange, int minRating, Boolean allowProminent,
+                                         Boolean openNow) {
         // initialize all values to default
         Float distFromUser = null;
         String name = null;
@@ -129,6 +133,11 @@ class DataParser {
                 }
             }
 
+            if(openNow != null && openNow && (isCurrentlyOpen == null || !isCurrentlyOpen)){
+                Log.d(TAG, "getRestaurantData: " + name + " taken out because not open..");
+                return null;
+            }
+
             // rating
             if (!googlePlaceJson.isNull("rating")) {
                 rating = googlePlaceJson.getDouble("rating");
@@ -157,12 +166,15 @@ class DataParser {
             // place id
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");
+            } else {
+                Log.d(TAG, "getRestaurantData: " + name + " doesn't have a placeId. Returning null.");
+                return null;
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "getRestaurantData: ---------------------------------------------------------");
+        Log.d(TAG, "getRestaurantData: --------------------------------------------------------");
 
         return new Restaurant(
                 name, address, isCurrentlyOpen, rating, totRating, priceLevel,
