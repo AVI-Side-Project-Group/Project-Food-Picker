@@ -46,7 +46,7 @@
             android:text="@string/restcard_open_now_placeholder"
             android:textSize="@dimen/font_size_pref_main"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/vertical50"
+            app:layout_constraintEnd_toStartOf="@+id/vertical55"
             app:layout_constraintStart_toStartOf="@+id/txtvw_title_name"
             app:layout_constraintTop_toBottomOf="@+id/txtvw_title_name"
             app:layout_constraintVertical_bias="0.0" />
@@ -60,7 +60,7 @@
             android:textSize="@dimen/font_size_pref_main"
             app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_title_open_now"
             app:layout_constraintEnd_toEndOf="@+id/txtvw_title_name"
-            app:layout_constraintStart_toStartOf="@+id/vertical50" />
+            app:layout_constraintStart_toStartOf="@+id/vertical55" />
 
 
         <me.nakukibo.projectfoodpicker.RestaurantCardContents
@@ -80,7 +80,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/imgvw_title_restaurant"
-            app:layout_constraintEnd_toStartOf="@+id/vertical50"
+            app:layout_constraintEnd_toStartOf="@+id/vertical55"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/imgvw_title_restaurant" />
 
@@ -90,7 +90,7 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="@+id/imgvw_title_restaurant"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/vertical50"
+            app:layout_constraintStart_toStartOf="@+id/vertical55"
             app:layout_constraintTop_toTopOf="@+id/imgvw_title_restaurant" />
 
         <View
@@ -106,7 +106,7 @@
             app:layout_constraintVertical_bias="0.0" />
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/vertical50"
+            android:id="@+id/vertical55"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"

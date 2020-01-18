@@ -149,7 +149,7 @@
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_close_wrapper"
-            app:layout_constraintStart_toStartOf="@+id/vertical50"
+            app:layout_constraintStart_toStartOf="@+id/vertical55"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/quantum_ic_clear_grey600_24" />
 
@@ -160,7 +160,7 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/vertical50"
+            app:layout_constraintStart_toStartOf="@+id/vertical55"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -184,7 +184,7 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/vertical50"
+            app:layout_constraintStart_toStartOf="@+id/vertical55"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -203,7 +203,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/vertical50"
+            android:id="@+id/vertical55"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"

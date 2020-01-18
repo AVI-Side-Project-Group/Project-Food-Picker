@@ -27,7 +27,8 @@ class DataParser {
      * @return List<HashMap < String, String> parsed List for the JSON data
      */
     List<Restaurant> parse(String jsonData, Location userLocation, int maxDistance,
-                                        int pricingRange, int minRating) throws RuntimeException {
+                                        int pricingRange, int minRating, Boolean allowProminent, Boolean openNow)
+            throws RuntimeException {
         Log.d(TAG, "parse: jsonData=" + jsonData);
 
         JSONArray jsonArray;
@@ -37,6 +38,7 @@ class DataParser {
         try {
             jsonObject = new JSONObject(jsonData);
             if (!jsonObject.isNull("status") && jsonObject.getString("status").equals("INVALID_REQUEST")) {
+                Log.d(TAG, "parse: Invalid Request error");
                 throw new RuntimeException("Invalid Request");
             }
 
@@ -53,7 +55,7 @@ class DataParser {
             return null;
         }
 
-        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating);
+        return getAllPlacesData(jsonArray, userLocation, maxDistance, pricingRange, minRating, allowProminent, openNow);
     }
 
     /**
@@ -63,13 +65,17 @@ class DataParser {
      * @return List<HashMap < String, String>>  list of all HashMaps returned for each location
      */
     private List<Restaurant> getAllPlacesData(JSONArray jsonArray, Location userLocation,
-                                                           int maxDistance, int pricingRange, int minRating) {
+                                              int maxDistance, int pricingRange,
+                                              int minRating, Boolean allowProminent, Boolean openNow) {
         List<Restaurant> restaurants = new ArrayList<>();
         Restaurant restaurantObj;
 
+        Log.d(TAG, "getAllPlacesData: number of restaurants=" + jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {
+            Log.d(TAG, "getAllPlacesData: restaurant " + (i+1) + " out of " + jsonArray.length());
             try {
-                restaurantObj = getRestaurantData((JSONObject) jsonArray.get(i), userLocation, maxDistance, pricingRange, minRating);
+                restaurantObj = getRestaurantData((JSONObject) jsonArray.get(i), userLocation,
+                        maxDistance, pricingRange, minRating, allowProminent, openNow);
                 if (restaurantObj != null) {
                     restaurants.add(restaurantObj);
                     Log.d(TAG, "getAllPlacesData: place added");
@@ -90,7 +96,8 @@ class DataParser {
      * @return HashMap<String, String> key values are declared as constants for easy access
      */
     private Restaurant getRestaurantData(JSONObject googlePlaceJson, Location userLocation,
-                                         int maxDistance, int pricingRange, int minRating) {
+                                         int maxDistance, int pricingRange, int minRating, Boolean allowProminent,
+                                         Boolean openNow) {
         // initialize all values to default
         Float distFromUser = null;
         String name = null;
@@ -110,7 +117,7 @@ class DataParser {
             }
 
             // if too far, then return null
-            distFromUser = distFromUser(userLocation, googlePlaceJson, name, maxDistance);
+            distFromUser = distFromUser(userLocation, googlePlaceJson, name, maxDistance, allowProminent);
             if (distFromUser == null) return null;
 
             // address
@@ -124,6 +131,11 @@ class DataParser {
                 if (!openHoursObject.isNull("open_now")) {
                     isCurrentlyOpen = openHoursObject.getBoolean("open_now");
                 }
+            }
+
+            if(openNow != null && openNow && (isCurrentlyOpen == null || !isCurrentlyOpen)){
+                Log.d(TAG, "getRestaurantData: " + name + " taken out because not open..");
+                return null;
             }
 
             // rating
@@ -154,12 +166,15 @@ class DataParser {
             // place id
             if (!googlePlaceJson.isNull("place_id")) {
                 placeId = googlePlaceJson.getString("place_id");
+            } else {
+                Log.d(TAG, "getRestaurantData: " + name + " doesn't have a placeId. Returning null.");
+                return null;
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "getRestaurantData: ---------------------------------------------------------");
+        Log.d(TAG, "getRestaurantData: --------------------------------------------------------");
 
         return new Restaurant(
                 name, address, isCurrentlyOpen, rating, totRating, priceLevel,
@@ -173,9 +188,10 @@ class DataParser {
      * @param userLocation    Location object representing user's location with latitude and longitude
      * @param googlePlaceJson the JSONObject representing the data retrieved from Google Places
      * @param name            name of the restaurant
-     * @return Float - distance from user in meters, null if out of range
+     * @return Float - distance from user in meters, null if out of range and allowProminent == false
      */
-    private Float distFromUser(Location userLocation, JSONObject googlePlaceJson, String name, int maxDistance) {
+    private Float distFromUser(Location userLocation, JSONObject googlePlaceJson, String name,
+                               int maxDistance, Boolean allowProminent) {
         double latitude;
         double longitude;
         try {
@@ -195,8 +211,8 @@ class DataParser {
         restLocation.setLongitude(longitude);
 
         boolean closeEnough = userLocation.distanceTo(restLocation) <= maxDistance;
-        if (!closeEnough) Log.d(TAG, "distFromUser: " + name + " removed b/c too far.");
-        return closeEnough ? userLocation.distanceTo(restLocation) : null;
+        if (!closeEnough && !allowProminent) Log.d(TAG, "distFromUser: " + name + " removed b/c too far.");
+        return closeEnough || allowProminent ? userLocation.distanceTo(restLocation) : null;
     }
 
     String getNextPageToken() {
