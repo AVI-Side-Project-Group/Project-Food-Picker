@@ -78,7 +78,12 @@ class Restaurant {
 
             name = jsonObject.getString("name");
             address = jsonObject.getString("address");
-            isOpen = jsonObject.getBoolean("isOpen");
+            try {
+                isOpen = jsonObject.getBoolean("isOpen");
+            } catch (JSONException err) {
+                Log.d(TAG, "Restaurant: error" + err.toString());
+                isOpen = null;
+            }
             rating = jsonObject.getDouble("rating");
             totRating = jsonObject.getInt("totRating");
             priceLevel = jsonObject.getInt("priceLevel");
@@ -236,7 +241,9 @@ class Restaurant {
         try {
             jsonObject.put("name", getName());
             jsonObject.put("address", getAddress());
-            jsonObject.put("isOpen", getOpen());
+            if(isOpen != null) {
+                jsonObject.put("isOpen", getOpen());
+            }
             jsonObject.put("rating", getRating());
             jsonObject.put("totRating", getTotRating());
             jsonObject.put("priceLevel", getPriceLevel());

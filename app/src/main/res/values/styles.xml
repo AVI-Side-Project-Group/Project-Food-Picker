@@ -1,5 +1,12 @@
 <resources>
 
+    <declare-styleable name="ViewStyle">
+        <attr name="colorPrimary" format="color" />
+        <attr name="colorPrimaryDark" format="color" />
+        <attr name="colorAccent" format="color" />
+        <attr name="android:textColor" format="color" />
+    </declare-styleable>
+
     <!-- Base application theme. -->
     <style name="Light" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->

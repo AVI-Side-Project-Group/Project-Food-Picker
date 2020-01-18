@@ -83,8 +83,8 @@ public class HistoryActivity extends ThemedAppCompatActivity {
     public void getInfo(View view){
         LayoutInflater inflater = (LayoutInflater) view.getContext().getSystemService(view.getContext().LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.history_card,null);
-//        HistoryCard layout = findViewById(R)
         popupWindow = new PopupWindow(layout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true);
+        CardView cardView = layout.findViewById(R.id.his_cardView);
 
         if(Build.VERSION.SDK_INT >= 21){
             popupWindow.setElevation(5.0f);
@@ -92,7 +92,8 @@ public class HistoryActivity extends ThemedAppCompatActivity {
         popupWindow.showAtLocation(view, Gravity.CENTER,0,0);
 
         setValues(view, layout);
-        //hisCard.setCardBackgroundColor();
+        TypedArray typedArray = this.getTheme().obtainStyledAttributes(R.styleable.ViewStyle);
+        cardView.setCardBackgroundColor(typedArray.getColor(R.styleable.ViewStyle_colorPrimary, Color.BLACK));
     }
 
     public void closePopUpWindow(View view){
@@ -102,56 +103,14 @@ public class HistoryActivity extends ThemedAppCompatActivity {
     private void setValues(View view, View card){
         Restaurant restaurant = previouslyAccessed.get(recyclerView.getChildLayoutPosition(view));
 
-        RestaurantCard restaurantCard = card.findViewById(R.id.history_restcard);
-        restaurantCard.setValues(restaurant);
-        restaurantCard.setPopupMode(true);
-//        View restCard = hisCard.findViewById(R.id.hiscard_restcard);
-//        TextView restName = restCard.findViewById(R.id.txtvw_title_name);
-//        restName.setText(restaurant.getName());
 
         Log.d(TAG, "setValues: " + restaurant.getJsonFromRestaurant());
 
         Log.d(TAG, "setValues: " + restaurant.getPhotos());
 
-        /*TextView restaurantName = card.findViewById(R.id.txtvw_hiscard_name);
-        TextView restaurantOpenNow = card.findViewById(R.id.txtvw_hiscard_open_now);
-        TextView restaurantDistance = card.findViewById(R.id.txtvw_hiscard_distance);
-        ImageView restaurantPhoto = card.findViewById(R.id.imgvw_hiscard_restaurant);
-        Button imageBtnLeft = card.findViewById(R.id.btn_hiscard_left);
-        Button imageBtnRight = card.findViewById(R.id.btn_hiscard_right);
-
-        Log.d(TAG, "getInfo: " + hisCard);
-
-        restaurantName.setText(restaurant.getName());
-        restaurantDistance.setText(restaurant.getDistanceMiles() == null? "Unknown Distance" : String.format(Locale.US, "%.2f miles", restaurant.getDistanceMiles()));
-        String openNowText;
-        if(restaurant.getOpen() == null){
-            openNowText = "Unsure if open";
-        } else if(restaurant.getOpen()){
-            openNowText = "Open Now!";
-        } else {
-            openNowText = "Closed";
-        }
-        restaurantOpenNow.setText(openNowText);
-
-        /*List<Photo> photos = restaurant.getPhotos();
-        if(photos == null) {
-            restaurantPhoto.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher_background));
-            imageBtnLeft.setOnClickListener(v -> {
-                if (currentImage > 0) {
-                    currentImage--;
-                    restaurantPhoto.setImageBitmap(photos.get(currentImage).getBitmap());
-                }
-            });
-            imageBtnRight.setOnClickListener(v -> {
-                if(currentImage < photos.size()){
-                    currentImage++;
-                    restaurantPhoto.setImageBitmap(photos.get(currentImage).getBitmap());
-                }
-            });
-        }else {
-            restaurantPhoto.setImageBitmap(photos.get(currentImage).getBitmap());
-        }*/
+        RestaurantCard restaurantCard = card.findViewById(R.id.history_restcard);
+        restaurantCard.setValues(restaurant);
+        restaurantCard.setPopupMode(true);
     }
 }
 

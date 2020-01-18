@@ -379,7 +379,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
         Log.d(TAG, "setViewValues: " + previouslyAccessed);
 
-        savePreviouslyAccessedData(previouslyAccessed);
+        savePreviouslyAccessedData(previouslyAccessed); //TODO: put this somewhere else
 
         Animation inAnimation = inFromRightAnimation();
         inAnimation.setAnimationListener(new Animation.AnimationListener() {
@@ -411,8 +411,6 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void savePreviouslyAccessedData(List<Restaurant> previouslyAccessed) {
         jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), new HashSet<>());
         jsonSet.add(previouslyAccessed.get(previouslyAccessed.size()-1).getJsonFromRestaurant());
-
-        Log.d(TAG, "savePreviouslyAccessedData: " + jsonSet);
 
         SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
         editor.putStringSet(getString(R.string.sp_previously_accessed_json), jsonSet);
