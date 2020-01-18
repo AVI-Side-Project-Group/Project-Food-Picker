@@ -7,6 +7,10 @@ import android.util.Log;
 
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,12 +66,24 @@ class Restaurant {
     }
 
     Restaurant(String json){
+        photos = new ArrayList<>();
+
         try {
             JSONObject jsonObject = new JSONObject(json);
 
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonParser jp = new JsonParser();
+            JsonElement je = jp.parse(jsonObject.toString());
+            Log.d(TAG, "Restaurant: " + gson.toJson(je));
+
             name = jsonObject.getString("name");
             address = jsonObject.getString("address");
-            isOpen = jsonObject.getBoolean("isOpen");
+            try {
+                isOpen = jsonObject.getBoolean("isOpen");
+            } catch (JSONException err) {
+                Log.d(TAG, "Restaurant: error" + err.toString());
+                isOpen = null;
+            }
             rating = jsonObject.getDouble("rating");
             totRating = jsonObject.getInt("totRating");
             priceLevel = jsonObject.getInt("priceLevel");
@@ -76,8 +92,10 @@ class Restaurant {
             phoneNumber = jsonObject.getString("phoneNumber");
             website = jsonObject.getString("website");
             weekdayTextConcatenated = jsonObject.getString("weekdayText");
-            for(int i = 0; i < jsonObject.getInt("numPhoto"); i++){
-                Bitmap bitmap = getBitmapFromString(jsonObject.getString("photo" + i));
+            numPhotos = jsonObject.getInt("numPhoto");
+            for(int i = 0; i < numPhotos; i++){
+                Log.d(TAG, "Restaurant: restoring image " + i);
+                Bitmap bitmap = getBitmapFromString(jsonObject.getString("photo " + i));
                 Photo photo = new Photo(bitmap);
                 photos.add(photo);
             }
@@ -218,12 +236,14 @@ class Restaurant {
         void onFinishRetrieve(Restaurant restaurant);
     }
 
-    String getJsonFromResturant(){
+    String getJsonFromRestaurant(){
         JSONObject jsonObject= new JSONObject();
         try {
             jsonObject.put("name", getName());
             jsonObject.put("address", getAddress());
-            jsonObject.put("isOpen", getOpen());
+            if(isOpen != null) {
+                jsonObject.put("isOpen", getOpen());
+            }
             jsonObject.put("rating", getRating());
             jsonObject.put("totRating", getTotRating());
             jsonObject.put("priceLevel", getPriceLevel());
@@ -236,6 +256,8 @@ class Restaurant {
             for(int i = 0; i < numPhotos; i++){
                 jsonObject.put("photo " + i, getPhotos().get(i).getStringFromBitmap(getPhotos().get(i).getBitmap()));
             }
+
+            Log.d(TAG, "getJsonFromResturant: " + jsonObject.toString());
 
             return jsonObject.toString();
         } catch (JSONException e) {

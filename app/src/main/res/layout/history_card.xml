@@ -7,58 +7,88 @@
     android:layout_height="match_parent">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/his_cardView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
         app:cardBackgroundColor="#00FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/imgvw_title_restaurant"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/restcard_img_height"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_launcher_background" />
-
-        <TextView
-            android:id="@+id/txtvw_title_distance"
-            android:layout_width="wrap_content"
+        <!--<TextView
+            android:id="@+id/txtvw_hiscard_open_now"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="450dp"
-            android:fontFamily="sans-serif"
-            android:text="@string/restcard_distance_placeholder"
-            android:textSize="@dimen/font_size_pref_main" />
-
-        <TextView
-            android:id="@+id/txtvw_title_open_now"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="250dp"
-            android:layout_marginTop="450dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginTop="8dp"
             android:fontFamily="sans-serif"
             android:text="@string/restcard_open_now_placeholder"
             android:textSize="@dimen/font_size_pref_main" />
 
         <TextView
-            android:id="@+id/txtvw_title_name"
+            android:id="@+id/txtvw_hiscard_name"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="400dp"
-            android:layout_marginEnd="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
             android:fontFamily="sans-serif-medium"
             android:text="@string/restcard_default_name"
             android:textSize="@dimen/font_size_restaurant_title_name_text" />
 
+        <ImageView
+            android:id="@+id/imgvw_hiscard_restaurant"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/restcard_img_height"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/ic_launcher_background" />
+
         <Button
+            android:id="@+id/btn_hiscard_right"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF" />
+
+        <Button
+            android:id="@+id/btn_hiscard_left"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#00FFFFFF" />
+
+        <TextView
+            android:id="@+id/txtvw_hiscard_distance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:fontFamily="sans-serif"
+            android:text="@string/restcard_distance_placeholder"
+            android:textSize="@dimen/font_size_pref_main" /> -->
+
+        <me.nakukibo.projectfoodpicker.RestaurantCard
+            android:id="@+id/history_restcard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="end" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/hiscard_btn_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="closePopUpWindown"
-            android:text="Button" />
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="closePopUpWindow"
+            app:backgroundTint="@color/common_google_signin_btn_text_light_pressed"
+            app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
+
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

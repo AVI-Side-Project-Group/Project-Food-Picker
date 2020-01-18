@@ -1,25 +1,32 @@
 <resources>
 
+    <declare-styleable name="ViewStyle">
+        <attr name="colorPrimary" format="color" />
+        <attr name="colorPrimaryDark" format="color" />
+        <attr name="colorAccent" format="color" />
+        <attr name="android:textColor" format="color" />
+    </declare-styleable>
+
     <!-- Base application theme. -->
     <style name="Light" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">#9E9E9E</item>
-        <item name="colorPrimaryDark">#616161</item>
-        <item name="colorAccent">#607D8B</item>
-        <item name="android:textColor">#212121</item>
+        <item name="colorPrimary">@color/colorPrimaryLight</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkLight</item>
+        <item name="colorAccent">@color/colorAccentLight</item>
+        <item name="android:textColor">@color/textColorLight</item>
     </style>
 
     <style name="Purple" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">#673AB7</item>
-        <item name="colorPrimaryDark">#512DA8</item>
-        <item name="colorAccent">#FFC107</item>
-        <item name="android:textColor">#212121</item>
+        <item name="colorPrimary">@color/colorPrimaryPurple</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkPurple</item>
+        <item name="colorAccent">@color/colorAccentPurple</item>
+        <item name="android:textColor">@color/textColorPurple</item>
     </style>
 
     <style name="Dark" parent="ThemeOverlay.AppCompat.Dark">
-        <item name="colorPrimary">#434343</item>
-        <item name="colorPrimaryDark">#212121</item>
-        <item name="colorAccent">#08a3d0</item>
-        <item name="android:textColor">#E0E0E0</item>
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkDark</item>
+        <item name="colorAccent">@color/colorAccentDark</item>
+        <item name="android:textColor">@color/textColorDark</item>
     </style>
 </resources>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/vertical_text"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -86,6 +85,7 @@
         app:layout_constraintStart_toStartOf="@+id/txtvw_pricing"
         app:layout_constraintTop_toBottomOf="@+id/txtvw_pricing" />
 
+
     <TextView
         android:id="@+id/txtvw_distance_progress"
         android:layout_width="0dp"
@@ -120,6 +120,37 @@
         app:layout_constraintStart_toStartOf="@+id/txtvw_distance"
         app:layout_constraintTop_toBottomOf="@+id/toggle_open_now" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/vertical45"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.38199514" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/horizontal5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.10123119" />
+
+    <TextView
+        android:id="@+id/txtvw_distance_progress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:textSize="@dimen/font_size_pref_main"
+        app:layout_constraintBaseline_toBaselineOf="@+id/txtvw_distance"
+        app:layout_constraintEnd_toStartOf="@+id/vertical55"
+        app:layout_constraintStart_toStartOf="@+id/vertical45" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/vertical55"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5523114" />
+
     <Button
         android:id="@+id/btn_setting"
         style="@style/Widget.AppCompat.Button.Borderless"
@@ -141,7 +172,7 @@
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:onClick="openHistory"
         android:text="@string/prefs_btn_gethistory"
         app:layout_constraintEnd_toEndOf="@+id/btn_search"
@@ -189,5 +220,4 @@
         app:layout_constraintEnd_toEndOf="@+id/txtvw_distance"
         app:layout_constraintStart_toStartOf="@+id/txtvw_distance"
         app:layout_constraintTop_toBottomOf="@+id/txtvw_distance" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

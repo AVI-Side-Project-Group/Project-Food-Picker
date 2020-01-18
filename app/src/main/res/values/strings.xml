@@ -16,6 +16,9 @@
 
     <!--    restaurant_card.xml text-->
     <string name="restcard_txtvw_hours">Opening Hours</string>
+    <string name="restcard_txtvw_hours_label">
+        Sun:\nMon:\nTue:\nWed:\nThu:\nFri:\nSat:
+    </string>
     <string name="restcard_txtvw_hours_placeholder">
         12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM\n12:00AM - 12:00PM
     </string>
@@ -23,13 +26,14 @@
         123 NE 123th Street\nCity, State, ZipCode
     </string>
     <string name="restcard_open_now_placeholder">Open Now!</string>
-    <string name="restcard_distance_placeholder">10.22 miles</string>
+    <string name="restcard_distance_placeholder">20.22 miles</string>
 
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_maps2">Map</string>
     <string name="title_activity_settings">Settings</string>
 
-    <!-- activity_settings.xml text -->
-    <string name="setting_txtvw_title_sec_pref">Secondary Preferences</string>
-    <string name="setting_txtvw_theme">Themes</string>
+    <!-- settings_activity.xml text -->
+    <string name="setting_txtvw_theme">Theme</string>
     <string name="setting_txtvw_general">General</string>
     <string name="setting_txtvw_distance_margin">Error margin</string>
     <string name="setting_txtvw_distance_margin_placeholder">55%</string>
