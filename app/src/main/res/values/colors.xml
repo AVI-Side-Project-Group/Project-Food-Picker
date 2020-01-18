@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<!--    TODO: fix this later-->
+    <color name="colorDivider">#E0E0E0</color>
+
     <color name="colorPrimaryLight">#9e9e9e</color>
     <color name="colorPrimaryDarkLight">#616161</color>
     <color name="colorAccentLight">#607d8b</color>
