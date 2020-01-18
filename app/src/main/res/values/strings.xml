@@ -7,7 +7,8 @@
     <string name="prefs_edtxt_food_type_hint">\"Chinese\"</string>
     <string name="prefs_txtvw_rating">Rating (min)</string>
     <string name="prefs_txtvw_pricing">Price (max)</string>
-    <string name="prefs_txtvw_distance">Distance (max)</string>
+    <string name="prefs_txtvw_distance">Search radius</string>
+    <string name="prefs_txtvw_open_now">Is open now</string>
     <string name="prefs_txtvw_allow_prominent">Allow prominent</string>
     <string name="prefs_btn_search">Search</string>
     <string name="prefs_btn_setting">Settings</string>
@@ -31,10 +32,13 @@
     <string name="setting_txtvw_theme">Themes</string>
     <string name="setting_txtvw_general">General</string>
     <string name="setting_txtvw_distance_margin">Error margin</string>
+    <string name="setting_txtvw_distance_margin_placeholder">55%</string>
     <string name="setting_btn_apply">Apply</string>
 
     <!-- shared preferences key -->
     <string name="sp_theme">theme_key</string>
+    <string name="sp_allow_prominent">allow_prominent</string>
+    <string name="sp_distance_margin">distance_margin</string>
     <string name="sp_previously_accessed_json">previously_accessed_json</string>
     <string name="sp_date">date</string>
     <string name="sp_month">month</string>

@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,7 +37,9 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
+    public static final String PREF_INTENT_ALLOW_PROMINENT = "allow_prominent";
     public static final String PREF_INTENT_PRICING = "pricing";
+    public static final String PREF_INTENT_OPEN_NOW = "open_now";
 
     private static final String TAG = PreferencesActivity.class.getSimpleName();
 
@@ -48,6 +51,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     private Spinner spinRating;
     private Spinner spinPricing;
     private SeekBar sbrDistance;
+    private Switch toggleOpenNow;
     private Button btnHistory;
 
     // values for views
@@ -118,7 +122,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
             String foodType = spinFoodType.getSelectedItem().toString();
             int rating = spinRating.getSelectedItemPosition();
             int pricing = spinPricing.getSelectedItemPosition();
-            int distMeters = milesToMeters(distances[sbrDistance.getProgress()]);
+            int distMeters = milesToMeters(getMaxDistance(distances[sbrDistance.getProgress()]));
 
             // log the values
             Log.d(TAG, "submitPref: Attempting to submit preferences:");
@@ -131,6 +135,11 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
             switchIntent.putExtra(PREF_INTENT_RATING, rating);
             switchIntent.putExtra(PREF_INTENT_PRICING, pricing);
             switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);
+            switchIntent.putExtra(PREF_INTENT_ALLOW_PROMINENT,
+                    getApplicationSharedPreferences()
+                            .getBoolean(getResources()
+                                    .getString(R.string.sp_allow_prominent), false));
+            switchIntent.putExtra(PREF_INTENT_OPEN_NOW, toggleOpenNow.isChecked());
             startActivity(switchIntent);
         } else {
             // notify user error message
@@ -215,7 +224,13 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         initRatingsView();
         initDistancesView();
         initPriceRangesView();
+        initIsOpenNowView();
         initHistoryButton();
+    }
+
+    private void initIsOpenNowView() {
+        toggleOpenNow = findViewById(R.id.toggle_open_now);
+        toggleOpenNow.setChecked(true);
     }
 
     private void initFoodTypesView() {
@@ -302,6 +317,13 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
      * @return String string representation of the value to be displayed in view
      * */
     private String getDistance(int index) {
-        return String.format(Locale.US, "%2.1f miles", distances[index]);
+        float distance = distances[index];
+        return String.format(Locale.US, "%2.1f miles", distance);
+    }
+
+    private float getMaxDistance(float distance){
+        int errorMargin = getApplicationSharedPreferences()
+                .getInt(getResources().getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER);
+        return distance + errorMargin * distance / 100.0f;
     }
 }
