@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -61,6 +62,11 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private boolean firstCard;
     private boolean needToSetCard;
 
+    private GetNearbyData getNearbyData;
+    private FetchDetails fetchDetails;
+
+    private boolean fetchedNearbyData;
+
     // data passed from PreferencesActivity.java
     private String foodType;
     private int distance;
@@ -84,6 +90,22 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         retrievePassedValues();
         resetRolls();
         fetchLocation();
+    }
+
+    @Override
+    public void onBackPressed(){
+        Log.d(TAG, "onBackPressed: back pressed");
+        if(!fetchedNearbyData && getNearbyData != null){
+            Log.d(TAG, "onBackPressed: cancelling nearby fetch");
+            getNearbyData.cancel(true);
+        }
+
+        if(fetchDetails != null){
+            Log.d(TAG, "onBackPressed: cancelling details fetch");
+            fetchDetails.cancel(true);
+        }
+
+        finish();
     }
 
     private void initViewEvents() {
@@ -140,6 +162,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
         firstCard = true;
         needToSetCard = true;
+        fetchedNearbyData = false;
+        getNearbyData = null;
+        fetchDetails = null;
     }
 
     private void initViewVariables() {
@@ -237,7 +262,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         Log.d(TAG, "fetchLocation: calling getnearbydata");
 
                         // find restaurants
-                        GetNearbyData getNearbyPlacesData = new GetNearbyData(getResources().getString(R.string.google_maps_key),
+                        getNearbyData = new GetNearbyData(getResources().getString(R.string.google_maps_key),
                                 this, nearbyRestaurants);
                         String url = getUrl(latitude, longitude);
                         dataTransfer[0] = url;
@@ -249,7 +274,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         dataTransfer[6] = openNow;
 
                         Log.d(TAG, "fetchLocation: openNow=" + openNow);
-                        getNearbyPlacesData.execute(dataTransfer);
+                        getNearbyData.execute(dataTransfer);
                     }
                 });
     }
@@ -260,6 +285,8 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      */
     @Override
     public void onFinishNearbyFetch(){
+        fetchedNearbyData = true;
+
         Log.d(TAG, "onFinishNearbyFetch: combined list has a size of " + nearbyRestaurants.size());
         logAllPlacesList(nearbyRestaurants);
 
@@ -273,7 +300,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                 onFinishDetailsFetch(restaurant);
             }
         };
-        FetchDetails fetchDetails = new FetchDetails(unvisitedRestaurants, onFinishRetrievingImages);
+        fetchDetails = new FetchDetails(unvisitedRestaurants, onFinishRetrievingImages);
         fetchDetails.execute(placesClient);
     }
 

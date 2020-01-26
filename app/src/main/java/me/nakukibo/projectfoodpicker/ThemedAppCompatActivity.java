@@ -2,6 +2,9 @@ package me.nakukibo.projectfoodpicker;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,11 +17,22 @@ public abstract class ThemedAppCompatActivity extends AppCompatActivity {
     private int[] themeIDs = {R.style.Light, R.style.Dark, R.style.Purple};
     private int currentTheme;
 
+    private static final String TAG = ThemedAppCompatActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         initSharedPreferences();
         initTheme();
         super.onCreate(savedInstanceState);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home) {
+            onBackPressed();
+        }
+        return true;
     }
 
     private void initSharedPreferences() {

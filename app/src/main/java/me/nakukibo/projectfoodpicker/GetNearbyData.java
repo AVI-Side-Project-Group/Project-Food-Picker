@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MenuItem;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,14 +28,14 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
     private Boolean openNow;
     private List<Restaurant> restaurants;
 
+    private static final String TAG = GetNearbyData.class.getSimpleName();
+
     GetNearbyData(String apiKey, ReceiveNearbyData receiveNearbyData, List<Restaurant> listToPopulate) {
         this.apiKey = apiKey;
         this.receiveNearbyData = receiveNearbyData;
 
         this.restaurants = listToPopulate;
     }
-
-    private static final String TAG = GetNearbyData.class.getSimpleName();
 
     @Override
     protected String doInBackground(Object... objects){
@@ -61,6 +62,9 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
 
     @Override
     protected void onPostExecute(String s){
+
+        Log.d(TAG, "onPostExecute: finished executing");
+
         List<Restaurant> nearbyPlaceList;
         DataParser parser = new DataParser();
         String nextPageToken;
@@ -76,10 +80,22 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
         if(nextPageToken != null){
             final String url = getUrlNextPage(nextPageToken);
 
-            new Handler().postDelayed(() -> {
+            Thread fetchThread = new Thread(() -> {
+                for(int i=0; i<20; i++){
+                    if(isCancelled()) return;
+
+                    try{
+                        Thread.sleep(100);
+                    } catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+
+                }
                 new GetNearbyData(apiKey, receiveNearbyData, restaurants)
                         .execute(url, userLocation, maxDistance, pricingRange, minRating, allowProminent, openNow);
-            }, 2000);
+            });
+
+            fetchThread.start();
         } else {
             receiveNearbyData.onFinishNearbyFetch();
         }
@@ -92,7 +108,7 @@ public class GetNearbyData extends AsyncTask<Object, String, String> {
         return googlePlaceUrl;
     }
 
-    public static interface ReceiveNearbyData {
+    public interface ReceiveNearbyData {
 
         void onFinishNearbyFetch();
     }
