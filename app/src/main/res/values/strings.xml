@@ -56,7 +56,7 @@
     <string name="restcard_default_hours">Restaurant weekdayTextConcatenated</string>
 
     <!--    restaurant_card_finder values-->
-    <string name="restcardfinder_default_load_txt">loading restaurants&#8230;</string>
+    <string name="restcardfinder_default_load_txt">loading&#8230;</string>
     <string name="restcard_finder_no_more_restaurants">
         It seems you have ran out of restaurants matching your preferences.
     </string>

@@ -182,21 +182,9 @@ public class PreferencesActivity extends CustomAppCompatActivity {
     }
 
     public void openHistory(View view) {
-
-        final String jsonArrayStr = getApplicationSharedPreferences().
-                getString(getString(R.string.sp_previously_accessed_json), null);
-
-        if (jsonArrayStr == null) {
-            Toast.makeText(
-                    this,
-                    "History is blank.",
-                    Toast.LENGTH_LONG)
-                    .show();
-        } else {
-            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
-            deactivateActivityButtons();
-            startActivity(intent);
-        }
+        Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+        deactivateActivityButtons();
+        startActivity(intent);
     }
 
     /**
