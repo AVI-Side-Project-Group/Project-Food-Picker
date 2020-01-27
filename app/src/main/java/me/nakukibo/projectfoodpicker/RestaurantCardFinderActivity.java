@@ -19,18 +19,22 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.JsonArray;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class RestaurantCardFinder extends ThemedAppCompatActivity implements GetNearbyData.ReceiveNearbyData {
+public class RestaurantCardFinderActivity extends CustomAppCompatActivity implements GetNearbyData.ReceiveNearbyData {
 
-    private static final String TAG = RestaurantCardFinder.class.getSimpleName();
+    private static final String TAG = RestaurantCardFinderActivity.class.getSimpleName();
 
     private View loadingView;
     private View wrapperOpen;
@@ -51,9 +55,6 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private List<Restaurant> nearbyRestaurants;
     private LinkedList<Restaurant> processedRestaurants;
     private List<Restaurant> previouslyAccessed;
-
-    private Set jsonSet;
-    private Calendar calendar;
 
     private boolean firstCard;
     private boolean needToSetCard;
@@ -83,7 +84,6 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         resetGlobalVariables();
 
         retrievePassedValues();
-        resetRolls();
         fetchLocation();
     }
 
@@ -150,10 +150,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
         nearbyRestaurants = new ArrayList<>();
         processedRestaurants = new LinkedList<>();
-        //previouslyAccessed = new ArrayList<>();
-        previouslyAccessed = getPreviouslyAccessed(); //TODO: put back in when interface with restaurant
-
-        calendar = Calendar.getInstance();
+        previouslyAccessed = getPreviouslyAccessed();
 
         firstCard = true;
         needToSetCard = true;
@@ -221,35 +218,6 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                 PreferencesActivity.PREF_INTENT_OPEN_NOW,
                 PreferencesActivity.getDefaultIsOpen()
         );
-    }
-
-    private void resetRolls() {
-        SharedPreferences sharedPreferences = getApplicationSharedPreferences();
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        int day = calendar.get(Calendar.DATE);
-        int month = calendar.get(Calendar.MONTH);
-        int year = calendar.get(Calendar.YEAR);
-        String date = "" + month + day + year;
-
-        int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
-        int lastMonth = sharedPreferences.getInt(getString(R.string.sp_month), 0);
-        int lastYear = sharedPreferences.getInt(getString(R.string.sp_year), 0);
-        String lastDate = "" + lastMonth + lastDay + lastYear;
-
-        if(!lastDate.equals(date)){
-            editor.remove(getString(R.string.sp_previously_accessed_json));
-            editor.apply();
-            editor.remove(getString(R.string.sp_remained_rerolls));
-            editor.apply();
-
-            editor.putInt(getString(R.string.sp_date), day);
-            editor.apply();
-            editor.putInt(getString(R.string.sp_month), month);
-            editor.apply();
-            editor.putInt(getString(R.string.sp_year), year);
-            editor.apply();
-        }
     }
 
     /**
@@ -422,12 +390,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      * set values of views to values in HashMap<String, String>
      */
     private void setViewValues(Restaurant selectedRestaurant) {
-        previouslyAccessed = getPreviouslyAccessed();
         previouslyAccessed.add(selectedRestaurant);
-
-        Log.d(TAG, "setViewValues: " + previouslyAccessed);
-
-        savePreviouslyAccessedData(previouslyAccessed); //TODO: put this somewhere else
 
         Animation inAnimation = inFromRightAnimation();
         inAnimation.setAnimationListener(new Animation.AnimationListener() {
@@ -450,36 +413,82 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
 
     private Set<Restaurant> removeVisited(List<Restaurant> list){
         Set<Restaurant> potentials = new HashSet<>(list);
-        previouslyAccessed = getPreviouslyAccessed(); //TODO: put back in when interface with restaurant
         potentials.removeAll(previouslyAccessed);
         return potentials;
     }
 
     // TODO: rewrite using Restaurant classes
-    private void savePreviouslyAccessedData(List<Restaurant> previouslyAccessed) {
-        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), new HashSet<>());
-        jsonSet.add(previouslyAccessed.get(previouslyAccessed.size()-1).getJsonFromRestaurant());
+    private void savePreviouslyAccessedData() {
 
-        SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
-        editor.putStringSet(getString(R.string.sp_previously_accessed_json), jsonSet);
-        editor.apply();
+        Log.d(TAG, "savePreviouslyAccessedData: saving previously accessed restaurants");
 
-        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
-        Log.d(TAG, "savePreviouslyAccessedData: " + jsonSet);
+        final String jsonArrayStr = getApplicationSharedPreferences().getString(getString(R.string.sp_previously_accessed_json), null);
+        JSONArray jsonArray = new JSONArray();
+
+        try{
+            JSONObject jsonArrayObj = jsonArrayStr == null ? new JSONObject() : new JSONObject(jsonArrayStr);
+            jsonArray = jsonArrayObj.getJSONArray(getString(R.string.sp_previously_accessed_json));
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
+        for(Restaurant restaurant: previouslyAccessed){
+            String restJSON = restaurant.getJsonFromRestaurant();
+            boolean add = true;
+
+            for(int i=0; i<jsonArray.length(); i++){
+                try {
+                    if (jsonArray.getString(i).equals(restJSON)) add = false;
+                } catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+
+            if(add) jsonArray.put(restJSON);
+        }
+
+        try {
+            JSONObject jsonArrayObj = new JSONObject();
+            jsonArrayObj.put(getString(R.string.sp_previously_accessed_json), jsonArray);
+
+            Log.d(TAG, "savePreviouslyAccessedData: saving jsonArrayObj=" + jsonArrayObj.toString());
+
+            SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
+            editor.putString(getString(R.string.sp_previously_accessed_json), jsonArrayObj.toString());
+            editor.apply();
+
+        } catch (JSONException e){
+            e.printStackTrace();
+            Log.e(TAG, "savePreviouslyAccessedData: failed to save jsonArray");
+        }
     }
 
-    // TODO: put back in when interface with restaurant
     private List<Restaurant> getPreviouslyAccessed() {
+
         List<Restaurant> restaurantList = new ArrayList<>();
-        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
 
-        Log.d(TAG, "getPreviouslyAccessed: " + jsonSet);
+        final String jsonArrayStr = getApplicationSharedPreferences().getString(getString(R.string.sp_previously_accessed_json), null);
+        JSONArray jsonArray = null;
 
-        if(jsonSet != null){
-            ArrayList<String> jsonList = new ArrayList<String>(jsonSet);
-            for(int i = 0; i < jsonList.size(); i++) {
-                Restaurant restaurant = new Restaurant(jsonList.get(i));
-                restaurantList.add(restaurant);
+        try{
+            JSONObject jsonArrayObj = jsonArrayStr == null ? new JSONObject() : new JSONObject(jsonArrayStr);
+            jsonArray = jsonArrayObj.getJSONArray(getString(R.string.sp_previously_accessed_json));
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
+
+        Log.d(TAG, "getPreviouslyAccessed: " + jsonArray);
+
+        if(jsonArray != null){
+            for(int i = 0; i < jsonArray.length(); i++) {
+                try {
+                    Restaurant restaurant = new Restaurant(jsonArray.getString(i));
+                    restaurantList.add(restaurant);
+                } catch(JSONException e){
+                    e.printStackTrace();
+                    Log.e(TAG, "getPreviouslyAccessed: failed to restore restaurant " + i);
+                }
             }
         }
 
@@ -544,6 +553,12 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      */
     public void finishCardFinder(View view) {
         finish();
+    }
+
+    @Override
+    public void onStop(){
+        savePreviouslyAccessedData();
+        super.onStop();
     }
 
     private void showLoadingScreen(){

@@ -19,11 +19,11 @@ import java.util.Set;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public class PreferencesActivity extends ThemedAppCompatActivity {
+public class PreferencesActivity extends CustomAppCompatActivity {
 
     private static final String TAG = PreferencesActivity.class.getSimpleName();
 
-    // variables used to pass data between PreferencesActivity and RestaurantCardFinder
+    // variables used to pass data between PreferencesActivity and RestaurantCardFinderActivity
     public static final int PREF_ANY_INT_REP = 0;
     public static final String PREF_ANY_STR_REP = "Any";
 
@@ -55,6 +55,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         setContentView(R.layout.activity_preferences);
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        resetDaily();
         requestLocationPermission();
         initPrefViews();
     }
@@ -62,6 +63,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        resetDaily();
         activateActivityButtons();
     }
 
@@ -181,10 +183,10 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
 
     public void openHistory(View view) {
 
-        final Set jsonSet = getApplicationSharedPreferences().
-                getStringSet(getString(R.string.sp_previously_accessed_json), null);
+        final String jsonArrayStr = getApplicationSharedPreferences().
+                getString(getString(R.string.sp_previously_accessed_json), null);
 
-        if (jsonSet == null) {
+        if (jsonArrayStr == null) {
             Toast.makeText(
                     this,
                     "History is blank.",
@@ -198,7 +200,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     }
 
     /**
-     * gets the preference values and opens the results activity (RestaurantCardFinder.java)
+     * gets the preference values and opens the results activity (RestaurantCardFinderActivity.java)
      */
     public void submitPref(View view) {
 
@@ -225,7 +227,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
 
     private void startRestaurantCardFinder() {
 
-        final Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
+        final Intent switchIntent = new Intent(this, RestaurantCardFinderActivity.class);
         final int errorMargin = getApplicationSharedPreferences()
                 .getInt(getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER);
 
@@ -247,7 +249,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
                         "mustBeOpen=" + mustBeOpen
         );
 
-        // go to RestaurantCardFinder.java and pass along values
+        // go to RestaurantCardFinderActivity.java and pass along values
         switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
         switchIntent.putExtra(PREF_INTENT_RATING, rating);
         switchIntent.putExtra(PREF_INTENT_PRICING, pricing);

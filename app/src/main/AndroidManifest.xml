@@ -27,7 +27,7 @@
             android:label="@string/title_activity_settings"
             android:parentActivityName=".PreferencesActivity" />
         <activity
-            android:name=".RestaurantCardFinder"
+            android:name=".RestaurantCardFinderActivity"
             android:parentActivityName=".PreferencesActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

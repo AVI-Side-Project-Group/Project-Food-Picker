@@ -257,7 +257,7 @@ class Restaurant {
                 jsonObject.put("photo " + i, getPhotos().get(i).getStringFromBitmap(getPhotos().get(i).getBitmap()));
             }
 
-            Log.d(TAG, "getJsonFromResturant: " + jsonObject.toString());
+            Log.d(TAG, "getJsonFromRestaurant: " + jsonObject.toString());
 
             return jsonObject.toString();
         } catch (JSONException e) {

@@ -9,6 +9,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.Nullable;
@@ -16,9 +17,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
+import java.util.Calendar;
+import java.util.Locale;
+
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
-public abstract class ThemedAppCompatActivity extends AppCompatActivity {
+public abstract class CustomAppCompatActivity extends AppCompatActivity {
+
+    private static final String TAG = CustomAppCompatActivity.class.getSimpleName();
 
     private SharedPreferences sharedPreferences;
     private String[] themes = {"Light", "Dark", "Purple"};
@@ -104,6 +110,48 @@ public abstract class ThemedAppCompatActivity extends AppCompatActivity {
         }
 
         return false;
+    }
+
+    void resetDaily() {
+
+        SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
+        String newDate = getNewDate();
+
+        if(newDate != null){
+            editor.remove(getString(R.string.sp_previously_accessed_json));
+            editor.apply();
+
+            editor.remove(getString(R.string.sp_remained_rerolls));
+            editor.apply();
+
+            editor.putString(getString(R.string.sp_date), newDate);
+            editor.apply();
+        }
+    }
+
+    String getNewDate(){
+
+        SharedPreferences sharedPreferences = getApplicationSharedPreferences();
+        Calendar calendar = Calendar.getInstance();
+
+        int day = calendar.get(Calendar.DATE);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+
+        String date = getDateFormat(day, month, year);
+        String lastDate = sharedPreferences.getString(getString(R.string.sp_date), getDefaultDate());
+
+        Log.d(TAG, "getNewDate: current date=" + date + ", last date=" + lastDate);
+
+        return lastDate.equals(date) ? null : date;
+    }
+
+    private static String getDateFormat(int day, int month, int year){
+        return String.format(Locale.US, "%02d%02d%04d", day, month, year);
+    }
+
+    private static String getDefaultDate(){
+        return getDateFormat(0, 0, 0);
     }
 
     /**

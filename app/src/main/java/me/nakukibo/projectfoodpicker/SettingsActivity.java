@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import java.util.Locale;
 
-public class SettingsActivity extends ThemedAppCompatActivity {
+public class SettingsActivity extends CustomAppCompatActivity {
 
     static final int MARGIN_MULTIPLIER = 5;
     private static final String TAG = SettingsActivity.class.getSimpleName();

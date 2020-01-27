@@ -44,8 +44,6 @@
     <string name="sp_distance_margin">distance_margin</string>
     <string name="sp_previously_accessed_json">previously_accessed_json</string>
     <string name="sp_date">date</string>
-    <string name="sp_month">month</string>
-    <string name="sp_year">year</string>
     <string name="sp_remained_rerolls">remained_rerolls</string>
 
     <!--    restaurant_card.xml default values-->
