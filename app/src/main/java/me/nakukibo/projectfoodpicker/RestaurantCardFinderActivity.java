@@ -411,6 +411,7 @@ public class RestaurantCardFinderActivity extends CustomAppCompatActivity implem
         activeCard.setAnimation(inAnimation);
     }
 
+    // TODO: fix this
     private Set<Restaurant> removeVisited(List<Restaurant> list){
         Set<Restaurant> potentials = new HashSet<>(list);
         potentials.removeAll(previouslyAccessed);
@@ -432,19 +433,16 @@ public class RestaurantCardFinderActivity extends CustomAppCompatActivity implem
             e.printStackTrace();
         }
 
+        List<Restaurant> storedRestaurants = getPreviouslyAccessed();
+
         for(Restaurant restaurant: previouslyAccessed){
-            String restJSON = restaurant.getJsonFromRestaurant();
             boolean add = true;
 
-            for(int i=0; i<jsonArray.length(); i++){
-                try {
-                    if (jsonArray.getString(i).equals(restJSON)) add = false;
-                } catch(JSONException e){
-                    e.printStackTrace();
-                }
+            for(int i=0; i<storedRestaurants.size(); i++){
+                if(storedRestaurants.get(i).getId().equals(restaurant.getId())) add = false;
             }
 
-            if(add) jsonArray.put(restJSON);
+            if(add) jsonArray.put(restaurant.getJsonFromRestaurant());
         }
 
         try {

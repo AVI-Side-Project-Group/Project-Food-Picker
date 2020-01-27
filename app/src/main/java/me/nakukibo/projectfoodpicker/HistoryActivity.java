@@ -73,7 +73,7 @@ public class HistoryActivity extends CustomAppCompatActivity {
             for(int i = 0; i < jsonArray.length(); i++) {
                 try {
                     Restaurant restaurant = new Restaurant(jsonArray.getString(i));
-                    restaurantList.add(restaurant);
+                    restaurantList.add(0, restaurant);
                     Log.d(TAG, "getHistory: " + restaurantList.get(i).getName());
                 } catch(JSONException e){
                     e.printStackTrace();
@@ -106,7 +106,6 @@ public class HistoryActivity extends CustomAppCompatActivity {
 
     private void setValues(View view, View card){
         Restaurant restaurant = previouslyAccessed.get(recyclerView.getChildLayoutPosition(view));
-
 
         Log.d(TAG, "setValues: " + restaurant.getJsonFromRestaurant());
 
