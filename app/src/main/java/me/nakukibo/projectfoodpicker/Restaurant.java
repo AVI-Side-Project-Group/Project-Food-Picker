@@ -237,6 +237,8 @@ class Restaurant {
     }
 
     String getJsonFromRestaurant(){
+        final int MAX_STORE_PHOTOS = 2;
+
         JSONObject jsonObject= new JSONObject();
         try {
             jsonObject.put("name", getName());
@@ -253,11 +255,11 @@ class Restaurant {
             jsonObject.put("website", getWebsite());
             jsonObject.put("weekdayText", getWeekdayTextConcatenated());
             jsonObject.put("numPhoto", numPhotos);
-            for(int i = 0; i < numPhotos; i++){
+            for(int i = 0; i < Math.min(MAX_STORE_PHOTOS, numPhotos); i++){
                 jsonObject.put("photo " + i, getPhotos().get(i).getStringFromBitmap(getPhotos().get(i).getBitmap()));
             }
 
-            Log.d(TAG, "getJsonFromResturant: " + jsonObject.toString());
+            Log.d(TAG, "getJsonFromRestaurant: " + jsonObject.toString());
 
             return jsonObject.toString();
         } catch (JSONException e) {

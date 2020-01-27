@@ -4,7 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RestaurantCardFinder">
+    tools:context=".RestaurantCardFinderActivity">
+
+    <me.nakukibo.projectfoodpicker.DefaultLoadingScreen
+        android:id="@+id/restcard_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/no_restaurants_layout"
@@ -62,7 +71,6 @@
         app:rating="0"
         app:website="website"
         app:weekdayTextConcatenated="business weekdayTextConcatenated">
-
     </me.nakukibo.projectfoodpicker.RestaurantCard>
 
     <me.nakukibo.projectfoodpicker.RestaurantCard
@@ -85,38 +93,6 @@
         app:weekdayTextConcatenated="business weekdayTextConcatenated">
 
     </me.nakukibo.projectfoodpicker.RestaurantCard>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/restcard_loading"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
-
-        <TextView
-            android:id="@+id/restcard_loading_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="@string/restcardfinder_default_load_txt"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="@style/Widget.AppCompat.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="@+id/restcard_loading_txt"
-            app:layout_constraintStart_toStartOf="@+id/restcard_loading_txt"
-            app:layout_constraintTop_toBottomOf="@+id/restcard_loading_txt" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/restcard_finder_btn_set"

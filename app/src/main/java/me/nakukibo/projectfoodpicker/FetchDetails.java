@@ -22,14 +22,17 @@ class FetchDetails {
     private static final String TAG = GetNearbyData.class.getSimpleName();
     private Restaurant.OnFinishRetrievingImages onFinishRetrievingImages;
     private LinkedList<Restaurant> restaurants;
+    private boolean cancelled;
 
-    FetchDetails(LinkedList<Restaurant> restaurants, Restaurant.OnFinishRetrievingImages onFinishRetrievingImages) {
-        this.restaurants = restaurants;
+        FetchDetails(LinkedList<Restaurant> restaurants, Restaurant.OnFinishRetrievingImages onFinishRetrievingImages) {
+            this.restaurants = restaurants;
         this.onFinishRetrievingImages = onFinishRetrievingImages;
+
+        this.cancelled = false;
     }
 
     void execute(PlacesClient placesClient){
-        fetch(restaurants.pop(), placesClient);
+        if(restaurants.size() > 0) fetch(restaurants.pop(), placesClient);
     }
 
     /**
@@ -45,7 +48,11 @@ class FetchDetails {
                 Place.Field.WEBSITE_URI, Place.Field.PHOTO_METADATAS);
         FetchPlaceRequest request = FetchPlaceRequest.newInstance(selectedRestaurant.getId(), placeFields);
 
+        if(cancelled) return;
+
         placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+            if(cancelled) return;
+
             Place place = response.getPlace();
             OpeningHours openingHours = place.getOpeningHours();
             Uri website = place.getWebsiteUri();
@@ -59,11 +66,17 @@ class FetchDetails {
             if(!restaurants.isEmpty()) fetch(restaurants.pop(), placesClient);
 
         }).addOnFailureListener((exception) -> {
+            if(cancelled) return;
+
             if (exception instanceof ApiException) {
                 Log.e(TAG, "Place not found " + selectedRestaurant.getName());
                 exception.printStackTrace();
             }
             if(!restaurants.isEmpty()) fetch(restaurants.pop(), placesClient);
         });
+    }
+
+    public void cancel(boolean cancelled) {
+        this.cancelled = cancelled;
     }
 }

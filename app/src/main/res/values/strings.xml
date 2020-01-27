@@ -44,8 +44,6 @@
     <string name="sp_distance_margin">distance_margin</string>
     <string name="sp_previously_accessed_json">previously_accessed_json</string>
     <string name="sp_date">date</string>
-    <string name="sp_month">month</string>
-    <string name="sp_year">year</string>
     <string name="sp_remained_rerolls">remained_rerolls</string>
 
     <!--    restaurant_card.xml default values-->
@@ -58,7 +56,7 @@
     <string name="restcard_default_hours">Restaurant weekdayTextConcatenated</string>
 
     <!--    restaurant_card_finder values-->
-    <string name="restcardfinder_default_load_txt">loading restaurants&#8230;</string>
+    <string name="restcardfinder_default_load_txt">loading&#8230;</string>
     <string name="restcard_finder_no_more_restaurants">
         It seems you have ran out of restaurants matching your preferences.
     </string>

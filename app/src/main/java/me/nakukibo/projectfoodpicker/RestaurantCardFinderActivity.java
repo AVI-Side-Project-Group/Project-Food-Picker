@@ -13,27 +13,28 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.JsonArray;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class RestaurantCardFinder extends ThemedAppCompatActivity implements GetNearbyData.ReceiveNearbyData {
+public class RestaurantCardFinderActivity extends CustomAppCompatActivity implements GetNearbyData.ReceiveNearbyData {
 
-    private static final String TAG = RestaurantCardFinder.class.getSimpleName();
-    private static final int ERROR_PASSED_VALUE = -1;
+    private static final String TAG = RestaurantCardFinderActivity.class.getSimpleName();
 
     private View loadingView;
     private View wrapperOpen;
@@ -52,21 +53,22 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private RestaurantCard activeCard;
 
     private List<Restaurant> nearbyRestaurants;
-    private LinkedList<Restaurant> placesProcessed;
+    private LinkedList<Restaurant> processedRestaurants;
     private List<Restaurant> previouslyAccessed;
-
-    private Set jsonSet;
-    private Calendar calendar;
 
     private boolean firstCard;
     private boolean needToSetCard;
+
+    private GetNearbyData getNearbyData;
+    private FetchDetails fetchDetails;
+
+    private boolean fetchedNearbyData;
 
     // data passed from PreferencesActivity.java
     private String foodType;
     private int distance;
     private int pricing;
     private int rating;
-    private Boolean allowProminent;
     private Boolean openNow;
 
     @Override
@@ -82,8 +84,23 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         resetGlobalVariables();
 
         retrievePassedValues();
-        resetRolls();
         fetchLocation();
+    }
+
+    @Override
+    public void onBackPressed(){
+        Log.d(TAG, "onBackPressed: back pressed");
+        if(!fetchedNearbyData && getNearbyData != null){
+            Log.d(TAG, "onBackPressed: cancelling nearby fetch");
+            getNearbyData.cancel(true);
+        }
+
+        if(fetchDetails != null){
+            Log.d(TAG, "onBackPressed: cancelling details fetch");
+            fetchDetails.cancel(true);
+        }
+
+        finish();
     }
 
     private void initViewEvents() {
@@ -132,14 +149,14 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void resetGlobalVariables() {
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
         nearbyRestaurants = new ArrayList<>();
-        placesProcessed = new LinkedList<>();
-        //previouslyAccessed = new ArrayList<>();
-        previouslyAccessed = getPreviouslyAccessed(); //TODO: put back in when interface with restaurant
-
-        calendar = Calendar.getInstance();
+        processedRestaurants = new LinkedList<>();
+        previouslyAccessed = getPreviouslyAccessed();
 
         firstCard = true;
         needToSetCard = true;
+        fetchedNearbyData = false;
+        getNearbyData = null;
+        fetchDetails = null;
     }
 
     private void initViewVariables() {
@@ -179,40 +196,28 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      */
     private void retrievePassedValues() {
         foodType = getIntent().getStringExtra(PreferencesActivity.PREF_INTENT_FOOD_TYPE);
-        rating = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_RATING, ERROR_PASSED_VALUE);
-        distance = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
-        pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
-        allowProminent = getIntent().getBooleanExtra(PreferencesActivity.PREF_INTENT_ALLOW_PROMINENT, false);
-        openNow = getIntent().getBooleanExtra(PreferencesActivity.PREF_INTENT_OPEN_NOW, false);
-    }
+        if(foodType == null) foodType = PreferencesActivity.getDefaultFoodType();
 
-    private void resetRolls() {
-        SharedPreferences sharedPreferences = getApplicationSharedPreferences();
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        rating = getIntent().getIntExtra(
+                PreferencesActivity.PREF_INTENT_RATING,
+                PreferencesActivity.getDefaultRating()
+        );
 
-        int day = calendar.get(Calendar.DATE);
-        int month = calendar.get(Calendar.MONTH);
-        int year = calendar.get(Calendar.YEAR);
-        String date = "" + month + day + year;
+        distance = getIntent().getIntExtra(
+                PreferencesActivity.PREF_INTENT_DISTANCE,
+                PreferencesActivity.getDefaultDistanceMeters(getApplicationSharedPreferences()
+                        .getInt(getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER))
+        );
 
-        int lastDay = sharedPreferences.getInt(getString(R.string.sp_date), 0);
-        int lastMonth = sharedPreferences.getInt(getString(R.string.sp_month), 0);
-        int lastYear = sharedPreferences.getInt(getString(R.string.sp_year), 0);
-        String lastDate = "" + lastMonth + lastDay + lastYear;
+        pricing = getIntent().getIntExtra(
+                PreferencesActivity.PREF_INTENT_PRICING,
+                PreferencesActivity.getDefaultPriceRange()
+        );
 
-        if(!lastDate.equals(date)){
-            editor.remove(getString(R.string.sp_previously_accessed_json));
-            editor.apply();
-            editor.remove(getString(R.string.sp_remained_rerolls));
-            editor.apply();
-
-            editor.putInt(getString(R.string.sp_date), day);
-            editor.apply();
-            editor.putInt(getString(R.string.sp_month), month);
-            editor.apply();
-            editor.putInt(getString(R.string.sp_year), year);
-            editor.apply();
-        }
+        openNow = getIntent().getBooleanExtra(
+                PreferencesActivity.PREF_INTENT_OPEN_NOW,
+                PreferencesActivity.getDefaultIsOpen()
+        );
     }
 
     /**
@@ -237,7 +242,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         Log.d(TAG, "fetchLocation: calling getnearbydata");
 
                         // find restaurants
-                        GetNearbyData getNearbyPlacesData = new GetNearbyData(getResources().getString(R.string.google_maps_key),
+                        getNearbyData = new GetNearbyData(getResources().getString(R.string.google_maps_key),
                                 this, nearbyRestaurants);
                         String url = getUrl(latitude, longitude);
                         dataTransfer[0] = url;
@@ -245,11 +250,13 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         dataTransfer[2] = distance;
                         dataTransfer[3] = pricing;
                         dataTransfer[4] = rating;
-                        dataTransfer[5] = allowProminent;
+                        dataTransfer[5] = getApplicationSharedPreferences()
+                                .getBoolean(getResources()
+                                        .getString(R.string.sp_allow_prominent), false);
                         dataTransfer[6] = openNow;
 
                         Log.d(TAG, "fetchLocation: openNow=" + openNow);
-                        getNearbyPlacesData.execute(dataTransfer);
+                        getNearbyData.execute(dataTransfer);
                     }
                 });
     }
@@ -260,6 +267,8 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      */
     @Override
     public void onFinishNearbyFetch(){
+        fetchedNearbyData = true;
+
         Log.d(TAG, "onFinishNearbyFetch: combined list has a size of " + nearbyRestaurants.size());
         logAllPlacesList(nearbyRestaurants);
 
@@ -273,7 +282,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                 onFinishDetailsFetch(restaurant);
             }
         };
-        FetchDetails fetchDetails = new FetchDetails(unvisitedRestaurants, onFinishRetrievingImages);
+        fetchDetails = new FetchDetails(unvisitedRestaurants, onFinishRetrievingImages);
         fetchDetails.execute(placesClient);
     }
 
@@ -306,9 +315,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             needToSetCard = false; // hint: you can make it swipe automatically if u set this to true
             makeRoll(selectedRestaurant);
         }else {
-            placesProcessed.add(selectedRestaurant);
-            Log.d(TAG, "sendDetailData: adding to placesProcessed");
-            logAllPlacesList(placesProcessed);
+            processedRestaurants.add(selectedRestaurant);
+            Log.d(TAG, "sendDetailData: adding to processedRestaurants");
+            logAllPlacesList(processedRestaurants);
         }
     }
 
@@ -321,10 +330,10 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             return;
         }
 
-        if(placesProcessed.size() > 0){
+        if(processedRestaurants.size() > 0){
             hideLoadingScreen();
             activateFloatingButtons();
-            Restaurant nextRestaurant = placesProcessed.pop();
+            Restaurant nextRestaurant = processedRestaurants.pop();
             makeRoll(nextRestaurant);
         } else{
             needToSetCard = true;
@@ -381,12 +390,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      * set values of views to values in HashMap<String, String>
      */
     private void setViewValues(Restaurant selectedRestaurant) {
-        previouslyAccessed = getPreviouslyAccessed();
         previouslyAccessed.add(selectedRestaurant);
-
-        Log.d(TAG, "setViewValues: " + previouslyAccessed);
-
-        savePreviouslyAccessedData(previouslyAccessed); //TODO: put this somewhere else
 
         Animation inAnimation = inFromRightAnimation();
         inAnimation.setAnimationListener(new Animation.AnimationListener() {
@@ -407,38 +411,82 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
         activeCard.setAnimation(inAnimation);
     }
 
+    // TODO: fix this
     private Set<Restaurant> removeVisited(List<Restaurant> list){
         Set<Restaurant> potentials = new HashSet<>(list);
-        previouslyAccessed = getPreviouslyAccessed(); //TODO: put back in when interface with restaurant
         potentials.removeAll(previouslyAccessed);
         return potentials;
     }
 
     // TODO: rewrite using Restaurant classes
-    private void savePreviouslyAccessedData(List<Restaurant> previouslyAccessed) {
-        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), new HashSet<>());
-        jsonSet.add(previouslyAccessed.get(previouslyAccessed.size()-1).getJsonFromRestaurant());
+    private void savePreviouslyAccessedData() {
 
-        SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
-        editor.putStringSet(getString(R.string.sp_previously_accessed_json), jsonSet);
-        editor.apply();
+        Log.d(TAG, "savePreviouslyAccessedData: saving previously accessed restaurants");
 
-        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
-        Log.d(TAG, "savePreviouslyAccessedData: " + jsonSet);
+        final String jsonArrayStr = getApplicationSharedPreferences().getString(getString(R.string.sp_previously_accessed_json), null);
+        JSONArray jsonArray = new JSONArray();
+
+        try{
+            JSONObject jsonArrayObj = jsonArrayStr == null ? new JSONObject() : new JSONObject(jsonArrayStr);
+            jsonArray = jsonArrayObj.getJSONArray(getString(R.string.sp_previously_accessed_json));
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
+        List<Restaurant> storedRestaurants = getPreviouslyAccessed();
+
+        for(Restaurant restaurant: previouslyAccessed){
+            boolean add = true;
+
+            for(int i=0; i<storedRestaurants.size(); i++){
+                if(storedRestaurants.get(i).getId().equals(restaurant.getId())) add = false;
+            }
+
+            if(add) jsonArray.put(restaurant.getJsonFromRestaurant());
+        }
+
+        try {
+            JSONObject jsonArrayObj = new JSONObject();
+            jsonArrayObj.put(getString(R.string.sp_previously_accessed_json), jsonArray);
+
+            Log.d(TAG, "savePreviouslyAccessedData: saving jsonArrayObj=" + jsonArrayObj.toString());
+
+            SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
+            editor.putString(getString(R.string.sp_previously_accessed_json), jsonArrayObj.toString());
+            editor.apply();
+
+        } catch (JSONException e){
+            e.printStackTrace();
+            Log.e(TAG, "savePreviouslyAccessedData: failed to save jsonArray");
+        }
     }
 
-    // TODO: put back in when interface with restaurant
     private List<Restaurant> getPreviouslyAccessed() {
+
         List<Restaurant> restaurantList = new ArrayList<>();
-        jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
 
-        Log.d(TAG, "getPreviouslyAccessed: " + jsonSet);
+        final String jsonArrayStr = getApplicationSharedPreferences().getString(getString(R.string.sp_previously_accessed_json), null);
+        JSONArray jsonArray = null;
 
-        if(jsonSet != null){
-            ArrayList<String> jsonList = new ArrayList<String>(jsonSet);
-            for(int i = 0; i < jsonList.size(); i++) {
-                Restaurant restaurant = new Restaurant(jsonList.get(i));
-                restaurantList.add(restaurant);
+        try{
+            JSONObject jsonArrayObj = jsonArrayStr == null ? new JSONObject() : new JSONObject(jsonArrayStr);
+            jsonArray = jsonArrayObj.getJSONArray(getString(R.string.sp_previously_accessed_json));
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
+
+        Log.d(TAG, "getPreviouslyAccessed: " + jsonArray);
+
+        if(jsonArray != null){
+            for(int i = 0; i < jsonArray.length(); i++) {
+                try {
+                    Restaurant restaurant = new Restaurant(jsonArray.getString(i));
+                    restaurantList.add(restaurant);
+                } catch(JSONException e){
+                    e.printStackTrace();
+                    Log.e(TAG, "getPreviouslyAccessed: failed to restore restaurant " + i);
+                }
             }
         }
 
@@ -503,6 +551,12 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      */
     public void finishCardFinder(View view) {
         finish();
+    }
+
+    @Override
+    public void onStop(){
+        savePreviouslyAccessedData();
+        super.onStop();
     }
 
     private void showLoadingScreen(){

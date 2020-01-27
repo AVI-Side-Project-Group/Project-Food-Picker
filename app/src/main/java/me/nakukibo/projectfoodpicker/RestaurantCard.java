@@ -325,7 +325,7 @@ public class RestaurantCard extends ScrollView {
         Log.d(TAG, "initViews: card is swiped left");
 
         if(onSwipeStartEvent != null) onSwipeStartEvent.onSwipeStart();
-        Animation exitAnimation = RestaurantCardFinder.outToLeftAnimation();
+        Animation exitAnimation = RestaurantCardFinderActivity.outToLeftAnimation();
         exitAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) { }

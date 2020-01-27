@@ -1,38 +1,30 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.content.Intent;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
-public class HistoryActivity extends ThemedAppCompatActivity {
+public class HistoryActivity extends CustomAppCompatActivity {
 
     private static final String TAG = HistoryActivity.class.getSimpleName();
     private List<Restaurant> previouslyAccessed;
@@ -64,18 +56,30 @@ public class HistoryActivity extends ThemedAppCompatActivity {
 
     private List<Restaurant> getHistory(){
         List<Restaurant> restaurantList = new ArrayList<>();
-        Set jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
+        String jsonArrayStr = getApplicationSharedPreferences().getString(getString(R.string.sp_previously_accessed_json), null);
 
-        if(jsonSet != null){
-            ArrayList<String> jsonList = new ArrayList<String>(jsonSet);
-            for(int i = 0; i < jsonList.size(); i++) {
-                Restaurant restaurant = new Restaurant(jsonList.get(i));
-                restaurantList.add(restaurant);
-                Log.d(TAG, "getHistory: " + restaurantList.get(i).getName());
+        Log.d(TAG, "getHistory: restoring jsonArray=" + jsonArrayStr);
+
+        if(jsonArrayStr != null){
+            JSONArray jsonArray = null;
+
+            try {
+                JSONObject jsonObject = new JSONObject(jsonArrayStr);
+                jsonArray = jsonObject.getJSONArray(getString(R.string.sp_previously_accessed_json));
+            } catch(JSONException e){
+                e.printStackTrace();
+            }
+
+            for(int i = 0; i < jsonArray.length(); i++) {
+                try {
+                    Restaurant restaurant = new Restaurant(jsonArray.getString(i));
+                    restaurantList.add(0, restaurant);
+                    Log.d(TAG, "getHistory: " + restaurantList.get(i).getName());
+                } catch(JSONException e){
+                    e.printStackTrace();
+                }
             }
         }
-
-        Log.d(TAG, "getHistory: " + restaurantList);
 
         return restaurantList;
     }
@@ -102,7 +106,6 @@ public class HistoryActivity extends ThemedAppCompatActivity {
 
     private void setValues(View view, View card){
         Restaurant restaurant = previouslyAccessed.get(recyclerView.getChildLayoutPosition(view));
-
 
         Log.d(TAG, "setValues: " + restaurant.getJsonFromRestaurant());
 
