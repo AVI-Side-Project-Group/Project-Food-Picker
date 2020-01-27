@@ -1,20 +1,11 @@
 package me.nakukibo.projectfoodpicker;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -22,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import java.util.Locale;
 import java.util.Set;
@@ -31,9 +21,12 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 
 public class PreferencesActivity extends ThemedAppCompatActivity {
 
+    private static final String TAG = PreferencesActivity.class.getSimpleName();
+
     // variables used to pass data between PreferencesActivity and RestaurantCardFinder
     public static final int PREF_ANY_INT_REP = 0;
     public static final String PREF_ANY_STR_REP = "Any";
+
     public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
@@ -41,18 +34,12 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     public static final String PREF_INTENT_PRICING = "pricing";
     public static final String PREF_INTENT_OPEN_NOW = "open_now";
 
-    private static final String TAG = PreferencesActivity.class.getSimpleName();
-
-    // flag for checking whether the user allowed for location data
-    private boolean isLocationOn;
-
     // views from layout
     private Spinner spinFoodType;
     private Spinner spinRating;
     private Spinner spinPricing;
     private SeekBar sbrDistance;
     private Switch toggleOpenNow;
-    private Button btnHistory;
 
     // values for views
     private String[] foodTypes = {PREF_ANY_STR_REP, "American", "Asian",
@@ -71,161 +58,71 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         requestLocationPermission();
         initPrefViews();
-
-        /*SharedPreferences.Editor editor = getApplicationSharedPreferences().edit();
-        editor.remove(getString(R.string.sp_previously_accessed_json));
-        editor.apply();*/
-    }
-
-
-    /**
-     * logs all values for debugging purposes
-     *
-     * @param tag:      the tag for the messages
-     * @param funcName: function name where this function is called from
-     * @param values:   values to be logged
-     */
-    public static void logValues(String tag, String funcName, String... values) {
-        for (String value : values) {
-            Log.d(tag, funcName + ": " + value);
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // reactivate the button (was deactivate during onSubmit)
-        findViewById(R.id.btn_search).setClickable(true);
-        initHistoryButton();
+        activateActivityButtons();
     }
 
     /**
-     * gets the preference values and opens the results activity (RestaurantCardFinder.java)
-     */
-    public void submitPref(View view) {
-        // if not search button then wrong view
-        if (view.getId() != R.id.btn_search) return;
-
-        // check if user is connected to the internet
-        if (!checkNetworkConnection()) {
-            // notify user error message
-            Toast toast = Toast.makeText(getApplicationContext(), "There is no internet connection. Please try again later.",
-                    Toast.LENGTH_LONG);
-            toast.show();
-            return;
-        }
-
-        if (isLocationOn) {
-            findViewById(R.id.btn_search).setClickable(false);
-
-            // retrieve value from preferences
-            String foodType = spinFoodType.getSelectedItem().toString();
-            int rating = spinRating.getSelectedItemPosition();
-            int pricing = spinPricing.getSelectedItemPosition();
-            int distMeters = milesToMeters(getMaxDistance(distances[sbrDistance.getProgress()]));
-
-            // log the values
-            Log.d(TAG, "submitPref: Attempting to submit preferences:");
-            logValues(TAG, "submitPref", foodType, String.valueOf(rating),
-                    String.valueOf(distMeters), String.valueOf(pricing));
-
-            // go to RestaurantCardFinder.java and pass along values
-            Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
-            switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
-            switchIntent.putExtra(PREF_INTENT_RATING, rating);
-            switchIntent.putExtra(PREF_INTENT_PRICING, pricing);
-            switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);
-            switchIntent.putExtra(PREF_INTENT_ALLOW_PROMINENT,
-                    getApplicationSharedPreferences()
-                            .getBoolean(getResources()
-                                    .getString(R.string.sp_allow_prominent), false));
-            switchIntent.putExtra(PREF_INTENT_OPEN_NOW, toggleOpenNow.isChecked());
-            startActivity(switchIntent);
-        } else {
-            // notify user error message
-            Toast toast = Toast.makeText(getApplicationContext(), "You cannot search with location off.",
-                    Toast.LENGTH_LONG);
-            toast.show();
-        }
-    }
-
-    public void changeSettings(View view) {
-        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        startActivity(intent);
-    }
-
-    public void openHistory(View view) {
-        Set jsonSet = getApplicationSharedPreferences().getStringSet(getString(R.string.sp_previously_accessed_json), null);
-        if (jsonSet == null) {
-            Toast toast = Toast.makeText(this, "History is blank.",
-                    Toast.LENGTH_LONG);
-            toast.show();
-        } else {
-            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
-            startActivity(intent);
-        }
-    }
-
-    /**
-     * ask user for location permission and sets global isLocationOn
+     * ask user for location permission if not already enabled
      * */
     private void requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(PreferencesActivity.this, new String[]{ACCESS_FINE_LOCATION}, 1);
-            if (ContextCompat.checkSelfPermission(this, ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                isLocationOn = false;
-            }
+        if (!hasLocationPermission()) {
+            ActivityCompat.requestPermissions(
+                    PreferencesActivity.this, new String[]{ACCESS_FINE_LOCATION},
+                    1
+            );
         }
-        isLocationOn = true;
-    }
-
-    /**
-     * checks to see if the user is connected to the internet
-     *
-     * @return boolean true if connected, false otherwise
-     */
-    private boolean checkNetworkConnection() {
-        final ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (connectivityManager != null) {
-            if (Build.VERSION.SDK_INT < 23) {
-                final NetworkInfo ni = connectivityManager.getActiveNetworkInfo();
-
-                if (ni != null) {
-                    return (ni.isConnected() && (ni.getType() == ConnectivityManager.TYPE_WIFI || ni.getType() == ConnectivityManager.TYPE_MOBILE));
-                }
-            } else {
-                final Network n = connectivityManager.getActiveNetwork();
-
-                if (n != null) {
-                    final NetworkCapabilities nc = connectivityManager.getNetworkCapabilities(n);
-
-                    if (nc == null) {
-                        Log.d(TAG, "checkNetworkConnection: NetworkCapabilities instance is null. " +
-                                "User is not connected.");
-                        return false;
-                    }
-
-                    return nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                            nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                            nc.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET);
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
      * initializes the view globals and the values
      */
     private void initPrefViews() {
+
         initFoodTypesView();
         initRatingsView();
         initDistancesView();
         initPriceRangesView();
         initIsOpenNowView();
-        initHistoryButton();
+        activateActivityButtons();
+    }
+
+    private void initFoodTypesView() {
+
+        ArrayAdapter<String> adapterFood = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, foodTypes);
+
+        spinFoodType = findViewById(R.id.spin_foodtype);
+        spinFoodType.setAdapter(adapterFood);
+        spinFoodType.setSelection(0);
+    }
+
+    private void initRatingsView() {
+
+        ArrayAdapter<String> adapterRating;
+        String[] ratingString = new String[minRatings.length];
+
+        for (int i = 0; i < minRatings.length; i++) {
+
+            final int rating = minRatings[i];
+
+            if (rating == PREF_ANY_INT_REP) {
+                ratingString[i] = PREF_ANY_STR_REP;
+            } else {
+                ratingString[i] = String.format(Locale.US, "%d stars", rating);
+            }
+        }
+
+        adapterRating = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, ratingString);
+
+        spinRating = findViewById(R.id.spin_rating);
+        spinRating.setAdapter(adapterRating);
+        spinRating.setSelection(0);
     }
 
     private void initIsOpenNowView() {
@@ -233,51 +130,35 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         toggleOpenNow.setChecked(true);
     }
 
-    private void initFoodTypesView() {
-        spinFoodType = findViewById(R.id.spin_foodtype);
-        ArrayAdapter<String> adapterFood = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item, foodTypes);
-        spinFoodType.setAdapter(adapterFood);
-        spinFoodType.setSelection(0);
-    }
-
-    private void initRatingsView() {
-        spinRating = findViewById(R.id.spin_rating);
-        String[] ratingString = new String[minRatings.length];
-        for (int i = 0; i < minRatings.length; i++) {
-            int rating = minRatings[i];
-            if (rating == PREF_ANY_INT_REP) {
-                ratingString[i] = PREF_ANY_STR_REP;
-            } else {
-                ratingString[i] = String.format(Locale.US, "%d stars", rating);
-            }
-        }
-        ArrayAdapter<String> adapterRating = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item, ratingString);
-        spinRating.setAdapter(adapterRating);
-        spinRating.setSelection(0);
-    }
-
     private void initPriceRangesView() {
-        spinPricing = findViewById(R.id.spin_pricing);
+
+        ArrayAdapter<String> adapterPricing;
         String[] pricingString = new String[priceRanges.length];
+
         for (int i = 0; i < priceRanges.length; i++) {
-            int pricing = priceRanges[i];
+
+            final int pricing = priceRanges[i];
+
             if (pricing == PREF_ANY_INT_REP) {
                 pricingString[i] = PREF_ANY_STR_REP;
             } else {
-                pricingString[i] = "$$$$".substring(0, pricing);
+                pricingString[i] = getPricingText(pricing);
             }
         }
-        ArrayAdapter<String> adapterPricing = new ArrayAdapter<>(this,
+
+        adapterPricing = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item, pricingString);
+
+        spinPricing = findViewById(R.id.spin_pricing);
         spinPricing.setAdapter(adapterPricing);
         spinPricing.setSelection(0);
     }
 
     private void initDistancesView() {
-        sbrDistance = findViewById(R.id.sbr_distance);
+
         final TextView distanceVal = findViewById(R.id.txtvw_distance_progress);
+        sbrDistance = findViewById(R.id.sbr_distance);
+
         distanceVal.setText(getDistance(sbrDistance.getProgress()));
         sbrDistance.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -293,8 +174,114 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         });
     }
 
-    private void initHistoryButton() {
-        btnHistory = findViewById(R.id.btn_get_history);
+    public void changeSettings(View view) {
+        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+        deactivateActivityButtons();
+        startActivity(intent);
+    }
+
+    public void openHistory(View view) {
+
+        final Set jsonSet = getApplicationSharedPreferences().
+                getStringSet(getString(R.string.sp_previously_accessed_json), null);
+
+        if (jsonSet == null) {
+            Toast.makeText(
+                    this,
+                    "History is blank.",
+                    Toast.LENGTH_LONG)
+                    .show();
+        } else {
+            Intent intent = new Intent(getApplicationContext(), HistoryActivity.class);
+            deactivateActivityButtons();
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * gets the preference values and opens the results activity (RestaurantCardFinder.java)
+     */
+    public void submitPref(View view) {
+
+        // if not search button then wrong view
+        if (view.getId() != R.id.btn_search) return;
+
+        // check if user is connected to the internet
+        if (!checkNetworkConnection()) {
+            // notify user error message
+            Toast toast = Toast.makeText(getApplicationContext(), "There is no internet connection. Please try again later.",
+                    Toast.LENGTH_LONG);
+            toast.show();
+            return;
+        }
+
+        if (hasLocationPermission()) {
+            startRestaurantCardFinder();
+        } else {
+            Toast toast = Toast.makeText(getApplicationContext(), "You cannot search with location off.",
+                    Toast.LENGTH_LONG);
+            toast.show();
+        }
+    }
+
+    private void startRestaurantCardFinder() {
+
+        final Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
+
+        // retrieve value from preferences
+        final String foodType = spinFoodType.getSelectedItem().toString();
+        final int rating = spinRating.getSelectedItemPosition();
+        final int pricing = spinPricing.getSelectedItemPosition();
+        final int distMeters = milesToMeters(getMaxDistance(distances[sbrDistance.getProgress()]));
+        final boolean mustBeOpen = toggleOpenNow.isChecked();
+
+        deactivateActivityButtons();
+
+        // log the values
+        Log.d(TAG,
+                "submitPref: Attempting to submit preferences:" +
+                        "foodType=" + foodType + ", " +
+                        "distMeters=" + distMeters + ", " +
+                        "pricing=" + pricing + ", " +
+                        "mustBeOpen=" + mustBeOpen
+        );
+
+        // go to RestaurantCardFinder.java and pass along values
+        switchIntent.putExtra(PREF_INTENT_FOOD_TYPE, foodType);
+        switchIntent.putExtra(PREF_INTENT_RATING, rating);
+        switchIntent.putExtra(PREF_INTENT_PRICING, pricing);
+        switchIntent.putExtra(PREF_INTENT_DISTANCE, distMeters);
+        switchIntent.putExtra(PREF_INTENT_OPEN_NOW, mustBeOpen);
+
+        startActivity(switchIntent);
+    }
+
+    private void activateActivityButtons() {
+        findViewById(R.id.btn_search).setClickable(true);
+        findViewById(R.id.btn_setting).setClickable(true);
+        findViewById(R.id.btn_get_history).setClickable(true);
+    }
+
+    private void deactivateActivityButtons() {
+        findViewById(R.id.btn_search).setClickable(false);
+        findViewById(R.id.btn_setting).setClickable(false);
+        findViewById(R.id.btn_get_history).setClickable(false);
+    }
+
+    public static Double metersToMiles(Float meters) {
+        if (meters == null) return null;
+        return meters * 0.000621371;
+    }
+
+    private float getMaxDistance(float distance) {
+        int errorMargin = getApplicationSharedPreferences()
+                .getInt(getResources().getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER);
+        return distance + errorMargin * distance / 100.0f;
+    }
+
+    public static String getPricingText(int pricing) {
+        if (pricing <= 0) return "free";
+        return "$$$$".substring(0, pricing);
     }
 
     /**
@@ -306,11 +293,6 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         return (int) Math.ceil(miles*1609.34);
     }
 
-    public static Double metersToMiles(Float meters){
-        if(meters == null) return null;
-        return meters * 0.000621371;
-    }
-
     /**
      * returns the distance as a string: "[miles of the index] miles"
      * @param index  index of the distances array
@@ -319,11 +301,5 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     private String getDistance(int index) {
         float distance = distances[index];
         return String.format(Locale.US, "%2.1f miles", distance);
-    }
-
-    private float getMaxDistance(float distance){
-        int errorMargin = getApplicationSharedPreferences()
-                .getInt(getResources().getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER);
-        return distance + errorMargin * distance / 100.0f;
     }
 }

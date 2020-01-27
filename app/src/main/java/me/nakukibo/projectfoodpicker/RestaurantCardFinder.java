@@ -6,7 +6,6 @@ import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -14,7 +13,6 @@ import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -25,7 +23,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -270,7 +267,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
                         dataTransfer[2] = distance;
                         dataTransfer[3] = pricing;
                         dataTransfer[4] = rating;
-                        dataTransfer[5] = allowProminent;
+                        dataTransfer[5] = getApplicationSharedPreferences()
+                                .getBoolean(getResources()
+                                        .getString(R.string.sp_allow_prominent), false);
                         dataTransfer[6] = openNow;
 
                         Log.d(TAG, "fetchLocation: openNow=" + openNow);
