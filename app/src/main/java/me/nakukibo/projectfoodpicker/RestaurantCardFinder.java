@@ -31,7 +31,6 @@ import java.util.Set;
 public class RestaurantCardFinder extends ThemedAppCompatActivity implements GetNearbyData.ReceiveNearbyData {
 
     private static final String TAG = RestaurantCardFinder.class.getSimpleName();
-    private static final int ERROR_PASSED_VALUE = -1;
 
     private View loadingView;
     private View wrapperOpen;
@@ -50,7 +49,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private RestaurantCard activeCard;
 
     private List<Restaurant> nearbyRestaurants;
-    private LinkedList<Restaurant> placesProcessed;
+    private LinkedList<Restaurant> processedRestaurants;
     private List<Restaurant> previouslyAccessed;
 
     private Set jsonSet;
@@ -69,7 +68,6 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private int distance;
     private int pricing;
     private int rating;
-    private Boolean allowProminent;
     private Boolean openNow;
 
     @Override
@@ -151,7 +149,7 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
     private void resetGlobalVariables() {
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_key));
         nearbyRestaurants = new ArrayList<>();
-        placesProcessed = new LinkedList<>();
+        processedRestaurants = new LinkedList<>();
         //previouslyAccessed = new ArrayList<>();
         previouslyAccessed = getPreviouslyAccessed(); //TODO: put back in when interface with restaurant
 
@@ -201,11 +199,28 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
      */
     private void retrievePassedValues() {
         foodType = getIntent().getStringExtra(PreferencesActivity.PREF_INTENT_FOOD_TYPE);
-        rating = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_RATING, ERROR_PASSED_VALUE);
-        distance = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_DISTANCE, ERROR_PASSED_VALUE);
-        pricing = getIntent().getIntExtra(PreferencesActivity.PREF_INTENT_PRICING, ERROR_PASSED_VALUE);
-        allowProminent = getIntent().getBooleanExtra(PreferencesActivity.PREF_INTENT_ALLOW_PROMINENT, false);
-        openNow = getIntent().getBooleanExtra(PreferencesActivity.PREF_INTENT_OPEN_NOW, false);
+        if(foodType == null) foodType = PreferencesActivity.getDefaultFoodType();
+
+        rating = getIntent().getIntExtra(
+                PreferencesActivity.PREF_INTENT_RATING,
+                PreferencesActivity.getDefaultRating()
+        );
+
+        distance = getIntent().getIntExtra(
+                PreferencesActivity.PREF_INTENT_DISTANCE,
+                PreferencesActivity.getDefaultDistanceMeters(getApplicationSharedPreferences()
+                        .getInt(getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER))
+        );
+
+        pricing = getIntent().getIntExtra(
+                PreferencesActivity.PREF_INTENT_PRICING,
+                PreferencesActivity.getDefaultPriceRange()
+        );
+
+        openNow = getIntent().getBooleanExtra(
+                PreferencesActivity.PREF_INTENT_OPEN_NOW,
+                PreferencesActivity.getDefaultIsOpen()
+        );
     }
 
     private void resetRolls() {
@@ -332,9 +347,9 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             needToSetCard = false; // hint: you can make it swipe automatically if u set this to true
             makeRoll(selectedRestaurant);
         }else {
-            placesProcessed.add(selectedRestaurant);
-            Log.d(TAG, "sendDetailData: adding to placesProcessed");
-            logAllPlacesList(placesProcessed);
+            processedRestaurants.add(selectedRestaurant);
+            Log.d(TAG, "sendDetailData: adding to processedRestaurants");
+            logAllPlacesList(processedRestaurants);
         }
     }
 
@@ -347,10 +362,10 @@ public class RestaurantCardFinder extends ThemedAppCompatActivity implements Get
             return;
         }
 
-        if(placesProcessed.size() > 0){
+        if(processedRestaurants.size() > 0){
             hideLoadingScreen();
             activateFloatingButtons();
-            Restaurant nextRestaurant = placesProcessed.pop();
+            Restaurant nextRestaurant = processedRestaurants.pop();
             makeRoll(nextRestaurant);
         } else{
             needToSetCard = true;

@@ -30,7 +30,6 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     public static final String PREF_INTENT_FOOD_TYPE = "food_type";
     public static final String PREF_INTENT_RATING = "rating";
     public static final String PREF_INTENT_DISTANCE = "distance";
-    public static final String PREF_INTENT_ALLOW_PROMINENT = "allow_prominent";
     public static final String PREF_INTENT_PRICING = "pricing";
     public static final String PREF_INTENT_OPEN_NOW = "open_now";
 
@@ -42,12 +41,12 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     private Switch toggleOpenNow;
 
     // values for views
-    private String[] foodTypes = {PREF_ANY_STR_REP, "American", "Asian",
+    private static String[] foodTypes = {PREF_ANY_STR_REP, "American", "Asian",
             "Barbecue", "Boba", "Dessert", "European", "Hamburger", "Mediterranean",
             "Mexican", "Pizza", "Seafood", "Steak"};
-    private int[] minRatings = {0, 1, 2, 3, 4};
-    private int[] priceRanges = {0, 1, 2, 3, 4};
-    private float[] distances = {.5f, 1f, 5f, 10f, 20f};
+    private static int[] minRatings = {0, 2, 3, 4};
+    private static int[] priceRanges = {0, 2, 3, 4};
+    private static float[] distances = {.5f, 1f, 5f, 10f, 20f};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -227,12 +226,14 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
     private void startRestaurantCardFinder() {
 
         final Intent switchIntent = new Intent(this, RestaurantCardFinder.class);
+        final int errorMargin = getApplicationSharedPreferences()
+                .getInt(getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER);
 
         // retrieve value from preferences
         final String foodType = spinFoodType.getSelectedItem().toString();
-        final int rating = spinRating.getSelectedItemPosition();
-        final int pricing = spinPricing.getSelectedItemPosition();
-        final int distMeters = milesToMeters(getMaxDistance(distances[sbrDistance.getProgress()]));
+        final int rating = minRatings[spinRating.getSelectedItemPosition()];
+        final int pricing = priceRanges[spinPricing.getSelectedItemPosition()];
+        final int distMeters = milesToMeters(getMaxDistance(distances[sbrDistance.getProgress()], errorMargin));
         final boolean mustBeOpen = toggleOpenNow.isChecked();
 
         deactivateActivityButtons();
@@ -273,9 +274,7 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
         return meters * 0.000621371;
     }
 
-    private float getMaxDistance(float distance) {
-        int errorMargin = getApplicationSharedPreferences()
-                .getInt(getResources().getString(R.string.sp_distance_margin), SettingsActivity.MARGIN_MULTIPLIER);
+    private static float getMaxDistance(float distance, int errorMargin) {
         return distance + errorMargin * distance / 100.0f;
     }
 
@@ -298,8 +297,28 @@ public class PreferencesActivity extends ThemedAppCompatActivity {
      * @param index  index of the distances array
      * @return String string representation of the value to be displayed in view
      * */
-    private String getDistance(int index) {
+    private static String getDistance(int index) {
         float distance = distances[index];
         return String.format(Locale.US, "%2.1f miles", distance);
+    }
+
+    public static String getDefaultFoodType(){
+        return foodTypes[0];
+    }
+
+    public static int getDefaultRating(){
+        return minRatings[0];
+    }
+
+    public static int getDefaultPriceRange(){
+        return priceRanges[0];
+    }
+
+    public static int getDefaultDistanceMeters(int errorMargin){
+        return milesToMeters(getMaxDistance(distances[0], errorMargin));
+    }
+
+    public static boolean getDefaultIsOpen(){
+        return false;
     }
 }
